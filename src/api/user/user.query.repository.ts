@@ -100,7 +100,7 @@ export class UserQueryRepository {
   }
   _getUserViewModel(user: any): UserViewModel {
     return {
-      id: user.id,
+      id: String(user.id),
       login: user.login,
       email: user.email,
       createdAt: user.createdAt,
@@ -124,7 +124,7 @@ export class UserQueryRepository {
       pageSize,
       totalCount,
       items: items.map((item) => ({
-        id: item.id,
+        id: String(item.id),
         login: item.login,
         email: item.email,
         createdAt: item.createdAt,
