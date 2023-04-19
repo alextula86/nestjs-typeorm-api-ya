@@ -103,7 +103,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @Req()
-    request: Request & { userId: number; deviceId: string; deviceIat: string },
+    request: Request & { userId: string; deviceId: string; deviceIat: string },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     // Выполняем logout пользователя
@@ -123,7 +123,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Req()
-    request: Request & { userId: number; deviceId: string; deviceIat: string },
+    request: Request & { userId: string; deviceId: string; deviceIat: string },
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthAccessTokenModel> {
     // Формируем токены

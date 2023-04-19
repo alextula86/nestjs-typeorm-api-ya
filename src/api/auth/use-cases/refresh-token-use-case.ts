@@ -6,7 +6,7 @@ import { DeviceSqlRepository } from '../../device/device.sql.repository';
 
 export class RefreshTokenCommand {
   constructor(
-    public userId: number,
+    public userId: string,
     public deviceId: string,
     public deviceIat: string,
   ) {}

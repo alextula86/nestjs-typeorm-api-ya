@@ -7,7 +7,7 @@ export class DeviceEntity {
     public deviceId: string,
     public ip: string,
     public title: string,
-    public userId: number,
+    public userId: string,
     public lastActiveDate: string,
   ) {
     this.id = getNextStrId();

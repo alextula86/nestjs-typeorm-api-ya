@@ -33,7 +33,7 @@ export class DeviceSqlController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAllDevices(
-    @Req() request: Request & { userId: number },
+    @Req() request: Request & { userId: string },
   ): Promise<DeviceViewModel[]> {
     // Получаем идентификатор пользователя
     const userId = request.userId;
@@ -53,7 +53,7 @@ export class DeviceSqlController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteDeviceById(
     @Param('deviceId') deviceId: string,
-    @Req() request: Request & { userId: number },
+    @Req() request: Request & { userId: string },
   ): Promise<boolean> {
     // Получаем идентификатор пользователя
     const userId = request.userId;
@@ -77,7 +77,7 @@ export class DeviceSqlController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAllDevices(
-    @Req() request: Request & { userId: number; deviceId: string },
+    @Req() request: Request & { userId: string; deviceId: string },
   ): Promise<boolean> {
     // Получаем идентификатор пользователя
     const userId = request.userId;

@@ -11,7 +11,7 @@ import { UserRepository } from '../user.repository';
 import { BanUserDto } from '../dto/user.dto';
 
 export class BanUserCommand {
-  constructor(public userId: number, public banUserDto: BanUserDto) {}
+  constructor(public userId: string, public banUserDto: BanUserDto) {}
 }
 
 @CommandHandler(BanUserCommand)

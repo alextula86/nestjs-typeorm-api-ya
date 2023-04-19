@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DeviceSqlRepository } from '../device.sql.repository';
 
 export class DeleteSqlAllDevicesCommand {
-  constructor(public currentDeviceId: string, public userId: number) {}
+  constructor(public currentDeviceId: string, public userId: string) {}
 }
 
 @CommandHandler(DeleteSqlAllDevicesCommand)

@@ -51,10 +51,10 @@ export class DeviceSqlRepository {
     return madeDevice[0];
   }
   // Удаление устройства
-  async deleteDeviceById(deviceId: string, userId: number): Promise<boolean> {
+  async deleteDeviceById(deviceId: string, userId: string): Promise<boolean> {
     await this.dataSource.query(`
       DELETE FROM devices
-      WHERE "deviceId" = '${deviceId}' AND "userId" = ${userId};
+      WHERE "deviceId" = '${deviceId}' AND "userId" = '${userId}';
     `);
 
     return true;
@@ -62,11 +62,11 @@ export class DeviceSqlRepository {
   // Удаление всех устройств, кроме текущего устройства
   async deleteAllDevices(
     currentDeviceId: string,
-    userId: number,
+    userId: string,
   ): Promise<boolean> {
     await this.dataSource.query(`
       DELETE FROM devices
-      WHERE "deviceId" != '${currentDeviceId}' AND "userId" = ${userId};
+      WHERE "deviceId" != '${currentDeviceId}' AND "userId" = '${userId}';
     `);
 
     return true;
@@ -75,7 +75,7 @@ export class DeviceSqlRepository {
   async deleteAllUserDevices(userId: string): Promise<boolean> {
     await this.dataSource.query(`
       DELETE FROM devices
-      WHERE "userId" = '${+userId}';
+      WHERE "userId" = '${userId}';
     `);
 
     return true;

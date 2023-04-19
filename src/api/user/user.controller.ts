@@ -74,7 +74,7 @@ export class UserController {
   async deleteUserById(@Param('userId') userId: string): Promise<boolean> {
     // Удаляем пользователя
     const { statusCode } = await this.commandBus.execute(
-      new DeleteUserCommand(+userId),
+      new DeleteUserCommand(userId),
     );
     // Если пользователь не найден, возвращаем ошибку 404
     if (statusCode === HttpStatus.NOT_FOUND) {
@@ -87,7 +87,7 @@ export class UserController {
   @Put(':userId/ban')
   @HttpCode(HttpStatus.NO_CONTENT)
   async banUser(
-    @Param('userId') userId: number,
+    @Param('userId') userId: string,
     @Body() banUserDto: BanUserDto,
   ): Promise<void> {
     // Баним пользователя

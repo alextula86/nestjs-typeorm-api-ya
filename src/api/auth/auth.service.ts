@@ -23,7 +23,7 @@ export class AuthService {
     return passwordHashNew === passwordHash;
   }
   // Генерация токенов пользователя
-  async generateAuthTokens(userId: number, deviceId: string) {
+  async generateAuthTokens(userId: string, deviceId: string) {
     // Формируем access токен
     const accessToken = await jwtService.createAccessToken(userId);
     // Формируем refresh токен

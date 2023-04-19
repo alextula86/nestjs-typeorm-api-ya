@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash';
 import { DeviceSqlRepository } from '../device.sql.repository';
 
 export class DeleteSqlDeviceByIdCommand {
-  constructor(public deviceId: string, public userId: number) {}
+  constructor(public deviceId: string, public userId: string) {}
 }
 
 @CommandHandler(DeleteSqlDeviceByIdCommand)
@@ -33,7 +33,7 @@ export class DeleteSqlDeviceByIdUseCase
       return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Если устройство пренадлежит другому пользователю возвращаем ошибку
-    if (Number(foundDevice.userId) !== userId) {
+    if (foundDevice.userId !== userId) {
       return { statusCode: HttpStatus.FORBIDDEN };
     }
     // Удаляем устройство

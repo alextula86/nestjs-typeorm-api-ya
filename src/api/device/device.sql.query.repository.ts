@@ -7,11 +7,11 @@ import { DeviceViewModel } from './types';
 @Injectable()
 export class DeviceSqlQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-  async findAllDevices(userId: number): Promise<DeviceViewModel[]> {
+  async findAllDevices(userId: string): Promise<DeviceViewModel[]> {
     const devices = await this.dataSource.query(`
       SELECT "ip", "title", "lastActiveDate", "deviceId"
       FROM devices
-      WHERE "userId" = ${userId}
+      WHERE "userId" = '${userId}'
     `);
 
     return this._getDevicesViewModel(devices);

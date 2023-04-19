@@ -42,8 +42,8 @@ export class UserRepository {
     return foundUser[0];
   }
   // Поиск пользователя по идентификатору
-  async findUserById(userId: number): Promise<{
-    id: number;
+  async findUserById(userId: string): Promise<{
+    id: string;
     login: string;
     email: string;
     passwordHash: string;
@@ -79,7 +79,7 @@ export class UserRepository {
       LEFT JOIN ban_info as bi ON bi."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
-      WHERE u."id" = ${userId};
+      WHERE u."id" = '${userId}';
     `);
 
     if (isEmpty(foundUser)) {
@@ -150,7 +150,7 @@ export class UserRepository {
   }
   // Создаем пользователя
   async createUser({ login, password, email }: MakeUserModel): Promise<{
-    id: number;
+    id: string;
     login: string;
     email: string;
     passwordHash: string;
@@ -200,13 +200,13 @@ export class UserRepository {
     return createdUser[0];
   }
   // Удаление пользователя
-  async deleteUserById(userId: number): Promise<boolean> {
+  async deleteUserById(userId: string): Promise<boolean> {
     await this.dataSource.query(`
-      DELETE FROM email_confirmation WHERE "userId" = ${userId};
-      DELETE FROM password_recovery WHERE "userId" = ${userId};
-      DELETE FROM ban_info WHERE "userId" = ${userId};
-      DELETE FROM devices WHERE "userId" = ${userId};
-      DELETE FROM users WHERE "id" = ${userId};
+      DELETE FROM email_confirmation WHERE "userId" = '${userId}';
+      DELETE FROM password_recovery WHERE "userId" = '${userId}';
+      DELETE FROM ban_info WHERE "userId" = '${userId}';
+      DELETE FROM devices WHERE "userId" = '${userId}';
+      DELETE FROM users WHERE "id" = '${userId}';
     `);
 
     return true;
@@ -215,7 +215,7 @@ export class UserRepository {
   async banUser(
     isBanned: boolean,
     banReason: string,
-    userId: number,
+    userId: string,
   ): Promise<boolean> {
     const dateNow = formatISO(new Date());
     const query = `
@@ -225,7 +225,7 @@ export class UserRepository {
         "banDate" = ${isBanned ? formatSqlChar(dateNow) : null}, 
         "banReason" = ${isBanned ? formatSqlChar(banReason) : null}
       WHERE 
-        "userId" = ${userId};
+        "userId" = '${userId}';
     `;
 
     await this.dataSource.query(query);
@@ -234,13 +234,13 @@ export class UserRepository {
   }
   // Обновление refresh токена пользователя
   async updateRefreshToken(
-    userId: number,
+    userId: string,
     refreshToken: string,
   ): Promise<boolean> {
     const query = `
       UPDATE users
       SET "refreshToken" = '${refreshToken}'
-      WHERE "id" = ${userId};
+      WHERE "id" = '${userId}';
     `;
     await this.dataSource.query(query);
 
@@ -248,13 +248,13 @@ export class UserRepository {
   }
   // Обновление refresh токена пользователя
   async updateEmailConfirmation(
-    userId: number,
+    userId: string,
     isConfirmed: boolean,
   ): Promise<boolean> {
     const query = `
       UPDATE email_confirmation
       SET "isConfirmed" = ${isConfirmed}
-      WHERE "userId" = ${userId};
+      WHERE "userId" = '${userId}';
     `;
     await this.dataSource.query(query);
 
@@ -262,13 +262,13 @@ export class UserRepository {
   }
   // Обновление refresh токена пользователя
   async updateConfirmationCode(
-    userId: number,
+    userId: string,
     confirmationCode: string,
   ): Promise<boolean> {
     const query = `
       UPDATE email_confirmation
       SET "confirmationCode" = ${confirmationCode}
-      WHERE "userId" = ${userId};
+      WHERE "userId" = '${userId}';
     `;
     await this.dataSource.query(query);
 
@@ -276,7 +276,7 @@ export class UserRepository {
   }
   // Обновление кода востановления пароля
   async updateRecoveryCodeByEmail(
-    userId: number,
+    userId: string,
     recoveryCode: string,
   ): Promise<boolean> {
     // Генерируем дату истечения востановления пароля
@@ -290,14 +290,14 @@ export class UserRepository {
         "recoveryCode" = '${recoveryCode}',
         "expirationDate" = '${expirationDate}',
         "recoveryCode" = false
-      WHERE "userId" = ${userId};
+      WHERE "userId" = '${userId}';
     `;
     await this.dataSource.query(query);
 
     return true;
   }
   // Обновление пароля пользователя
-  async updatePassword(userId: number, newPassword: string): Promise<boolean> {
+  async updatePassword(userId: string, newPassword: string): Promise<boolean> {
     // Генерируем соль
     const passwordSalt = bcryptService.generateSaltSync(10);
     // Генерируем хэш пароля
@@ -312,13 +312,13 @@ export class UserRepository {
     await this.dataSource.query(`
       UPDATE users
       SET "passwordHash" = '${passwordHash}'
-      WHERE "id" = ${userId};
+      WHERE "id" = '${userId}';
 
       UPDATE password_recovery
       SET 
         "isRecovered" = true,
         "recoveryCode" = ''
-      WHERE "userId" = ${userId};      
+      WHERE "userId" = '${userId}';      
     `);
 
     return true;
