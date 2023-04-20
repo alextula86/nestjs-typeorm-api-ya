@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { validateOrRejectModel } from '../../../validate';
+import { validateUUID } from '../../../utils';
 
 /*import { DeviceRepository } from '../../device/device.repository';
 import { CommentRepository } from '../../comment/comment.repository';
@@ -28,6 +29,10 @@ export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
     const { userId, banUserDto } = command;
     // Валидируем DTO
     await validateOrRejectModel(banUserDto, BanUserDto);
+    // Проверяем является ли идентификатор пользователя UUID
+    if (!validateUUID(userId)) {
+      return { statusCode: HttpStatus.NOT_FOUND };
+    }
     // Получаем поля из DTO
     const { isBanned, banReason } = banUserDto;
     // Проверяем добавлен ли пользователь с переданным идентификатором
