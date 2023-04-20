@@ -30,11 +30,12 @@ export class UserQueryRepository {
     const orderBy = `ORDER BY u."${sortBy}" ${sortDirection}`;
 
     if (searchLoginTerm) {
-      terms.push(`LOWER(u."login") like LOWER('%${searchLoginTerm}%')`);
+      terms.push(`u."login" ILIKE '%${searchLoginTerm}%'`);
     }
 
     if (searchEmailTerm) {
-      terms.push(`LOWER(u."email") like LOWER('%${searchEmailTerm}%')`);
+      // terms.push(`LOWER(u."email") like LOWER('%${searchEmailTerm}%') || '%'`);
+      terms.push(`u."email" ILIKE '%${searchEmailTerm}%'`);
     }
 
     if (banStatus === BanStatuses.BANNED) {
