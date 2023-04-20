@@ -42,7 +42,7 @@ export class DeviceSqlRepository {
     const query = `
       INSERT INTO devices
         ("deviceId", "ip", "title", "lastActiveDate", "userId")
-        VALUES ('${deviceId}', '${ip}', '${title}', '${lastActiveDate}', ${+userId})
+        VALUES ('${deviceId}', '${ip}', '${title}', '${lastActiveDate}', '${userId}')
         RETURNING *;
     `;
 

@@ -30,11 +30,11 @@ export class UserQueryRepository {
     const orderBy = `ORDER BY u."${sortBy}" ${sortDirection}`;
 
     if (searchLoginTerm) {
-      terms.push(`u."login" like '%${searchLoginTerm}%'`);
+      terms.push(`LOWER(u."login") like LOWER('%${searchLoginTerm}%')`);
     }
 
     if (searchEmailTerm) {
-      terms.push(`u."email" like '%${searchEmailTerm}%'`);
+      terms.push(`LOWER(u."email") like LOWER('%${searchEmailTerm}%')`);
     }
 
     if (banStatus === BanStatuses.BANNED) {
