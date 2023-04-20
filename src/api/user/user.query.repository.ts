@@ -30,11 +30,11 @@ export class UserQueryRepository {
     const orderBy = `ORDER BY u."${sortBy}" ${sortDirection}`;
 
     if (searchLoginTerm) {
-      terms.push(`u."login" ~* '${searchLoginTerm}'`);
+      terms.push(`u."login" ILIKE '%${searchLoginTerm}%'`);
     }
 
     if (searchEmailTerm) {
-      terms.push(`u."email" ~* '${searchEmailTerm}'`);
+      terms.push(`u."email" ILIKE '%${searchEmailTerm}%'`);
     }
 
     if (banStatus === BanStatuses.BANNED) {
@@ -45,7 +45,7 @@ export class UserQueryRepository {
       terms.push(`bi."isBanned" = false`);
     }
 
-    const where = !isEmpty(terms) ? `WHERE ${terms.join(' AND ')}` : '';
+    const where = !isEmpty(terms) ? `WHERE ${terms.join(' OR ')}` : '';
 
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*)
