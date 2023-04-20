@@ -267,7 +267,7 @@ export class UserRepository {
   ): Promise<boolean> {
     const query = `
       UPDATE email_confirmation
-      SET "confirmationCode" = ${confirmationCode}
+      SET "confirmationCode" = '${confirmationCode}'
       WHERE "userId" = '${userId}';
     `;
     await this.dataSource.query(query);

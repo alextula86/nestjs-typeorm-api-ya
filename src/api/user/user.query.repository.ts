@@ -34,7 +34,6 @@ export class UserQueryRepository {
     }
 
     if (searchEmailTerm) {
-      // terms.push(`LOWER(u."email") like LOWER('%${searchEmailTerm}%') || '%'`);
       terms.push(`u."email" ILIKE '%${searchEmailTerm}%'`);
     }
 
