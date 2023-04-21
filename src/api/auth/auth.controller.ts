@@ -18,7 +18,7 @@ import { Request, Response } from 'express';
 import {
   AuthBearerGuard,
   AuthRefreshTokenGuard,
-  // AuthCountRequestsGuard,
+  AuthCountRequestsGuard,
 } from '../../guards';
 
 import {
@@ -69,7 +69,7 @@ export class AuthController {
   }
   // Аутентификация пользователя
   @Post('/login')
-  //@UseGuards(AuthCountRequestsGuard)
+  @UseGuards(AuthCountRequestsGuard)
   @HttpCode(HttpStatus.OK)
   async login(
     @Req() request: Request,
