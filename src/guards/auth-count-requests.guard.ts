@@ -9,17 +9,17 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { Request } from 'express';
 
-// import { SessionService } from '../api/session/session.service';
-/*import {
+import { SessionService } from '../api/session/session.service';
+import {
   CreateSessionCommand,
   IncreaseAttemptSessionCommand,
   ResetAttemptSessionCommand,
-} from '../api/session/use-cases';*/
+} from '../api/session/use-cases';
 
 @Injectable()
 export class AuthCountRequestsGuard implements CanActivate {
   constructor(
-    // private readonly sessionService: SessionService,
+    private readonly sessionService: SessionService,
     private readonly commandBus: CommandBus,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,20 +31,20 @@ export class AuthCountRequestsGuard implements CanActivate {
     const limitSecondsRate = 10;
     const maxAttemps = 5;
 
-    /*const foundSession = await this.sessionService.findSession(
+    const foundSession = await this.sessionService.findSession(
       ip,
       url,
       deviceTitle,
-    );*/
+    );
 
-    /*if (!foundSession) {
+    if (!foundSession) {
       await this.commandBus.execute(
         new CreateSessionCommand({ ip, url, deviceTitle }),
       );
       return true;
-    }*/
+    }
 
-    /*const currentLocalDate = Date.now();
+    const currentLocalDate = Date.now();
     const sessionDate = new Date(foundSession.issuedAtt).getTime();
     const diffSeconds = (currentLocalDate - sessionDate) / 1000;
 
@@ -68,7 +68,7 @@ export class AuthCountRequestsGuard implements CanActivate {
         'Too many requests',
         HttpStatus.TOO_MANY_REQUESTS,
       );
-    }*/
+    }
 
     return true;
   }
