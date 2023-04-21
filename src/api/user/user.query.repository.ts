@@ -27,7 +27,7 @@ export class UserQueryRepository {
     const size = pageSize ? Number(pageSize) : 10;
 
     const terms: string[] = [];
-    const orderBy = `ORDER BY u."${sortBy}" ${sortDirection}`;
+    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     if (searchLoginTerm) {
       terms.push(`u."login" ILIKE '%${searchLoginTerm}%'`);
@@ -135,5 +135,12 @@ export class UserQueryRepository {
         },
       })),
     };
+  }
+  getOrderBy(sortBy: string, sortDirection: SortDirection) {
+    if (sortBy === 'createdAt') {
+      return `ORDER BY u."${sortBy}" ${sortDirection}`;
+    }
+
+    return `ORDER BY u."${sortBy}" COLLATE \"C\" ${sortDirection}`;
   }
 }
