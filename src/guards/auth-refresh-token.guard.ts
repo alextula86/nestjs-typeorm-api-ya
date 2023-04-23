@@ -16,7 +16,6 @@ export class AuthRefreshTokenGuard implements CanActivate {
       deviceId: string;
       deviceIat: string;
     } = context.switchToHttp().getRequest();
-
     if (!request.cookies || !request.cookies.refreshToken) {
       throw new UnauthorizedException();
     }
