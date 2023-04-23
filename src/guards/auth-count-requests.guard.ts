@@ -41,6 +41,7 @@ export class AuthCountRequestsGuard implements CanActivate {
       await this.commandBus.execute(
         new CreateSessionCommand({ ip, url, deviceTitle }),
       );
+
       return true;
     }
 

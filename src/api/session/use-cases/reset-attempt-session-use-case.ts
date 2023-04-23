@@ -30,6 +30,6 @@ export class ResetAttemptSessionUseCase
     // Сбрасываем поле attempt в исходное состояние
     const updatedSession = await this.sessionRepository.resetAttempt(sessionId);
 
-    return updatedSession;
+    return updatedSession[0];
   }
 }

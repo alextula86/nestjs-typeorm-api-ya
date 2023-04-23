@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { isEmpty } from 'lodash';
 import { formatISO } from 'date-fns';
 import { MakeSessionModel } from './types';
 
@@ -20,11 +21,13 @@ export class SessionRepository {
     issuedAtt: string;
     attempt: number;
   } | null> {
-    const foundSession = await this.dataSource.query(`
+    const query = `
       SELECT * FROM sessions WHERE "ip" = '${ip}' AND "url" = '${url}' AND "deviceTitle" = '${deviceTitle}';
-    `);
+    `;
 
-    if (!foundSession) {
+    const foundSession = await this.dataSource.query(query);
+
+    if (isEmpty(foundSession)) {
       return null;
     }
 

@@ -31,6 +31,6 @@ export class IncreaseAttemptSessionUseCase
       sessionId,
     );
 
-    return updatedSession;
+    return updatedSession[0];
   }
 }
