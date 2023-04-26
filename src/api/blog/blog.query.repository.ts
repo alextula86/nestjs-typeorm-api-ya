@@ -84,12 +84,12 @@ export class BlogQueryRepository {
         "isMembership",
         "createdAt"
       FROM blogs
-      WHERE id = '${blogId}' AND "isBanned" = false;
+      WHERE "id" = '${blogId}' AND "isBanned" = false;
     `;
 
     const foundBlog = await this.dataSource.query(query);
 
-    if (!foundBlog) {
+    if (isEmpty(foundBlog)) {
       return null;
     }
 
