@@ -26,6 +26,8 @@ export class TestingController {
         ban_info,
         sessions,
         devices,
+        posts,
+        blogs,
         users;
     `);
     // await this.deviceSqlRepository.deleteAll();

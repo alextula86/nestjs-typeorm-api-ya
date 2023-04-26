@@ -191,10 +191,6 @@ export class UserRepository {
       INSERT INTO 
         password_recovery("recoveryCode", "expirationDate", "isRecovered", "userId")
         VALUES ('${confirmationCode}', '${dateNow}', true, '${userId}');
-
-      INSERT INTO 
-        ban_info("isBanned", "banDate", "banReason", "userId")
-        VALUES (false, null, null, '${userId}');          
     `);
 
     return createdUser[0];
@@ -206,6 +202,8 @@ export class UserRepository {
       DELETE FROM password_recovery WHERE "userId" = '${userId}';
       DELETE FROM ban_info WHERE "userId" = '${userId}';
       DELETE FROM devices WHERE "userId" = '${userId}';
+      DELETE FROM blogs WHERE "userId" = '${userId}';
+      DELETE FROM posts WHERE "userId" = '${userId}';
       DELETE FROM users WHERE "id" = '${userId}';
     `);
 
@@ -332,6 +330,8 @@ export class UserRepository {
         ban_info,
         sessions,
         devices,
+        blogs,
+        posts,
         users;
     `);
 
