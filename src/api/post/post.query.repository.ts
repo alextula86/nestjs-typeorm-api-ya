@@ -287,7 +287,7 @@ export class PostQueryRepository {
 
     const foundPost = await this.dataSource.query(query);
 
-    if (!foundPost) {
+    if (isEmpty(foundPost)) {
       return null;
     }
 

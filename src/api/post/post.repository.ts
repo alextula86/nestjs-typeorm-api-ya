@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { isEmpty } from 'lodash';
 import { MakePostModel, UpdatePostModel } from './types';
 
 @Injectable()
@@ -32,11 +33,11 @@ export class PostRepository {
 
     const foundPost = await this.dataSource.query(query);
 
-    if (!foundPost) {
+    if (isEmpty(foundPost)) {
       return null;
     }
 
-    return foundPost;
+    return foundPost[0];
   }
   // Создание документа поста
   async createPost({
