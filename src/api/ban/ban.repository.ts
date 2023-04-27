@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { formatISO } from 'date-fns';
 import { MakeBanModel } from './types';
 
 @Injectable()
@@ -52,7 +51,7 @@ export class BanRepository {
     banReason: string,
   ): Promise<boolean> {
     const banReasonResult = isBanned ? `'${banReason}'` : null;
-    const banDateResult = isBanned ? `'${formatISO(new Date())}'` : null;
+    const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
 
     const query = `
         UPDATE ban_info

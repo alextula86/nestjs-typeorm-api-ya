@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { add, formatISO } from 'date-fns';
+import { add } from 'date-fns';
 import { isEmpty } from 'lodash';
 import { bcryptService } from '../../application';
 import { MakeUserModel } from './types';
@@ -166,13 +166,11 @@ export class UserRepository {
       password,
       passwordSalt,
     );
-    const expirationDateEmailConfirmation = formatISO(
-      add(new Date(), {
-        hours: 1,
-        minutes: 30,
-      }),
-    );
-    const dateNow = formatISO(new Date());
+    const expirationDateEmailConfirmation = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    }).toISOString();
+    const dateNow = new Date().toISOString();
 
     const createdUser = await this.dataSource.query(`
       INSERT INTO users
@@ -215,7 +213,7 @@ export class UserRepository {
     banReason: string,
     userId: string,
   ): Promise<boolean> {
-    const dateNow = formatISO(new Date());
+    const dateNow = new Date().toISOString();
     const query = `
       UPDATE ban_info
       SET 
@@ -278,10 +276,10 @@ export class UserRepository {
     recoveryCode: string,
   ): Promise<boolean> {
     // Генерируем дату истечения востановления пароля
-    const expirationDate = formatISO(
-      add(new Date(), { hours: 1, minutes: 30 }),
-    );
-
+    const expirationDate = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    }).toISOString();
     const query = `
       UPDATE password_recovery
       SET 

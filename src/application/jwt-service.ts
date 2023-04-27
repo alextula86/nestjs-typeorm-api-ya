@@ -1,5 +1,4 @@
 import * as jwt from 'jsonwebtoken';
-import { formatISO } from 'date-fns';
 import { settings } from '../settings';
 
 export const jwtService = {
@@ -33,7 +32,7 @@ export const jwtService = {
       return {
         userId: result.userId,
         deviceId: result.deviceId,
-        iat: formatISO(new Date(result.iat * 1000)),
+        iat: new Date(result.iat * 1000).toISOString(),
       };
     } catch (error) {
       console.log('getRefreshTokenUserIdAndDeviceId error', error);

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
-import { formatISO } from 'date-fns';
 import { MakeSessionModel } from './types';
 
 @Injectable()
@@ -79,7 +78,7 @@ export class SessionRepository {
     attempt: number;
   }> {
     const attempt = 1;
-    const issuedAtt = formatISO(new Date());
+    const issuedAtt = new Date().toISOString();
 
     const query = `
       UPDATE sessions

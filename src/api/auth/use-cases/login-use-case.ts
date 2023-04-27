@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { formatISO } from 'date-fns';
 
 import { validateOrRejectModel } from '../../../validate';
 import { getNextStrId } from '../../../utils';
@@ -69,7 +68,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       deviceId,
       ip: ip,
       title: deviceTitle,
-      lastActiveDate: formatISO(new Date(iatRefreshToken)),
+      lastActiveDate: new Date(iatRefreshToken).toISOString(),
       userId: user.id,
     });
     // Обновляем refreshToken пользователя

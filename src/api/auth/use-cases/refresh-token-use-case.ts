@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { formatISO, isEqual } from 'date-fns';
+import { isEqual } from 'date-fns';
 import { AuthService } from '../../auth/auth.service';
 import { UserRepository } from '../../user/user.repository';
 import { DeviceSqlRepository } from '../../device/device.sql.repository';
@@ -53,7 +53,7 @@ export class RefreshTokenUseCase
     // Обновляем дату у устройства
     this.deviceSqlRepository.updateLastActiveDate(
       device.deviceId,
-      formatISO(new Date(iatRefreshToken)),
+      new Date(iatRefreshToken).toISOString(),
     );
     // Возвращаем access и refresh токены
     return { accessToken, refreshToken };

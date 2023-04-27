@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { formatISO } from 'date-fns';
 import { isEmpty } from 'lodash';
 import { MakeBlogModel, UpdateBlogModel } from './types';
 
@@ -100,7 +99,7 @@ export class BlogRepository {
   }
   // Бан блогера
   async banBlog(blogId: string, isBanned: boolean): Promise<boolean> {
-    const banDate = isBanned ? `'${formatISO(new Date())}'` : null;
+    const banDate = isBanned ? `'${new Date().toISOString()}'` : null;
 
     const query = `
       UPDATE blogs
