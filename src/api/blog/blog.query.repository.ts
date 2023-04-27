@@ -286,9 +286,9 @@ export class BlogQueryRepository {
   }
   getOrderBy(sortBy: string, sortDirection: SortDirection) {
     if (sortBy === 'createdAt') {
-      return `ORDER BY blogs."${sortBy}" ${sortDirection}`;
+      return `ORDER BY "${sortBy}" ${sortDirection}`;
     }
 
-    return `ORDER BY blogs."${sortBy}" COLLATE \"C\" ${sortDirection}`;
+    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
   }
 }

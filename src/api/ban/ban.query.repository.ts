@@ -101,9 +101,9 @@ export class BanQueryRepository {
   }
   getOrderBy(sortBy: string, sortDirection: SortDirection) {
     if (sortBy === 'createdAt') {
-      return `ORDER BY bi."${sortBy}" ${sortDirection}`;
+      return `ORDER BY "${sortBy}" ${sortDirection}`;
     }
 
-    return `ORDER BY bi."${sortBy}" COLLATE \"C\" ${sortDirection}`;
+    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
   }
 }
