@@ -105,9 +105,10 @@ export class BlogRepository {
       UPDATE blogs
       SET 
         "isBanned" = ${isBanned},
-        "banDate" = '${banDate}'
+        "banDate" = ${banDate}
       WHERE "id" = '${blogId}';
     `;
+
     await this.dataSource.query(query);
 
     return true;
