@@ -39,7 +39,7 @@ export class CommentQueryRepository {
     const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     const where = `
-      WHERE comments."postId" = ${postId} AND "isBanned" = false
+      WHERE comments."postId" = '${postId}' AND comments."isBanned" = false
     `;
 
     const totalCountResponse = await this.dataSource.query(`

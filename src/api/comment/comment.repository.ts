@@ -36,7 +36,7 @@ export class CommentRepository {
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
-      WHERE comments."id" = ${commentId}
+      WHERE comments."id" = '${commentId}'
     ;`;
 
     const foundComment = await this.dataSource.query(query);
@@ -91,7 +91,7 @@ export class CommentRepository {
   // Удаление комментария
   async deleteCommentById(commentId: string): Promise<boolean> {
     await this.dataSource.query(`
-      DELETE FROM commetns WHERE "id" = '${commentId}';
+      DELETE FROM comments WHERE "id" = '${commentId}';
     `);
 
     return true;
