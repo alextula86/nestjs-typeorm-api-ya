@@ -79,6 +79,7 @@ export class PostRepository {
           "content" = '${content}'
         WHERE "id" = '${postId}';
       `;
+
     await this.dataSource.query(query);
 
     return true;

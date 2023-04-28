@@ -5,7 +5,7 @@ import { BlogRepository } from './blog.repository';
 export class BlogService {
   constructor(private readonly blogRepository: BlogRepository) {}
   // Получение конкретного блогера по его идентификатору
-  async findBlogById(id: string): Promise<{
+  async findBlogById(blogId: string): Promise<{
     id: string;
     name: string;
     description: string;
@@ -16,7 +16,7 @@ export class BlogService {
     banDate: Date;
     createdAt: string;
   } | null> {
-    const foundBlogById = await this.blogRepository.findBlogById(id);
+    const foundBlogById = await this.blogRepository.findBlogById(blogId);
 
     if (!foundBlogById) {
       return null;

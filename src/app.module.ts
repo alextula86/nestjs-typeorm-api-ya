@@ -14,14 +14,14 @@ import { BloggerController } from './api/blog/blogger.controller';
 import { SABlogController } from './api/blog/sa-blog.controller';
 import { PostController } from './api/post/post.controller';
 import { DeviceSqlController } from './api/device/device.sql.controller';
-// import { CommentController } from './api/comment/comment.controller';
+import { CommentController } from './api/comment/comment.controller';
 import { TestingController } from './api/testing/testing.controller';
 
 import { AuthService } from './api/auth/auth.service';
 // import { UserService } from './api/user/user.service';
 import { BlogService } from './api/blog/blog.service';
 import { PostService } from './api/post/post.service';
-// import { CommentService } from './api/comment/comment.service';
+import { CommentService } from './api/comment/comment.service';
 import { DeviceService } from './api/device/device.service';
 import { SessionService } from './api/session/session.service';
 // import { LikeStatusService } from './api/likeStatus/likeStatus.service';
@@ -54,11 +54,11 @@ import {
   UpdatePostUseCase,
   DeletePostUseCase,
 } from './api/post/use-cases';
-/*import {
+import {
   CreateCommentUseCase,
   UpdateCommentUseCase,
   DeleteCommentUseCase,
-} from './api/comment/use-cases';*/
+} from './api/comment/use-cases';
 import {
   DeleteSqlAllDevicesUseCase,
   DeleteSqlDeviceByIdUseCase,
@@ -76,7 +76,7 @@ import {
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
 import { PostRepository } from './api/post/post.repository';
-// import { CommentRepository } from './api/comment/comment.repository';*/
+import { CommentRepository } from './api/comment/comment.repository';
 import { DeviceSqlRepository } from './api/device/device.sql.repository';
 import { SessionRepository } from './api/session/session.repository';
 // import { LikeStatusRepository } from './api/likeStatus/likeStatus.repository';
@@ -85,7 +85,7 @@ import { BanRepository } from './api/ban/ban.repository';
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
 import { PostQueryRepository } from './api/post/post.query.repository';
-// import { CommentQueryRepository } from './api/comment/comment.query.repository';
+import { CommentQueryRepository } from './api/comment/comment.query.repository';
 import { DeviceSqlQueryRepository } from './api/device/device.sql.query.repository';
 import { AuthQueryRepository } from './api/auth/auth.query.repository';
 import { BanQueryRepository } from './api/ban/ban.query.repository';
@@ -134,14 +134,14 @@ const postProviders = [
   UpdatePostUseCase,
   DeletePostUseCase,
 ];
-/*const commentProviders = [
+const commentProviders = [
   CommentService,
   CommentRepository,
   CommentQueryRepository,
   CreateCommentUseCase,
   UpdateCommentUseCase,
   DeleteCommentUseCase,
-];*/
+];
 const deviceProviders = [
   DeviceService,
   DeviceSqlRepository,
@@ -201,7 +201,7 @@ const adapters = [EmailManager, EmailAdapter];
     BloggerController,
     SABlogController,
     PostController,
-    // CommentController,
+    CommentController,
     DeviceSqlController,
     TestingController,
   ],
@@ -211,7 +211,7 @@ const adapters = [EmailManager, EmailAdapter];
     ...userProviders,
     ...blogProviders,
     ...postProviders,
-    // ...commentProviders,
+    ...commentProviders,
     ...deviceProviders,
     ...sessionSProviders,
     // ...likeStatusSProviders,

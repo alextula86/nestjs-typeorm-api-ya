@@ -20,6 +20,6 @@ export class PostService {
       return null;
     }
 
-    return foundPostById[0];
+    return foundPostById;
   }
 }

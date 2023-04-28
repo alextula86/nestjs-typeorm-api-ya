@@ -1,44 +1,43 @@
 import {
   Controller,
   Get,
-  // Post,
+  Post,
   // Put,
   Req,
   Query,
   Param,
-  // Body,
-  // BadRequestException,
+  Body,
+  BadRequestException,
   NotFoundException,
   HttpCode,
   HttpStatus,
   UseGuards,
-  // ForbiddenException,
+  ForbiddenException,
 } from '@nestjs/common';
-// import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus } from '@nestjs/cqrs';
 
-// import { AuthBearerGuard, AuthPublicGuard } from '../../guards';
-import { AuthPublicGuard } from '../../guards';
+import { AuthBearerGuard, AuthPublicGuard } from '../../guards';
 // import { LikeStatuses, ResponseViewModelDetail } from '../../types';
 import { ResponseViewModelDetail } from '../../types';
 
-// import { CreateCommentCommand } from '../comment/use-cases';
-// import { CommentQueryRepository } from '../comment/comment.query.repository';
-// import { CreateCommentDto } from '../comment/dto';
+import { CreateCommentCommand } from '../comment/use-cases';
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+import { CreateCommentDto } from '../comment/dto';
 
 // import { UpdateLikeStatusPostCommand } from '../likeStatus/use-cases';
 // import { AddLikeStatusDTO } from '../likeStatus/dto';
 
-// import { PostService } from './post.service';
+import { PostService } from './post.service';
 import { PostQueryRepository } from './post.query.repository';
 import { PostViewModel, QueryPostModel } from './types';
-// import { CommentViewModel, QueryCommentModel } from '../comment/types';
+import { CommentViewModel, QueryCommentModel } from '../comment/types';
 
 @Controller('api/posts')
 export class PostController {
   constructor(
-    // private readonly commandBus: CommandBus,
-    // private readonly postService: PostService,
-    // private readonly commentQueryRepository: CommentQueryRepository,
+    private readonly commandBus: CommandBus,
+    private readonly postService: PostService,
+    private readonly commentQueryRepository: CommentQueryRepository,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
   @Get()
@@ -89,7 +88,7 @@ export class PostController {
     // Возвращаем пост в формате ответа пользователю
     return foundPost;
   }
-  /*// Получение списка комментариев по идентификатору поста
+  // Получение списка комментариев по идентификатору поста
   @Get(':postId/comments')
   @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
@@ -152,12 +151,12 @@ export class PostController {
     // Порлучаем созданный комментарий в формате ответа пользователю
     const foundComment = await this.commentQueryRepository.findCommentById(
       commentId,
-      LikeStatuses.NONE,
+      request.userId,
     );
     // Возвращаем созданный комментарий
     return foundComment;
   }
-  // Обновление лайк статуса поста
+  /*// Обновление лайк статуса поста
   @Put(':postId/like-status')
   @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
