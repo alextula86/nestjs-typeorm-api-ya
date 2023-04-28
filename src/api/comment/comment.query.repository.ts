@@ -65,11 +65,31 @@ export class CommentQueryRepository {
         blogs."id" as "blogId",
         blogs."name" as "blogName",
         posts."id" as "postId",
-        posts."title" as "postTitle"
+        posts."title" as "postTitle",
+        COALESCE(likesCount."likesCount", 0) as "likesCount",
+        COALESCE(dislikesCount."dislikesCount", 0) as "dislikesCount",
+        COALESCE(likeStatus."likeStatus", 'None') as "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
+      LEFT JOIN (
+        SELECT "commentId", COUNT(*) as "likesCount"
+        FROM comment_like_status
+        WHERE "likeStatus" = 'Like'
+        GROUP BY "commentId"
+      ) as likesCount ON likesCount."commentId" = comments."id"
+      LEFT JOIN (
+        SELECT "commentId", COUNT(*) as "dislikesCount"
+        FROM comment_like_status
+        WHERE "likeStatus" = 'Dislike'
+        GROUP BY "commentId"
+      ) as dislikesCount ON dislikesCount."commentId" = comments."id"
+      LEFT JOIN (
+        SELECT "commentId", "likeStatus"
+        FROM comment_like_status
+        WHERE "userId" = '${userId}'
+      ) as likeStatus ON likeStatus."commentId" = comments."id"
       ${where}
       ${orderBy}
       ${offset}
@@ -313,12 +333,9 @@ export class CommentQueryRepository {
         },
         createdAt: item.createdAt,
         likesInfo: {
-          likesCount: 0,
-          dislikesCount: 0,
-          myStatus: LikeStatuses.NONE,
-          /*myStatus: foundLikeStatus
-            ? foundLikeStatus.likeStatus
-            : LikeStatuses.NONE,*/
+          likesCount: item.likesCount,
+          dislikesCount: item.dislikesCount,
+          myStatus: item.likeStatus,
         },
       })),
     };

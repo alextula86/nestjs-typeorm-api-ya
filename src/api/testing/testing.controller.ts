@@ -26,6 +26,8 @@ export class TestingController {
         ban_info,
         sessions,
         devices,
+        post_like_status,
+        comment_like_status,
         comments,
         posts,
         blogs,

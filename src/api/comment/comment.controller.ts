@@ -17,8 +17,8 @@ import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthBearerGuard, AuthPublicGuard } from '../../guards';
 
-// import { UpdateLikeStatusCommentCommand } from '../likeStatus/use-cases';
-// import { AddLikeStatusDTO } from '../likeStatus/dto';
+import { UpdateLikeStatusCommentCommand } from '../commentLikeStatus/use-cases';
+import { AddLikeStatusDTO } from '../commentLikeStatus/dto';
 
 import { UpdateCommentCommand, DeleteCommentCommand } from './use-cases';
 import { CommentQueryRepository } from './comment.query.repository';
@@ -105,7 +105,7 @@ export class CommentController {
     return true;
   }
   // Обновление лайк статуса комментария
-  /*@Put(':commentId/like-status')
+  @Put(':commentId/like-status')
   @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateCommentLikeStatus(
@@ -132,5 +132,5 @@ export class CommentController {
     if (statusCode === HttpStatus.BAD_REQUEST) {
       throw new BadRequestException(statusMessage);
     }
-  }*/
+  }
 }

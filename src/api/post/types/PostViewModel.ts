@@ -1,7 +1,5 @@
 import { LikeStatuses } from '../../../types';
 
-import { LikeStatusPostEntity } from '../entity';
-
 type NewestLikes = {
   addedAt: string;
   userId: string;
@@ -13,7 +11,6 @@ type ExtendedLikesInfo = {
   dislikesCount: number;
   myStatus: LikeStatuses;
   newestLikes: NewestLikes[];
-  likes?: LikeStatusPostEntity[];
 };
 
 export type PostViewModel = {

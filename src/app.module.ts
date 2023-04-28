@@ -24,7 +24,8 @@ import { PostService } from './api/post/post.service';
 import { CommentService } from './api/comment/comment.service';
 import { DeviceService } from './api/device/device.service';
 import { SessionService } from './api/session/session.service';
-// import { LikeStatusService } from './api/likeStatus/likeStatus.service';
+import { CommentLikeStatusService } from './api/commentLikeStatus/commentlikeStatus.service';
+import { PostLikeStatusService } from './api/postlikeStatus/postLikeStatus.service';
 
 import {
   LoginUseCase,
@@ -68,10 +69,8 @@ import {
   IncreaseAttemptSessionUseCase,
   ResetAttemptSessionUseCase,
 } from './api/session/use-cases';
-/*import {
-  UpdateLikeStatusCommentUseCase,
-  UpdateLikeStatusPostUseCase,
-} from './api/likeStatus/use-cases';*/
+import { UpdateLikeStatusCommentUseCase } from './api/commentLikeStatus/use-cases';
+import { UpdateLikeStatusPostUseCase } from './api/postlikeStatus/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -79,7 +78,8 @@ import { PostRepository } from './api/post/post.repository';
 import { CommentRepository } from './api/comment/comment.repository';
 import { DeviceSqlRepository } from './api/device/device.sql.repository';
 import { SessionRepository } from './api/session/session.repository';
-// import { LikeStatusRepository } from './api/likeStatus/likeStatus.repository';
+import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLikeStatus.repository';
+import { PostLikeStatusRepository } from './api/postlikeStatus/postLikeStatus.repository';
 import { BanRepository } from './api/ban/ban.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
@@ -156,12 +156,16 @@ const sessionSProviders = [
   IncreaseAttemptSessionUseCase,
   ResetAttemptSessionUseCase,
 ];
-/*const likeStatusSProviders = [
-  LikeStatusService,
-  LikeStatusRepository,
+const commentLikeStatusProviders = [
+  CommentLikeStatusService,
+  CommentLikeStatusRepository,
   UpdateLikeStatusCommentUseCase,
+];
+const postLikeStatusProviders = [
+  PostLikeStatusService,
+  PostLikeStatusRepository,
   UpdateLikeStatusPostUseCase,
-];*/
+];
 const banSProviders = [BanRepository, BanQueryRepository];
 
 const adapters = [EmailManager, EmailAdapter];
@@ -214,7 +218,8 @@ const adapters = [EmailManager, EmailAdapter];
     ...commentProviders,
     ...deviceProviders,
     ...sessionSProviders,
-    // ...likeStatusSProviders,
+    ...commentLikeStatusProviders,
+    ...postLikeStatusProviders,
     ...banSProviders,
     ...adapters,
   ],

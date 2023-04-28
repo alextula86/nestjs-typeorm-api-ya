@@ -79,10 +79,10 @@ export class CommentRepository {
     { content }: UpdateCommentModel,
   ): Promise<boolean> {
     const query = `
-        UPDATE comments
-        SET "content" = '${content}'
-        WHERE "id" = '${commentId}';
-      `;
+      UPDATE comments
+      SET "content" = '${content}'
+      WHERE "id" = '${commentId}';
+    `;
 
     await this.dataSource.query(query);
 
