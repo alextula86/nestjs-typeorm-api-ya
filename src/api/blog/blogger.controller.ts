@@ -29,8 +29,8 @@ import { PostQueryRepository } from '../post/post.query.repository';
 import { CreatePostDto, UpdatePostDto } from '../post/dto/post.dto';
 import { PostViewModel } from '../post/types';
 
-// import { CommentQueryRepository } from '../comment/comment.query.repository';
-// import { QueryCommentModel, CommentByPostViewModel } from '../comment/types';
+import { CommentQueryRepository } from '../comment/comment.query.repository';
+import { QueryCommentModel, CommentByPostViewModel } from '../comment/types';
 
 import { BanQueryRepository } from '../ban/ban.query.repository';
 import { QueryVannedUserModel, BannedUserViewModel } from '../ban/types';
@@ -53,7 +53,7 @@ export class BloggerController {
     private readonly commandBus: CommandBus,
     private readonly blogService: BlogService,
     private readonly blogQueryRepository: BlogQueryRepository,
-    // private readonly commentQueryRepository: CommentQueryRepository,
+    private readonly commentQueryRepository: CommentQueryRepository,
     private readonly banQueryRepository: BanQueryRepository,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
@@ -83,7 +83,7 @@ export class BloggerController {
     return allBlogsByUserId;
   }
   // Получение списка комментария по всем постам блогера
-  /*@HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.OK)
   @Get('blogs/comments')
   async findCommentsByAllPosts(
     @Query()
@@ -98,7 +98,7 @@ export class BloggerController {
       });
 
     return commentsByAllPosts;
-  }*/
+  }
   // Создание блогера
   @Post('blogs')
   @HttpCode(HttpStatus.CREATED)

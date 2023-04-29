@@ -6,7 +6,7 @@ type CommentatorInfo = {
 };
 
 type LikesInfo = {
-  likesCount: number;
+  likesCount?: number;
   dislikesCount: number;
   myStatus: LikeStatuses;
 };

@@ -5,12 +5,9 @@ import { isEmpty } from 'lodash';
 
 import {
   LikeStatuses,
-  // PageType,
   ResponseViewModelDetail,
   SortDirection,
 } from '../../types';
-
-// import { LikeStatus, LikeStatusModelType } from '../likeStatus/schemas';
 
 import {
   CommentViewModel,
@@ -32,18 +29,12 @@ export class CommentQueryRepository {
       sortDirection = SortDirection.DESC,
     }: QueryCommentModel,
   ): Promise<ResponseViewModelDetail<CommentViewModel>> {
-    console.log('findCommentsByPostId userId', userId);
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
-    const orderBy = this.getOrderBy(sortBy, sortDirection);
-
-    const where = `
-      WHERE comments."postId" = '${postId}' AND comments."isBanned" = false
-    `;
-
     const totalCountResponse = await this.dataSource.query(`
-      SELECT COUNT(*) FROM comments ${where};
+      SELECT COUNT(*) FROM comments
+      WHERE comments."postId" = '${postId}' AND comments."isBanned" = false;
     `);
 
     const totalCount = +totalCountResponse[0].count;
@@ -66,78 +57,33 @@ export class CommentQueryRepository {
         blogs."name" as "blogName",
         posts."id" as "postId",
         posts."title" as "postTitle",
-        COALESCE(likesCount."likesCount", 0) as "likesCount",
-        COALESCE(dislikesCount."dislikesCount", 0) as "dislikesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+        ) as "dislikesCount",
         COALESCE(likeStatus."likeStatus", 'None') as "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
       LEFT JOIN (
-        SELECT "commentId", COUNT(*) as "likesCount"
-        FROM comment_like_status
-        WHERE "likeStatus" = 'Like'
-        GROUP BY "commentId"
-      ) as likesCount ON likesCount."commentId" = comments."id"
-      LEFT JOIN (
-        SELECT "commentId", COUNT(*) as "dislikesCount"
-        FROM comment_like_status
-        WHERE "likeStatus" = 'Dislike'
-        GROUP BY "commentId"
-      ) as dislikesCount ON dislikesCount."commentId" = comments."id"
-      LEFT JOIN (
         SELECT "commentId", "likeStatus"
         FROM comment_like_status
         WHERE "userId" = '${userId}'
       ) as likeStatus ON likeStatus."commentId" = comments."id"
-      ${where}
-      ${orderBy}
+      WHERE comments."postId" = '${postId}' AND comments."isBanned" = false
+      ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
       ${limit};
     `;
 
     const comments = await this.dataSource.query(query);
-
-    /*const commentsViewModel = await Promise.all(
-      comments.map(async (comment) => {
-        const foundLikeStatus = await this.LikeStatusModel.findOne({
-          parentId: comment.id,
-          userId,
-          pageType: PageType.COMMENT,
-        });
-
-        const likesCount = await this.LikeStatusModel.countDocuments({
-          parentId: comment.id,
-          pageType: PageType.COMMENT,
-          likeStatus: LikeStatuses.LIKE,
-          isBanned: false,
-        });
-
-        const dislikesCount = await this.LikeStatusModel.countDocuments({
-          parentId: comment.id,
-          pageType: PageType.COMMENT,
-          likeStatus: LikeStatuses.DISLIKE,
-          isBanned: false,
-        });
-
-        return {
-          id: comment.id,
-          content: comment.content,
-          commentatorInfo: {
-            userId: comment.userId,
-            userLogin: comment.userLogin,
-          },
-          createdAt: comment.createdAt,
-          likesInfo: {
-            likesCount: likesCount,
-            dislikesCount: dislikesCount,
-            myStatus: foundLikeStatus
-              ? foundLikeStatus.likeStatus
-              : LikeStatuses.NONE,
-          },
-        };
-      }),
-    );*/
 
     return this._getCommentsViewModelDetail({
       pagesCount,
@@ -157,8 +103,6 @@ export class CommentQueryRepository {
   > {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
-
-    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*) FROM comments;
@@ -188,7 +132,7 @@ export class CommentQueryRepository {
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
-      ${orderBy}
+      ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
       ${limit};
     `;
@@ -257,11 +201,27 @@ export class CommentQueryRepository {
         blogs."id" as "blogId",
         blogs."name" as "blogName",
         posts."id" as "postId",
-        posts."title" as "postTitle"
+        posts."title" as "postTitle",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+        ) as "dislikesCount",
+        COALESCE(likeStatus."likeStatus", 'None') as "likeStatus"        
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
+      LEFT JOIN (
+        SELECT "commentId", "likeStatus"
+        FROM comment_like_status
+        WHERE "userId" = '${userId}'
+      ) as likeStatus ON likeStatus."commentId" = comments."id"
       WHERE comments."id" = '${commentId}' AND comments."isBanned" = false;
     `;
 
@@ -270,26 +230,6 @@ export class CommentQueryRepository {
     if (isEmpty(foundComment)) {
       return null;
     }
-
-    /*const foundLikeStatus = await this.LikeStatusModel.findOne({
-      parentId: foundComment.id,
-      userId,
-      pageType: PageType.COMMENT,
-    });
-
-    const likesCount = await this.LikeStatusModel.countDocuments({
-      parentId: foundComment.id,
-      pageType: PageType.COMMENT,
-      likeStatus: LikeStatuses.LIKE,
-      isBanned: false,
-    });
-
-    const dislikesCount = await this.LikeStatusModel.countDocuments({
-      parentId: foundComment.id,
-      pageType: PageType.COMMENT,
-      likeStatus: LikeStatuses.DISLIKE,
-      isBanned: false,
-    });*/
 
     return this._getCommentViewModel(foundComment[0]);
   }
@@ -373,12 +313,5 @@ export class CommentQueryRepository {
         },
       })),
     };
-  }
-  getOrderBy(sortBy: string, sortDirection: SortDirection) {
-    if (sortBy === 'createdAt') {
-      return `ORDER BY "${sortBy}" ${sortDirection}`;
-    }
-
-    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
   }
 }

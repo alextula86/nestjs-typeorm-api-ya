@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  // Put,
+  Put,
   Req,
   Query,
   Param,
@@ -17,15 +17,14 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthBearerGuard, AuthPublicGuard } from '../../guards';
-// import { LikeStatuses, ResponseViewModelDetail } from '../../types';
 import { ResponseViewModelDetail } from '../../types';
 
 import { CreateCommentCommand } from '../comment/use-cases';
 import { CommentQueryRepository } from '../comment/comment.query.repository';
 import { CreateCommentDto } from '../comment/dto';
 
-// import { UpdateLikeStatusPostCommand } from '../likeStatus/use-cases';
-// import { AddLikeStatusDTO } from '../likeStatus/dto';
+import { UpdateLikeStatusPostCommand } from '../postlikeStatus/use-cases';
+import { AddLikeStatusDTO } from '../postlikeStatus/dto';
 
 import { PostService } from './post.service';
 import { PostQueryRepository } from './post.query.repository';
@@ -156,7 +155,7 @@ export class PostController {
     // Возвращаем созданный комментарий
     return foundComment;
   }
-  /*// Обновление лайк статуса поста
+  // Обновление лайк статуса поста
   @Put(':postId/like-status')
   @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -178,5 +177,5 @@ export class PostController {
     if (statusCode === HttpStatus.BAD_REQUEST) {
       throw new BadRequestException(statusMessage);
     }
-  }*/
+  }
 }
