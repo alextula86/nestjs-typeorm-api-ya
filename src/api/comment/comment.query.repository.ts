@@ -258,6 +258,7 @@ export class CommentQueryRepository {
     });
   }
   _getCommentViewModel(comment: any): CommentViewModel {
+    console.log('comment', comment);
     return {
       id: comment.id,
       content: comment.content,
@@ -267,8 +268,8 @@ export class CommentQueryRepository {
       },
       createdAt: comment.createdAt,
       likesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
+        likesCount: comment.likesCount,
+        dislikesCount: comment.dislikesCount,
         myStatus: comment.likeStatus,
       },
     };
