@@ -100,6 +100,62 @@ export class CommentQueryRepository {
       items: comments,
     });
   }
+  // Поиск комментария по его идентификатору
+  async findCommentById(
+    commentId: string,
+    userId: string,
+  ): Promise<CommentViewModel | null> {
+    const userUUID = userId ? `'${userId}'` : null;
+
+    const query = `
+      SELECT
+        comments."id",
+        comments."content",
+        comments."createdAt",
+        comments."isBanned",
+        users."id" as "userId",
+        users."login" as "userLogin",
+        blogs."id" as "blogId",
+        blogs."name" as "blogName",
+        posts."id" as "postId",
+        posts."title" as "postTitle",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+        ) as "dislikesCount",
+        CASE 
+          WHEN ${userUUID} IS NOT NULL 
+              THEN
+                (
+                  SELECT cls."likeStatus"
+                  FROM comment_like_status as cls
+                  WHERE 
+                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+                ) 
+              ELSE '${LikeStatuses.NONE}'
+        END "likeStatus"
+      FROM comments
+      LEFT JOIN users ON users."id" = comments."userId"
+      LEFT JOIN posts ON posts."id" = comments."postId"
+      LEFT JOIN blogs ON blogs."id" = comments."blogId"
+      WHERE comments."id" = '${commentId}' AND comments."isBanned" = false;
+    `;
+
+    const foundComment = await this.dataSource.query(query);
+
+    if (isEmpty(foundComment)) {
+      return null;
+    }
+
+    return this._getCommentViewModel(foundComment[0]);
+  }
+  // Поиск комментарий по всем постам
   async findCommentsByAllPosts({
     pageNumber,
     pageSize,
@@ -200,61 +256,6 @@ export class CommentQueryRepository {
       pageSize: size,
       items: comments,
     });
-  }
-  // Поиск комментария по его идентификатору
-  async findCommentById(
-    commentId: string,
-    userId: string,
-  ): Promise<CommentViewModel | null> {
-    const userUUID = userId ? `'${userId}'` : null;
-
-    const query = `
-      SELECT
-        comments."id",
-        comments."content",
-        comments."createdAt",
-        comments."isBanned",
-        users."id" as "userId",
-        users."login" as "userLogin",
-        blogs."id" as "blogId",
-        blogs."name" as "blogName",
-        posts."id" as "postId",
-        posts."title" as "postTitle",
-        (
-          SELECT COUNT(*)
-          FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
-        ) as "likesCount",
-        (
-          SELECT COUNT(*)
-          FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
-        ) as "dislikesCount",
-        CASE 
-          WHEN ${userUUID} IS NOT NULL 
-              THEN
-                (
-                  SELECT cls."likeStatus"
-                  FROM comment_like_status as cls
-                  WHERE 
-                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
-                ) 
-              ELSE '${LikeStatuses.NONE}'
-        END "likeStatus"
-      FROM comments
-      LEFT JOIN users ON users."id" = comments."userId"
-      LEFT JOIN posts ON posts."id" = comments."postId"
-      LEFT JOIN blogs ON blogs."id" = comments."blogId"
-      WHERE comments."id" = '${commentId}' AND comments."isBanned" = false;
-    `;
-
-    const foundComment = await this.dataSource.query(query);
-
-    if (isEmpty(foundComment)) {
-      return null;
-    }
-
-    return this._getCommentViewModel(foundComment[0]);
   }
   _getCommentViewModel(comment: any): CommentViewModel {
     return {

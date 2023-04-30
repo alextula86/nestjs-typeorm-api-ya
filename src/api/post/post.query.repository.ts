@@ -86,17 +86,17 @@ export class PostQueryRepository {
           WHERE 
             pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
         ) as "dislikesCount",
-        CASE 
-          WHEN ${userUUID} IS NOT NULL 
-              THEN
-                (
-                  SELECT pls."likeStatus"
-                  FROM post_like_status as pls
-                  WHERE 
-                    pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
-                ) 
-              ELSE '${LikeStatuses.NONE}'
-        END "likeStatus"
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT pls."likeStatus"
+                FROM post_like_status as pls
+                WHERE 
+                  pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as  "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
@@ -190,17 +190,17 @@ export class PostQueryRepository {
         WHERE 
           pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
       ) as "dislikesCount",
-      CASE 
-        WHEN ${userUUID} IS NOT NULL 
-            THEN
-              (
-                SELECT pls."likeStatus"
-                FROM post_like_status as pls
-                WHERE 
-                  pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
-              ) 
-            ELSE '${LikeStatuses.NONE}'
-      END "likeStatus"
+      COALESCE(
+        CASE WHEN ${userUUID} IS NOT NULL 
+          THEN
+            (
+              SELECT pls."likeStatus"
+              FROM post_like_status as pls
+              WHERE 
+                pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+            ) 
+          ELSE '${LikeStatuses.NONE}'
+      END, '${LikeStatuses.NONE}') as  "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
@@ -261,21 +261,23 @@ export class PostQueryRepository {
         WHERE 
           pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
       ) as "dislikesCount",
-      CASE 
-        WHEN ${userUUID} IS NOT NULL 
-            THEN
-              (
-                SELECT pls."likeStatus"
-                FROM post_like_status as pls
-                WHERE 
-                  pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
-              ) 
-            ELSE '${LikeStatuses.NONE}'
-      END "likeStatus"
+      COALESCE(
+        CASE WHEN ${userUUID} IS NOT NULL 
+          THEN
+            (
+              SELECT pls."likeStatus"
+              FROM post_like_status as pls
+              WHERE 
+                pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+            ) 
+          ELSE '${LikeStatuses.NONE}'
+      END, '${LikeStatuses.NONE}') as  "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       WHERE posts."id" = '${postId}' AND posts."isBanned" = false;
     `;
+
+    console.log('query', query);
 
     const foundPost = await this.dataSource.query(query);
 
@@ -286,6 +288,7 @@ export class PostQueryRepository {
     return this._getPostViewModel(foundPost[0]);
   }
   _getPostViewModel(post: any): PostViewModel {
+    console.log('post', post);
     return {
       id: post.id,
       title: post.title,
@@ -298,11 +301,13 @@ export class PostQueryRepository {
         likesCount: post.likesCount,
         dislikesCount: post.dislikesCount,
         myStatus: post.likeStatus,
-        newestLikes: post.newestLikes.map((i: NewestLikes) => ({
-          addedAt: i.addedAt,
-          userId: i.userId,
-          login: i.login,
-        })),
+        newestLikes: !isEmpty(post.newestLikes)
+          ? post.newestLikes.map((i: NewestLikes) => ({
+              addedAt: i.addedAt,
+              userId: i.userId,
+              login: i.login,
+            }))
+          : [],
       },
     };
   }
@@ -331,11 +336,13 @@ export class PostQueryRepository {
             likesCount: item.likesCount,
             dislikesCount: item.dislikesCount,
             myStatus: item.likeStatus,
-            newestLikes: item.newestLikes.map((i: NewestLikes) => ({
-              addedAt: i.addedAt,
-              userId: i.userId,
-              login: i.login,
-            })),
+            newestLikes: !isEmpty(item.newestLikes)
+              ? item.newestLikes.map((i: NewestLikes) => ({
+                  addedAt: i.addedAt,
+                  userId: i.userId,
+                  login: i.login,
+                }))
+              : [],
           },
         };
       }),
