@@ -62,12 +62,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
         ) as "dislikesCount",
         COALESCE(
           CASE WHEN ${userUUID} IS NOT NULL 
@@ -122,12 +122,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
         ) as "dislikesCount",
         COALESCE(
           CASE WHEN ${userUUID} IS NOT NULL 
@@ -194,12 +194,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
         ) as "dislikesCount",
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"

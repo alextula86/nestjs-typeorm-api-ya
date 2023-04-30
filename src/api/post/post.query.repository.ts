@@ -69,7 +69,7 @@ export class PostQueryRepository {
               users."login" as "login"
             FROM post_like_status AS pls
             LEFT JOIN users ON users."id" = pls."userId"
-            WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+            WHERE pls."postId" = posts."id" AND pls."isBanned" = false  AND pls."likeStatus" = '${LikeStatuses.LIKE}'
             ORDER BY pls."createdAt" desc
             LIMIT 3
           ) e
@@ -78,13 +78,13 @@ export class PostQueryRepository {
           SELECT COUNT(*)
           FROM post_like_status as pls
           WHERE 
-            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.LIKE}'
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM post_like_status as pls
           WHERE 
-            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.DISLIKE}'
         ) as "dislikesCount",
         COALESCE(
           CASE WHEN ${userUUID} IS NOT NULL 
@@ -173,7 +173,7 @@ export class PostQueryRepository {
             users."login" as "login"
           FROM post_like_status AS pls
           LEFT JOIN users ON users."id" = pls."userId"
-          WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+          WHERE pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.LIKE}'
           ORDER BY pls."createdAt" desc
           LIMIT 3
         ) e
@@ -182,13 +182,13 @@ export class PostQueryRepository {
         SELECT COUNT(*)
         FROM post_like_status as pls
         WHERE 
-          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.LIKE}'
       ) as "likesCount",
       (
         SELECT COUNT(*)
         FROM post_like_status as pls
         WHERE 
-          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.DISLIKE}'
       ) as "dislikesCount",
       COALESCE(
         CASE WHEN ${userUUID} IS NOT NULL 
@@ -244,7 +244,7 @@ export class PostQueryRepository {
             users."login" as "login"
           FROM post_like_status AS pls
           LEFT JOIN users ON users."id" = pls."userId"
-          WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+          WHERE pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.LIKE}'
           ORDER BY pls."createdAt" desc
           LIMIT 3
         ) e
@@ -253,13 +253,13 @@ export class PostQueryRepository {
         SELECT COUNT(*)
         FROM post_like_status as pls
         WHERE 
-          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.LIKE}'
       ) as "likesCount",
       (
         SELECT COUNT(*)
         FROM post_like_status as pls
         WHERE 
-          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = '${LikeStatuses.DISLIKE}'
       ) as "dislikesCount",
       COALESCE(
         CASE WHEN ${userUUID} IS NOT NULL 
@@ -277,10 +277,10 @@ export class PostQueryRepository {
       WHERE posts."id" = '${postId}' AND posts."isBanned" = false;
     `;
 
-    console.log('query', query);
+    // console.log('query', query);
 
     const foundPost = await this.dataSource.query(query);
-
+    console.log('foundPost', foundPost);
     if (isEmpty(foundPost)) {
       return null;
     }
