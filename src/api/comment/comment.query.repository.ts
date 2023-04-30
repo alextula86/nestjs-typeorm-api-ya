@@ -69,17 +69,17 @@ export class CommentQueryRepository {
           FROM comment_like_status as cls
           WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
         ) as "dislikesCount",
-        CASE 
-          WHEN ${userUUID} IS NOT NULL 
-              THEN
-                (
-                  SELECT cls."likeStatus"
-                  FROM comment_like_status as cls
-                  WHERE 
-                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
-                ) 
-              ELSE '${LikeStatuses.NONE}'
-        END "likeStatus"
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT cls."likeStatus"
+                FROM comment_like_status as cls
+                WHERE 
+                  cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
@@ -129,17 +129,17 @@ export class CommentQueryRepository {
           FROM comment_like_status as cls
           WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
         ) as "dislikesCount",
-        CASE 
-          WHEN ${userUUID} IS NOT NULL 
-              THEN
-                (
-                  SELECT cls."likeStatus"
-                  FROM comment_like_status as cls
-                  WHERE 
-                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
-                ) 
-              ELSE '${LikeStatuses.NONE}'
-        END "likeStatus"
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT cls."likeStatus"
+                FROM comment_like_status as cls
+                WHERE 
+                  cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
