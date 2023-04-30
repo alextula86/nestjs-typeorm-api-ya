@@ -298,8 +298,8 @@ export class PostQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
+        likesCount: +post.likesCount,
+        dislikesCount: +post.dislikesCount,
         myStatus: post.likeStatus,
         newestLikes: !isEmpty(post.newestLikes)
           ? post.newestLikes.map((i: NewestLikes) => ({
@@ -333,8 +333,8 @@ export class PostQueryRepository {
           blogName: item.blogName,
           createdAt: item.createdAt,
           extendedLikesInfo: {
-            likesCount: item.likesCount,
-            dislikesCount: item.dislikesCount,
+            likesCount: +item.likesCount,
+            dislikesCount: +item.dislikesCount,
             myStatus: item.likeStatus,
             newestLikes: !isEmpty(item.newestLikes)
               ? item.newestLikes.map((i: NewestLikes) => ({

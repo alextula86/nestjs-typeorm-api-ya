@@ -268,8 +268,8 @@ export class CommentQueryRepository {
       },
       createdAt: comment.createdAt,
       likesInfo: {
-        likesCount: comment.likesCount,
-        dislikesCount: comment.dislikesCount,
+        likesCount: +comment.likesCount,
+        dislikesCount: +comment.dislikesCount,
         myStatus: comment.likeStatus,
       },
     };
@@ -295,8 +295,8 @@ export class CommentQueryRepository {
         },
         createdAt: item.createdAt,
         likesInfo: {
-          likesCount: item.likesCount,
-          dislikesCount: item.dislikesCount,
+          likesCount: +item.likesCount,
+          dislikesCount: +item.dislikesCount,
           myStatus: item.likeStatus,
         },
       })),
