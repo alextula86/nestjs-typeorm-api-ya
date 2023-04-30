@@ -70,7 +70,7 @@ export class PostLikeStatusRepository {
         users."login" as "userLogin"
       FROM post_like_status as pls
       LEFT JOIN users ON users."id" = pls."userId"
-      WHERE cls."postId" = '${postId}' AND pls."userId" = '${userId}'
+      WHERE pls."postId" = '${postId}' AND pls."userId" = '${userId}'
     ;`;
 
     const foundLikeStatus = await this.dataSource.query(query);

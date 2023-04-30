@@ -29,6 +29,8 @@ export class CommentQueryRepository {
       sortDirection = SortDirection.DESC,
     }: QueryCommentModel,
   ): Promise<ResponseViewModelDetail<CommentViewModel>> {
+    const userUUID = userId ? `'${userId}'` : null;
+
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
@@ -67,16 +69,21 @@ export class CommentQueryRepository {
           FROM comment_like_status as cls
           WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
         ) as "dislikesCount",
-        COALESCE(likeStatus."likeStatus", 'None') as "likeStatus"
+        CASE 
+          WHEN ${userUUID} IS NOT NULL 
+              THEN
+                (
+                  SELECT cls."likeStatus"
+                  FROM comment_like_status as cls
+                  WHERE 
+                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+                ) 
+              ELSE '${LikeStatuses.NONE}'
+        END "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
-      LEFT JOIN (
-        SELECT "commentId", "likeStatus"
-        FROM comment_like_status
-        WHERE "userId" = '${userId}'
-      ) as likeStatus ON likeStatus."commentId" = comments."id"
       WHERE comments."postId" = '${postId}' AND comments."isBanned" = false
       ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
@@ -127,7 +134,17 @@ export class CommentQueryRepository {
         posts."id" as "postId",
         posts."title" as "postTitle",
         blogs."id" as "blogId",
-        blogs."name" as "blogName"
+        blogs."name" as "blogName",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Like'
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
+        ) as "dislikesCount",
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
@@ -189,7 +206,8 @@ export class CommentQueryRepository {
     commentId: string,
     userId: string,
   ): Promise<CommentViewModel | null> {
-    console.log('findCommentById userId', userId);
+    const userUUID = userId ? `'${userId}'` : null;
+
     const query = `
       SELECT
         comments."id",
@@ -212,16 +230,21 @@ export class CommentQueryRepository {
           FROM comment_like_status as cls
           WHERE cls."commentId" = comments."id" AND "likeStatus" = 'Dislike'
         ) as "dislikesCount",
-        COALESCE(likeStatus."likeStatus", 'None') as "likeStatus"        
+        CASE 
+          WHEN ${userUUID} IS NOT NULL 
+              THEN
+                (
+                  SELECT cls."likeStatus"
+                  FROM comment_like_status as cls
+                  WHERE 
+                    cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+                ) 
+              ELSE '${LikeStatuses.NONE}'
+        END "likeStatus"
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
       LEFT JOIN blogs ON blogs."id" = comments."blogId"
-      LEFT JOIN (
-        SELECT "commentId", "likeStatus"
-        FROM comment_like_status
-        WHERE "userId" = '${userId}'
-      ) as likeStatus ON likeStatus."commentId" = comments."id"
       WHERE comments."id" = '${commentId}' AND comments."isBanned" = false;
     `;
 
@@ -245,10 +268,7 @@ export class CommentQueryRepository {
       likesInfo: {
         likesCount: 0,
         dislikesCount: 0,
-        /*myStatus: foundLikeStatus
-          ? foundLikeStatus.likeStatus
-          : LikeStatuses.NONE,*/
-        myStatus: LikeStatuses.NONE,
+        myStatus: comment.likeStatus,
       },
     };
   }
@@ -306,12 +326,19 @@ export class CommentQueryRepository {
           blogId: item.blogId,
           blogName: item.blogName,
         },
-        likesInfo: {
+        /*likesInfo: {
           likesCount: 0,
           dislikesCount: 0,
           myStatus: LikeStatuses.NONE,
-        },
+        },*/
       })),
     };
   }
+  /*getOrderBy(sortBy: string, sortDirection: SortDirection) {
+    if (sortBy === 'createdAt') {
+      return `ORDER BY "${sortBy}" ${sortDirection}`;
+    }
+
+    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
+  }*/
 }

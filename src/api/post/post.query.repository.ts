@@ -5,15 +5,10 @@ import { isEmpty } from 'lodash';
 
 import {
   LikeStatuses,
-  // PageType,
   ResponseViewModelDetail,
   SortDirection,
 } from '../../types';
-
-// import { LikeStatus, LikeStatusModelType } from '../likeStatus/schemas';
-
-// import { Post, PostModelType } from './schemas';
-import { QueryPostModel, PostViewModel } from './types';
+import { QueryPostModel, PostViewModel, NewestLikes } from './types';
 
 @Injectable()
 export class PostQueryRepository {
@@ -29,12 +24,12 @@ export class PostQueryRepository {
       sortDirection = SortDirection.DESC,
     }: QueryPostModel,
   ): Promise<ResponseViewModelDetail<PostViewModel>> {
-    console.log('findAllPosts userId', userId);
+    const userUUID = userId ? `'${userId}'` : null;
+
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
     const terms: string[] = [];
-    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     if (searchNameTerm) {
       terms.push(`posts."title" ILIKE '%${searchNameTerm}%'`);
@@ -62,75 +57,55 @@ export class PostQueryRepository {
         posts."title", 
         posts."shortDescription",
         posts."content",
-        posts."blogId",
         posts."createdAt",
-        blogs."name" as "blogName"
+        blogs."id" as "blogId",
+        blogs."name" as "blogName",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              pls."createdAt" as "addedAt",
+              users."id" as "userId",
+              users."login" as "login"
+            FROM post_like_status AS pls
+            LEFT JOIN users ON users."id" = pls."userId"
+            WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+            ORDER BY pls."createdAt" desc
+            LIMIT 3
+          ) e
+        ) as "newestLikes",
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+        ) as "dislikesCount",
+        CASE 
+          WHEN ${userUUID} IS NOT NULL 
+              THEN
+                (
+                  SELECT pls."likeStatus"
+                  FROM post_like_status as pls
+                  WHERE 
+                    pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+                ) 
+              ELSE '${LikeStatuses.NONE}'
+        END "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
-      ${orderBy}
+      ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
       ${limit};
     `;
 
     const posts = await this.dataSource.query(query);
-
-    /*const postsViewModel = await Promise.all(
-      posts.map(async (post) => {
-        const foundLikeStatus = await this.LikeStatusModel.findOne({
-          parentId: post.id,
-          userId,
-          pageType: PageType.POST,
-        });
-
-        const newestLikes = await this.LikeStatusModel.find({
-          parentId: post.id,
-          likeStatus: LikeStatuses.LIKE,
-          pageType: PageType.POST,
-          isBanned: false,
-        })
-          .sort({ createdAt: -1 })
-          .limit(3);
-
-        const likesCount = await this.LikeStatusModel.countDocuments({
-          parentId: post.id,
-          pageType: PageType.POST,
-          likeStatus: LikeStatuses.LIKE,
-          isBanned: false,
-        });
-
-        const dislikesCount = await this.LikeStatusModel.countDocuments({
-          parentId: post.id,
-          pageType: PageType.POST,
-          likeStatus: LikeStatuses.DISLIKE,
-          isBanned: false,
-        });
-
-        return {
-          id: post.id,
-          title: post.title,
-          shortDescription: post.shortDescription,
-          content: post.content,
-          blogId: post.blogId,
-          blogName: post.blogName,
-          createdAt: post.createdAt,
-          extendedLikesInfo: {
-            // likesCount: post.likesCount,
-            // dislikesCount: post.dislikesCount,
-            likesCount: likesCount,
-            dislikesCount: dislikesCount,
-            myStatus: foundLikeStatus
-              ? foundLikeStatus.likeStatus
-              : LikeStatuses.NONE,
-            newestLikes: newestLikes.map((i) => ({
-              addedAt: i.createdAt,
-              userId: i.userId,
-              login: i.userLogin,
-            })),
-          },
-        };
-      }),
-    );*/
 
     return this._getPostsViewModelDetail({
       pagesCount,
@@ -152,12 +127,11 @@ export class PostQueryRepository {
       sortDirection = SortDirection.DESC,
     }: QueryPostModel,
   ): Promise<ResponseViewModelDetail<PostViewModel>> {
-    console.log('findPostsByBlogId userId', userId);
+    const userUUID = userId ? `'${userId}'` : null;
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
     const terms: string[] = [];
-    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     if (searchNameTerm) {
       terms.push(`posts."title" ILIKE '%${searchNameTerm}%'`);
@@ -183,79 +157,59 @@ export class PostQueryRepository {
 
     const query = `
       SELECT 
-        posts."id", 
-        posts."title", 
-        posts."shortDescription",
-        posts."content",
-        posts."blogId",
-        posts."createdAt",
-        blogs."name" as "blogName"
+      posts."id", 
+      posts."title", 
+      posts."shortDescription",
+      posts."content",
+      posts."createdAt",
+      blogs."id" as "blogId",
+      blogs."name" as "blogName",
+      (
+        SELECT json_agg(e)
+        FROM (
+          SELECT 
+            pls."createdAt" as "addedAt",
+            users."id" as "userId",
+            users."login" as "login"
+          FROM post_like_status AS pls
+          LEFT JOIN users ON users."id" = pls."userId"
+          WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+          ORDER BY pls."createdAt" desc
+          LIMIT 3
+        ) e
+      ) as "newestLikes",        
+      (
+        SELECT COUNT(*)
+        FROM post_like_status as pls
+        WHERE 
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+      ) as "likesCount",
+      (
+        SELECT COUNT(*)
+        FROM post_like_status as pls
+        WHERE 
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+      ) as "dislikesCount",
+      CASE 
+        WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT pls."likeStatus"
+                FROM post_like_status as pls
+                WHERE 
+                  pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+      END "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
-      ${orderBy}
+      ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
       ${limit};
     `;
 
     const posts = await this.dataSource.query(query);
-
-    /* const postsViewModel = await Promise.all(
-      posts.map(async (post) => {
-        const foundLikeStatus = await this.LikeStatusModel.findOne({
-          parentId: post.id,
-          userId,
-          pageType: PageType.POST,
-        });
-
-        const newestLikes = await this.LikeStatusModel.find({
-          parentId: post.id,
-          likeStatus: LikeStatuses.LIKE,
-          pageType: PageType.POST,
-          isBanned: false,
-        })
-          .sort({ createdAt: -1 })
-          .limit(3);
-
-        const likesCount = await this.LikeStatusModel.countDocuments({
-          parentId: post.id,
-          pageType: PageType.POST,
-          likeStatus: LikeStatuses.LIKE,
-          isBanned: false,
-        });
-
-        const dislikesCount = await this.LikeStatusModel.countDocuments({
-          parentId: post.id,
-          pageType: PageType.POST,
-          likeStatus: LikeStatuses.DISLIKE,
-          isBanned: false,
-        });
-
-        return {
-          id: post.id,
-          title: post.title,
-          shortDescription: post.shortDescription,
-          content: post.content,
-          blogId: post.blogId,
-          blogName: post.blogName,
-          createdAt: post.createdAt,
-          extendedLikesInfo: {
-            // likesCount: post.likesCount,
-            // dislikesCount: post.dislikesCount,
-            likesCount: likesCount,
-            dislikesCount: dislikesCount,
-            myStatus: foundLikeStatus
-              ? foundLikeStatus.likeStatus
-              : LikeStatuses.NONE,
-            newestLikes: newestLikes.map((i) => ({
-              addedAt: i.createdAt,
-              userId: i.userId,
-              login: i.userLogin,
-            })),
-          },
-        };
-      }),
-    );*/
 
     return this._getPostsViewModelDetail({
       pagesCount,
@@ -270,16 +224,54 @@ export class PostQueryRepository {
     postId: string,
     userId: string,
   ): Promise<PostViewModel | null> {
-    console.log('findPostById userId', userId);
+    const userUUID = userId ? `'${userId}'` : null;
+
     const query = `
-      SELECT
-        posts."id", 
-        posts."title", 
-        posts."shortDescription",
-        posts."content",
-        posts."blogId",
-        posts."createdAt",
-        blogs."name" as "blogName"
+      SELECT 
+      posts."id", 
+      posts."title", 
+      posts."shortDescription",
+      posts."content",
+      posts."createdAt",
+      blogs."id" as "blogId",
+      blogs."name" as "blogName",
+      (
+        SELECT json_agg(e)
+        FROM (
+          SELECT 
+            pls."createdAt" as "addedAt",
+            users."id" as "userId",
+            users."login" as "login"
+          FROM post_like_status AS pls
+          LEFT JOIN users ON users."id" = pls."userId"
+          WHERE pls."postId" = posts."id" AND pls."isBanned" = false
+          ORDER BY pls."createdAt" desc
+          LIMIT 3
+        ) e
+      ) as "newestLikes",
+      (
+        SELECT COUNT(*)
+        FROM post_like_status as pls
+        WHERE 
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Like'
+      ) as "likesCount",
+      (
+        SELECT COUNT(*)
+        FROM post_like_status as pls
+        WHERE 
+          pls."postId" = posts."id" AND pls."isBanned" = false AND pls."likeStatus" = 'Dislike'
+      ) as "dislikesCount",
+      CASE 
+        WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT pls."likeStatus"
+                FROM post_like_status as pls
+                WHERE 
+                  pls."postId" = posts."id" AND pls."isBanned" = false AND pls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+      END "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       WHERE posts."id" = '${postId}' AND posts."isBanned" = false;
@@ -290,35 +282,6 @@ export class PostQueryRepository {
     if (isEmpty(foundPost)) {
       return null;
     }
-
-    /*const foundLikeStatusByUserId = await this.LikeStatusModel.findOne({
-      parentId: foundPost.id,
-      userId,
-      pageType: PageType.POST,
-    });
-
-    const newestLikes = await this.LikeStatusModel.find({
-      parentId: foundPost.id,
-      likeStatus: LikeStatuses.LIKE,
-      pageType: PageType.POST,
-      isBanned: false,
-    })
-      .sort({ createdAt: -1 })
-      .limit(3);
-
-    const likesCount = await this.LikeStatusModel.countDocuments({
-      parentId: foundPost.id,
-      pageType: PageType.POST,
-      likeStatus: LikeStatuses.LIKE,
-      isBanned: false,
-    });
-
-    const dislikesCount = await this.LikeStatusModel.countDocuments({
-      parentId: foundPost.id,
-      pageType: PageType.POST,
-      likeStatus: LikeStatuses.DISLIKE,
-      isBanned: false,
-    });*/
 
     return this._getPostViewModel(foundPost[0]);
   }
@@ -332,20 +295,14 @@ export class PostQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        // likesCount: likesCount,
-        likesCount: 0,
-        // dislikesCount: dislikesCount,
-        dislikesCount: 0,
-        /*myStatus: foundLikeStatusByUserId
-          ? foundLikeStatusByUserId.likeStatus
-          : LikeStatuses.NONE,*/
-        myStatus: LikeStatuses.NONE,
-        /*newestLikes: newestLikes.map((i) => ({
-          addedAt: i.createdAt,
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: post.likeStatus,
+        newestLikes: post.newestLikes.map((i: NewestLikes) => ({
+          addedAt: i.addedAt,
           userId: i.userId,
-          login: i.userLogin,
-        })),*/
-        newestLikes: [],
+          login: i.login,
+        })),
       },
     };
   }
@@ -361,38 +318,34 @@ export class PostQueryRepository {
       page,
       pageSize,
       totalCount,
-      items: items.map((item) => ({
-        id: item.id,
-        title: item.title,
-        shortDescription: item.shortDescription,
-        content: item.content,
-        blogId: item.blogId,
-        blogName: item.blogName,
-        createdAt: item.createdAt,
-        extendedLikesInfo: {
-          // likesCount: likesCount,
-          likesCount: 0,
-          // dislikesCount: dislikesCount,
-          dislikesCount: 0,
-          /*myStatus: foundLikeStatus
-            ? foundLikeStatus.likeStatus
-            : LikeStatuses.NONE,*/
-          myStatus: LikeStatuses.NONE,
-          /*newestLikes: newestLikes.map((i) => ({
-            addedAt: i.createdAt,
-            userId: i.userId,
-            login: i.userLogin,
-          })),*/
-          newestLikes: [],
-        },
-      })),
+      items: items.map((item) => {
+        return {
+          id: item.id,
+          title: item.title,
+          shortDescription: item.shortDescription,
+          content: item.content,
+          blogId: item.blogId,
+          blogName: item.blogName,
+          createdAt: item.createdAt,
+          extendedLikesInfo: {
+            likesCount: item.likesCount,
+            dislikesCount: item.dislikesCount,
+            myStatus: item.likeStatus,
+            newestLikes: item.newestLikes.map((i: NewestLikes) => ({
+              addedAt: i.addedAt,
+              userId: i.userId,
+              login: i.login,
+            })),
+          },
+        };
+      }),
     };
   }
-  getOrderBy(sortBy: string, sortDirection: SortDirection) {
+  /*getOrderBy(sortBy: string, sortDirection: SortDirection) {
     if (sortBy === 'createdAt') {
       return `ORDER BY "${sortBy}" ${sortDirection}`;
     }
 
     return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
-  }
+  }*/
 }

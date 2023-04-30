@@ -1,6 +1,6 @@
 import { LikeStatuses } from '../../../types';
 
-type NewestLikes = {
+export type NewestLikes = {
   addedAt: string;
   userId: string;
   login: string;
