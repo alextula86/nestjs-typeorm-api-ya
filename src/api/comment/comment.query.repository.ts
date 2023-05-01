@@ -62,12 +62,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}' AND cls."isBanned" = false
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}' AND cls."isBanned" = false
         ) as "dislikesCount",
         COALESCE(
           CASE WHEN ${userUUID} IS NOT NULL 
@@ -76,7 +76,7 @@ export class CommentQueryRepository {
                 SELECT cls."likeStatus"
                 FROM comment_like_status as cls
                 WHERE 
-                  cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+                  cls."commentId" = comments."id" AND cls."userId" = ${userUUID}
               ) 
             ELSE '${LikeStatuses.NONE}'
         END, '${LikeStatuses.NONE}') as "likeStatus"
@@ -122,12 +122,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}' AND cls."isBanned" = false
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}' AND cls."isBanned" = false
         ) as "dislikesCount",
         COALESCE(
           CASE WHEN ${userUUID} IS NOT NULL 
@@ -136,7 +136,7 @@ export class CommentQueryRepository {
                 SELECT cls."likeStatus"
                 FROM comment_like_status as cls
                 WHERE 
-                  cls."commentId" = comments."id" AND cls."isBanned" = false AND cls."userId" = ${userUUID}
+                  cls."commentId" = comments."id" AND cls."userId" = ${userUUID}
               ) 
             ELSE '${LikeStatuses.NONE}'
         END, '${LikeStatuses.NONE}') as "likeStatus"
@@ -194,12 +194,12 @@ export class CommentQueryRepository {
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}' AND cls."isBanned" = false
         ) as "likesCount",
         (
           SELECT COUNT(*)
           FROM comment_like_status as cls
-          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}'
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}' AND cls."isBanned" = false
         ) as "dislikesCount",
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
@@ -258,7 +258,6 @@ export class CommentQueryRepository {
     });
   }
   _getCommentViewModel(comment: any): CommentViewModel {
-    console.log('comment', comment);
     return {
       id: comment.id,
       content: comment.content,
