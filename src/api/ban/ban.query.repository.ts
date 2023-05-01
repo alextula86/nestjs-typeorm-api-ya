@@ -22,22 +22,21 @@ export class BanQueryRepository {
     const size = pageSize ? Number(pageSize) : 10;
 
     const terms: string[] = [];
-    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     if (searchLoginTerm) {
       terms.push(`u."login" ILIKE '%${searchLoginTerm}%'`);
     }
 
     const where = !isEmpty(terms)
-      ? `WHERE bi."blogId" = '${blogId}' AND bi."isBanned" = true AND ${terms.join(
+      ? `WHERE bui."blogId" = '${blogId}' AND bui."isBanned" = true AND ${terms.join(
           ' OR ',
         )}`
-      : `WHERE bi."blogId" = '${blogId}' AND bi."isBanned" = true`;
+      : `WHERE bui."blogId" = '${blogId}' AND bui."isBanned" = true`;
 
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*) 
       FROM ban_user_info as bi
-      LEFT JOIN users as u ON u."id" = bi."userId"
+      LEFT JOIN users as u ON u."id" = bui."userId"
       ${where};
     `);
 
@@ -51,17 +50,17 @@ export class BanQueryRepository {
 
     const query = `
       SELECT 
-        bi."id", 
-        bi."isBanned", 
-        bi."banDate",
-        bi."banReason",
-        bi."createdAt",
-        u."login",
+        bui."id", 
+        bui."isBanned", 
+        bui."banDate",
+        bui."banReason",
+        bui."createdAt",
+        u."login" as "userLogin",
         u."id" as "userId"
       FROM ban_user_info as bi
-      LEFT JOIN users as u ON u."id" = bi."userId"
+      LEFT JOIN users as u ON u."id" = bui."userId"
       ${where}
-      ${orderBy}
+      ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
       ${limit};
     `;
@@ -90,7 +89,7 @@ export class BanQueryRepository {
       totalCount,
       items: items.map((item) => ({
         id: item.userId,
-        login: item.login,
+        login: item.userLogin,
         banInfo: {
           isBanned: item.isBanned,
           banDate: item.banDate,
@@ -98,12 +97,5 @@ export class BanQueryRepository {
         },
       })),
     };
-  }
-  getOrderBy(sortBy: string, sortDirection: SortDirection) {
-    if (sortBy === 'createdAt') {
-      return `ORDER BY "${sortBy}" ${sortDirection}`;
-    }
-
-    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
   }
 }

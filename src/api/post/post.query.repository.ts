@@ -157,50 +157,50 @@ export class PostQueryRepository {
 
     const query = `
       SELECT 
-      posts."id", 
-      posts."title", 
-      posts."shortDescription",
-      posts."content",
-      posts."createdAt",
-      blogs."id" as "blogId",
-      blogs."name" as "blogName",
-      (
-        SELECT json_agg(e)
-        FROM (
-          SELECT 
-            pls."createdAt" as "addedAt",
-            users."id" as "userId",
-            users."login" as "login"
-          FROM post_like_status AS pls
-          LEFT JOIN users ON users."id" = pls."userId"
-          WHERE pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
-          ORDER BY pls."createdAt" desc
-          LIMIT 3
-        ) e
-      ) as "newestLikes",        
-      (
-        SELECT COUNT(*)
-        FROM post_like_status as pls
-        WHERE 
-          pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
-      ) as "likesCount",
-      (
-        SELECT COUNT(*)
-        FROM post_like_status as pls
-        WHERE 
-          pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.DISLIKE}' AND pls."isBanned" = false
-      ) as "dislikesCount",
-      COALESCE(
-        CASE WHEN ${userUUID} IS NOT NULL 
-          THEN
-            (
-              SELECT pls."likeStatus"
-              FROM post_like_status as pls
-              WHERE 
-                pls."postId" = posts."id" AND pls."userId" = ${userUUID}
-            ) 
-          ELSE '${LikeStatuses.NONE}'
-      END, '${LikeStatuses.NONE}') as  "likeStatus"
+        posts."id", 
+        posts."title", 
+        posts."shortDescription",
+        posts."content",
+        posts."createdAt",
+        blogs."id" as "blogId",
+        blogs."name" as "blogName",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              pls."createdAt" as "addedAt",
+              users."id" as "userId",
+              users."login" as "login"
+            FROM post_like_status AS pls
+            LEFT JOIN users ON users."id" = pls."userId"
+            WHERE pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
+            ORDER BY pls."createdAt" desc
+            LIMIT 3
+          ) e
+        ) as "newestLikes",        
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.DISLIKE}' AND pls."isBanned" = false
+        ) as "dislikesCount",
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT pls."likeStatus"
+                FROM post_like_status as pls
+                WHERE 
+                  pls."postId" = posts."id" AND pls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as  "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
@@ -228,50 +228,50 @@ export class PostQueryRepository {
 
     const query = `
       SELECT 
-      posts."id", 
-      posts."title", 
-      posts."shortDescription",
-      posts."content",
-      posts."createdAt",
-      blogs."id" as "blogId",
-      blogs."name" as "blogName",
-      (
-        SELECT json_agg(e)
-        FROM (
-          SELECT 
-            pls."createdAt" as "addedAt",
-            users."id" as "userId",
-            users."login" as "login"
-          FROM post_like_status AS pls
-          LEFT JOIN users ON users."id" = pls."userId"
-          WHERE pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
-          ORDER BY pls."createdAt" desc
-          LIMIT 3
-        ) e
-      ) as "newestLikes",
-      (
-        SELECT COUNT(*)
-        FROM post_like_status as pls
-        WHERE 
-          pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
-      ) as "likesCount",
-      (
-        SELECT COUNT(*)
-        FROM post_like_status as pls
-        WHERE 
-          pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.DISLIKE}' AND pls."isBanned" = false
-      ) as "dislikesCount",
-      COALESCE(
-        CASE WHEN ${userUUID} IS NOT NULL 
-          THEN
-            (
-              SELECT pls."likeStatus"
-              FROM post_like_status as pls
-              WHERE 
-                pls."postId" = posts."id" AND pls."userId" = ${userUUID}
-            ) 
-          ELSE '${LikeStatuses.NONE}'
-      END, '${LikeStatuses.NONE}') as  "likeStatus"
+        posts."id", 
+        posts."title", 
+        posts."shortDescription",
+        posts."content",
+        posts."createdAt",
+        blogs."id" as "blogId",
+        blogs."name" as "blogName",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              pls."createdAt" as "addedAt",
+              users."id" as "userId",
+              users."login" as "login"
+            FROM post_like_status AS pls
+            LEFT JOIN users ON users."id" = pls."userId"
+            WHERE pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
+            ORDER BY pls."createdAt" desc
+            LIMIT 3
+          ) e
+        ) as "newestLikes",
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.LIKE}' AND pls."isBanned" = false
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM post_like_status as pls
+          WHERE 
+            pls."postId" = posts."id" AND pls."likeStatus" = '${LikeStatuses.DISLIKE}' AND pls."isBanned" = false
+        ) as "dislikesCount",
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT pls."likeStatus"
+                FROM post_like_status as pls
+                WHERE 
+                  pls."postId" = posts."id" AND pls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as  "likeStatus"
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       WHERE posts."id" = '${postId}' AND posts."isBanned" = false;
