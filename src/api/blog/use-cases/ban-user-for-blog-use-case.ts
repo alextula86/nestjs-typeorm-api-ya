@@ -53,14 +53,14 @@ export class BanUserForBlogUseCase
       return { statusCode: HttpStatus.FORBIDDEN };
     }
     // Ищем забаненного пользователя в базе
-    const foundBanUserForBlog = await this.banRepository.findBanUserById(
+    const foundBanUserForBlog = await this.banRepository.findBanUserForBlogById(
       userId,
       blogId,
     );
     // Если забаненного пользователя в базе нет, создаем его
     if (!foundBanUserForBlog) {
       // Создаем документ забаненного пользователя
-      await this.banRepository.createBanUser({
+      await this.banRepository.createBanUserForBlogId({
         userId: foundUser.id,
         blogId: foundBlog.id,
         isBanned,
@@ -68,7 +68,7 @@ export class BanUserForBlogUseCase
       });
     } else {
       // Обновляем статус бана пользователя
-      await this.banRepository.banUserForBlog(
+      await this.banRepository.updateBanUserForBlogId(
         userId,
         blogId,
         isBanned,

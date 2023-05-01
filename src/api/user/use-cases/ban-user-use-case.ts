@@ -4,9 +4,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { validateOrRejectModel } from '../../../validate';
 import { validateUUID } from '../../../utils';
 
-/*import { DeviceRepository } from '../../device/device.repository';
+import { DeviceSqlRepository } from '../../device/device.sql.repository';
 import { CommentRepository } from '../../comment/comment.repository';
-import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';*/
+import { PostLikeStatusRepository } from '../../postlikeStatus/postLikeStatus.repository';
+import { CommentLikeStatusRepository } from '../../commentLikeStatus/commentLikeStatus.repository';
 
 import { UserRepository } from '../user.repository';
 import { BanUserDto } from '../dto/user.dto';
@@ -18,9 +19,11 @@ export class BanUserCommand {
 @CommandHandler(BanUserCommand)
 export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
   constructor(
-    private readonly userRepository: UserRepository /*private readonly deviceRepository: DeviceRepository,
+    private readonly userRepository: UserRepository,
+    private readonly deviceSqlRepository: DeviceSqlRepository,
     private readonly commentRepository: CommentRepository,
-    private readonly likeStatusRepository: LikeStatusRepository,*/,
+    private readonly postLikeStatusRepository: PostLikeStatusRepository,
+    private readonly commentLikeStatusRepository: CommentLikeStatusRepository,
   ) {}
   // Бан пользователя
   async execute(command: BanUserCommand): Promise<{
@@ -43,12 +46,17 @@ export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
     }
     // Баним пользователя
     await this.userRepository.banUser(isBanned, banReason, foundUserById.id);
-    /*// Банним комментарии пользователя
+    // Банним комментарии пользователя
     await this.commentRepository.banCommentsByUserId(userId, isBanned);
-    // Банним лайк статусы пользователя
-    await this.likeStatusRepository.banUserLikeStatuses(userId, isBanned);
+    // Банним лайк статусы постов пользователя
+    await this.postLikeStatusRepository.banUserLikeStatuses(userId, isBanned);
+    // Банним лайк статусы комментарий пользователя
+    await this.commentLikeStatusRepository.banUserLikeStatuses(
+      userId,
+      isBanned,
+    );
     // Удаляем все устройства пользователя
-    await this.deviceRepository.deleteAllUserDevices(userId);*/
+    await this.deviceSqlRepository.deleteAllUserDevices(userId);
     // Возвращаем статус 204
     return { statusCode: HttpStatus.NO_CONTENT };
   }

@@ -66,13 +66,14 @@ export class CreateCommentUseCase
         ],
       };
     }
-    // Проверяем забанен ли пользователь, который оставляет комментарий
-    const findBanUserById = await this.banRepository.findBanUserById(
-      foundUser.id,
-      foundPost.blogId,
-    );
+    // Проверяем забанен ли пользователь для блога, который оставляет комментарий
+    const findBanUserForBlogById =
+      await this.banRepository.findBanUserForBlogById(
+        foundUser.id,
+        foundPost.blogId,
+      );
     // Если пользователь забанен, возвращаем ошибку 403
-    if (findBanUserById) {
+    if (findBanUserForBlogById) {
       return {
         commentId: null,
         statusCode: HttpStatus.FORBIDDEN,

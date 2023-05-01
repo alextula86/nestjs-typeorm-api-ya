@@ -29,7 +29,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE u."login" = '${loginOrEmail}' OR u."email" = '${loginOrEmail}';
@@ -76,7 +76,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE u."id" = '${userId}';
@@ -106,7 +106,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE ec."confirmationCode" = '${code}';
@@ -136,7 +136,7 @@ export class UserRepository {
       pr."expirationDate" as "passwordExpirationDate",
       pr."isRecovered"
     FROM users as u
-    LEFT JOIN ban_info as bi ON bi."userId" = u."id"
+    LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
     LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
     LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
     WHERE pr."recoveryCode" = '${recoveryCode}';
@@ -182,13 +182,15 @@ export class UserRepository {
     const userId = createdUser[0].id;
 
     await this.dataSource.query(`
-      INSERT INTO 
+      INSERT INTO
         email_confirmation("confirmationCode", "expirationDate", "isConfirmed", "userId")
         VALUES ('${confirmationCode}', '${expirationDateEmailConfirmation}', false, '${userId}');
         
-      INSERT INTO 
+      INSERT INTO
         password_recovery("recoveryCode", "expirationDate", "isRecovered", "userId")
         VALUES ('${confirmationCode}', '${dateNow}', true, '${userId}');
+
+      INSERT INTO ban_user_info("userId") VALUES ('${userId}');
     `);
 
     return createdUser[0];
@@ -198,33 +200,16 @@ export class UserRepository {
     await this.dataSource.query(`
       DELETE FROM email_confirmation WHERE "userId" = '${userId}';
       DELETE FROM password_recovery WHERE "userId" = '${userId}';
-      DELETE FROM ban_info WHERE "userId" = '${userId}';
+      DELETE FROM ban_user_info WHERE "userId" = '${userId}';
+      DELETE FROM ban_user_for_blog WHERE "userId" = '${userId}';
       DELETE FROM devices WHERE "userId" = '${userId}';
-      DELETE FROM blogs WHERE "userId" = '${userId}';
+      DELETE FROM comment_like_status WHERE "userId" = '${userId}';
+      DELETE FROM comments WHERE "userId" = '${userId}';
+      DELETE FROM post_like_status WHERE "userId" = '${userId}';
       DELETE FROM posts WHERE "userId" = '${userId}';
+      DELETE FROM blogs WHERE "userId" = '${userId}';
       DELETE FROM users WHERE "id" = '${userId}';
     `);
-
-    return true;
-  }
-  // Бан пользователя
-  async banUser(
-    isBanned: boolean,
-    banReason: string,
-    userId: string,
-  ): Promise<boolean> {
-    const dateNow = new Date().toISOString();
-    const query = `
-      UPDATE ban_info
-      SET 
-        "isBanned" = ${isBanned}, 
-        "banDate" = ${isBanned ? formatSqlChar(dateNow) : null}, 
-        "banReason" = ${isBanned ? formatSqlChar(banReason) : null}
-      WHERE 
-        "userId" = '${userId}';
-    `;
-
-    await this.dataSource.query(query);
 
     return true;
   }
@@ -319,13 +304,34 @@ export class UserRepository {
 
     return true;
   }
+  // Бан пользователя
+  async banUser(
+    isBanned: boolean,
+    banReason: string,
+    userId: string,
+  ): Promise<boolean> {
+    const dateNow = new Date().toISOString();
+    const query = `
+      UPDATE ban_user_info
+      SET 
+        "isBanned" = ${isBanned}, 
+        "banDate" = ${isBanned ? formatSqlChar(dateNow) : null}, 
+        "banReason" = ${isBanned ? formatSqlChar(banReason) : null}
+      WHERE 
+        "userId" = '${userId}';
+    `;
+
+    await this.dataSource.query(query);
+
+    return true;
+  }
   // Очистка таблицы
   async deleteAll(): Promise<boolean> {
     await this.dataSource.query(`
       TRUNCATE TABLE 
         email_confirmation,
         password_recovery,
-        ban_info,
+        ban_user_info,
         sessions,
         devices,
         blogs,

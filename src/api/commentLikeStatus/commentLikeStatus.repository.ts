@@ -109,47 +109,19 @@ export class CommentLikeStatusRepository {
 
     return foundLikeStatuses;
   }
-  /*async getLikeStatusCount(
-    parentId: string,
-    pageType: PageType,
-    likeStatus: LikeStatuses,
-  ): Promise<number> {
-    const count = await this.LikeStatusModel.countDocuments({
-      parentId,
-      pageType,
-      likeStatus,
-    });
-
-    return count;
-  }*/
-  // Удаление лайка по идентификатору комментария или поста
-  /*async deleteLikeStatusesByCommentId(
-    parentId: string,
-    pageType: PageType,
-  ): Promise<boolean> {
-    await this.LikeStatusModel.deleteMany({
-      parentId,
-      pageType,
-    });
-
-    return true;
-  }*/
-  // Удаление коллекции
-  /*async deleteAll(): Promise<boolean> {
-    const { deletedCount } = await this.LikeStatusModel.deleteMany({});
-
-    return deletedCount === 1;
-  }*/
-  /*// Бан лайков пользователя
+  // Бан лайков комментарий пользователя
   async banUserLikeStatuses(
     userId: string,
     isBanned: boolean,
   ): Promise<boolean> {
-    const { modifiedCount } = await this.LikeStatusModel.updateMany(
-      { userId },
-      { $set: { isBanned } },
-    );
+    const query = `
+      UPDATE comment_like_status
+      SET "isBanned" = ${isBanned}
+      WHERE "userId" = '${userId}';
+    `;
 
-    return modifiedCount > 0;
-  }*/
+    await this.dataSource.query(query);
+
+    return true;
+  }
 }

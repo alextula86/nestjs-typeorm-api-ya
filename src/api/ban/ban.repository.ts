@@ -7,7 +7,10 @@ import { MakeBanModel } from './types';
 export class BanRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
   // Поиск документа забаненного пользователя по его идентификатору
-  async findBanUserById(userId: string, blogId: string): Promise<any | null> {
+  async findBanUserForBlogById(
+    userId: string,
+    blogId: string,
+  ): Promise<any | null> {
     const query = `
       SELECT 
         "id", 
@@ -15,7 +18,7 @@ export class BanRepository {
         "banDate",
         "banReason",
         "createdAt"
-      FROM ban_info
+      FROM ban_user_for_blog
       WHERE "userId" = '${userId}' AND "blogId" = '${blogId}';
     `;
 
@@ -27,15 +30,16 @@ export class BanRepository {
 
     return foundbanUser[0];
   }
-  // Создание документа забаненного пользователя
-  async createBanUser({
+
+  // Баним пользователя для конкретного блога
+  async createBanUserForBlogId({
     userId,
     blogId,
     isBanned,
     banReason,
   }: MakeBanModel): Promise<any> {
     const madeBan = await this.dataSource.query(`
-      INSERT INTO ban_info
+      INSERT INTO ban_user_for_blog
         ("userId", "blogId", "isBanned", "banReason")
         VALUES ('${userId}', '${blogId}', ${isBanned}, '${banReason}')
         RETURNING *;
@@ -44,7 +48,7 @@ export class BanRepository {
     return madeBan[0];
   }
   // Обновление статуса бана пользователя
-  async banUserForBlog(
+  async updateBanUserForBlogId(
     userId: string,
     blogId: string,
     isBanned: boolean,
@@ -54,7 +58,7 @@ export class BanRepository {
     const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
 
     const query = `
-        UPDATE ban_info
+        UPDATE ban_user_for_blog
         SET 
           "isBanned" = ${isBanned},
           "banReason" = ${banReasonResult},
@@ -68,7 +72,7 @@ export class BanRepository {
   }
   // Очистить таблицу баннов
   async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`TRUNCATE TABLE ban_info;`);
+    await this.dataSource.query(`TRUNCATE TABLE ban_user_for_blog;`);
 
     return true;
   }
