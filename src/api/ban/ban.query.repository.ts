@@ -36,7 +36,7 @@ export class BanQueryRepository {
 
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*) 
-      FROM ban_info as bi
+      FROM ban_user_info as bi
       LEFT JOIN users as u ON u."id" = bi."userId"
       ${where};
     `);
@@ -58,7 +58,7 @@ export class BanQueryRepository {
         bi."createdAt",
         u."login",
         u."id" as "userId"
-      FROM ban_info as bi
+      FROM ban_user_info as bi
       LEFT JOIN users as u ON u."id" = bi."userId"
       ${where}
       ${orderBy}
