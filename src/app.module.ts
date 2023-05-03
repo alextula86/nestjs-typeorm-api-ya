@@ -94,6 +94,13 @@ import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
 import { IsBlogExistConstraint } from './api/blog/custom-validators/customValidateBlog';
 
+import {
+  Users,
+  EmailConfirmation,
+  PasswordRecovery,
+  BanUserInfo,
+} from './api/user/entities';
+
 const authProviders = [
   AuthService,
   AuthQueryRepository,
@@ -180,9 +187,15 @@ const adapters = [EmailManager, EmailAdapter];
       username: 'lmxvapgr',
       password: 's22x3YZbf6AiJISG1ehaj7k4TFs1h-Ih',
       database: 'lmxvapgr',
-      autoLoadEntities: false,
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
+    TypeOrmModule.forFeature([
+      Users,
+      EmailConfirmation,
+      PasswordRecovery,
+      BanUserInfo,
+    ]),
     MailerModule.forRoot({
       transport: {
         service: 'gmail',
