@@ -25,7 +25,7 @@ import { CommentService } from './api/comment/comment.service';
 import { DeviceService } from './api/device/device.service';
 import { SessionService } from './api/session/session.service';
 import { CommentLikeStatusService } from './api/commentLikeStatus/commentlikeStatus.service';
-import { PostLikeStatusService } from './api/postlikeStatus/postLikeStatus.service';
+import { PostLikeStatusService } from './api/postLikeStatus/postLikeStatus.service';
 
 import {
   LoginUseCase,
@@ -70,7 +70,7 @@ import {
   ResetAttemptSessionUseCase,
 } from './api/session/use-cases';
 import { UpdateLikeStatusCommentUseCase } from './api/commentLikeStatus/use-cases';
-import { UpdateLikeStatusPostUseCase } from './api/postlikeStatus/use-cases';
+import { UpdateLikeStatusPostUseCase } from './api/postLikeStatus/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -79,7 +79,7 @@ import { CommentRepository } from './api/comment/comment.repository';
 import { DeviceSqlRepository } from './api/device/device.sql.repository';
 import { SessionRepository } from './api/session/session.repository';
 import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLikeStatus.repository';
-import { PostLikeStatusRepository } from './api/postlikeStatus/postLikeStatus.repository';
+import { PostLikeStatusRepository } from './api/postLikeStatus/postLikeStatus.repository';
 import { BanRepository } from './api/ban/ban.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
@@ -100,6 +100,15 @@ import {
   PasswordRecovery,
   BanUserInfo,
 } from './api/user/entities';
+
+import { Blogs } from './api/blog/entities';
+import { Posts } from './api/post/entities';
+import { Comments } from './api/comment/entities';
+import { Devices } from './api/device/entities';
+import { Sessions } from './api/session/entities';
+import { CommentLikeStatus } from './api/commentLikeStatus/entities';
+import { PostLikeStatus } from './api/postLikeStatus/entities';
+import { BanUserForBlog } from './api/ban/entities';
 
 const authProviders = [
   AuthService,
@@ -195,6 +204,14 @@ const adapters = [EmailManager, EmailAdapter];
       EmailConfirmation,
       PasswordRecovery,
       BanUserInfo,
+      Devices,
+      Sessions,
+      Blogs,
+      Posts,
+      Comments,
+      CommentLikeStatus,
+      PostLikeStatus,
+      BanUserForBlog,
     ]),
     MailerModule.forRoot({
       transport: {

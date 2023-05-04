@@ -23,8 +23,8 @@ import { CreateCommentCommand } from '../comment/use-cases';
 import { CommentQueryRepository } from '../comment/comment.query.repository';
 import { CreateCommentDto } from '../comment/dto';
 
-import { UpdateLikeStatusPostCommand } from '../postlikeStatus/use-cases';
-import { AddLikeStatusDTO } from '../postlikeStatus/dto';
+import { UpdateLikeStatusPostCommand } from '../postLikeStatus/use-cases';
+import { AddLikeStatusDTO } from '../postLikeStatus/dto';
 
 import { PostService } from './post.service';
 import { PostQueryRepository } from './post.query.repository';

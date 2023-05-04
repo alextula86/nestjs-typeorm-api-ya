@@ -6,7 +6,7 @@ import { validateUUID } from '../../../utils';
 
 import { DeviceSqlRepository } from '../../device/device.sql.repository';
 import { CommentRepository } from '../../comment/comment.repository';
-import { PostLikeStatusRepository } from '../../postlikeStatus/postLikeStatus.repository';
+import { PostLikeStatusRepository } from '../../postLikeStatus/postLikeStatus.repository';
 import { CommentLikeStatusRepository } from '../../commentLikeStatus/commentLikeStatus.repository';
 
 import { UserRepository } from '../user.repository';
