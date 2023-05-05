@@ -24,7 +24,7 @@ export class CommentLikeStatus {
   @Column({ default: false, nullable: true })
   isBanned: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @ManyToOne(() => Comments, { nullable: false })

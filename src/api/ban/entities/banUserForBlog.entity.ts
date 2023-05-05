@@ -22,7 +22,7 @@ export class BanUserForBlog {
   @Column({ nullable: true })
   banReason: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @ManyToOne(() => Blogs, { nullable: false })

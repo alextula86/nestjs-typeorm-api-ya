@@ -22,6 +22,6 @@ export class Sessions {
   @Column({ default: 1 })
   attempt: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   issuedAtt: Date;
 }
