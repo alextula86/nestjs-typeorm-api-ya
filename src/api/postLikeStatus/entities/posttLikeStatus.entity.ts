@@ -3,8 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  OneToOne,
-  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { LikeStatuses } from '../../../types';
 import { Users } from '../../user/entities';
@@ -28,11 +27,9 @@ export class PostLikeStatus {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToOne(() => Posts, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Posts, { nullable: false })
   post: Posts;
 
-  @OneToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Users, { nullable: false })
   user: Users;
 }

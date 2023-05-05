@@ -3,8 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  OneToOne,
-  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Users } from '../../user/entities';
 import { Blogs } from '../../blog/entities';
@@ -24,15 +23,12 @@ export class Comments {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToOne(() => Posts, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Posts, { nullable: false })
   post: Posts;
 
-  @OneToOne(() => Blogs, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Blogs, { nullable: false })
   blog: Blogs;
 
-  @OneToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Users, { nullable: false })
   user: Users;
 }

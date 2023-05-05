@@ -3,7 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Users } from '../../user/entities';
@@ -34,7 +34,7 @@ export class Blogs {
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToOne(() => Users, { nullable: false })
+  @ManyToOne(() => Users, { nullable: false })
   @JoinColumn()
   user: Users;
 }

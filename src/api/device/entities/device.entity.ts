@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Users } from '../../user/entities';
 
 @Entity()
@@ -27,7 +21,6 @@ export class Devices {
   @Column({ default: true, nullable: true })
   active: boolean;
 
-  @OneToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @ManyToOne(() => Users, { nullable: false })
   user: Users;
 }
