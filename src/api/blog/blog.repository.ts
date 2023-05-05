@@ -91,7 +91,7 @@ export class BlogRepository {
   async deleteBlogById(blogId: string): Promise<boolean> {
     await this.dataSource.query(`
       DELETE FROM posts WHERE "blogId" = '${blogId}';
-      DELETE FROM ban_user_info WHERE "blogId" = '${blogId}';
+      DELETE FROM ban_user_for_blog WHERE "blogId" = '${blogId}';
       DELETE FROM blogs WHERE "id" = '${blogId}';
     `);
 

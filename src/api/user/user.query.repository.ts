@@ -38,11 +38,11 @@ export class UserQueryRepository {
     }
 
     if (banStatus === BanStatuses.BANNED) {
-      terms.push(`bi."isBanned" = true`);
+      terms.push(`bui."isBanned" = true`);
     }
 
     if (banStatus === BanStatuses.NOTBANNED) {
-      terms.push(`bi."isBanned" = false`);
+      terms.push(`bui."isBanned" = false`);
     }
 
     const where = !isEmpty(terms) ? `WHERE ${terms.join(' OR ')}` : '';
@@ -50,7 +50,7 @@ export class UserQueryRepository {
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*)
       FROM users as u
-      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
       ${where};
     `);
     const totalCount = +totalCountResponse[0].count;
@@ -66,11 +66,11 @@ export class UserQueryRepository {
         u."login", 
         u."email",
         u."createdAt",
-        bi."isBanned", 
-        bi."banDate", 
-        bi."banReason"
+        bui."isBanned", 
+        bui."banDate", 
+        bui."banReason"
       FROM users as u
-      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
       ${where}
       ${orderBy}
       ${offset}

@@ -19,9 +19,9 @@ export class UserRepository {
         u."email",
         u."passwordHash",
         u."createdAt",
-        bi."isBanned", 
-        bi."banDate", 
-        bi."banReason",
+        bui."isBanned", 
+        bui."banDate", 
+        bui."banReason",
         ec."confirmationCode",
         ec."expirationDate" as "emailExpirationDate",
         ec."isConfirmed",
@@ -29,7 +29,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE u."login" = '${loginOrEmail}' OR u."email" = '${loginOrEmail}';
@@ -66,9 +66,9 @@ export class UserRepository {
         u."email",
         u."passwordHash",
         u."createdAt",
-        bi."isBanned", 
-        bi."banDate", 
-        bi."banReason",
+        bui."isBanned", 
+        bui."banDate", 
+        bui."banReason",
         ec."confirmationCode",
         ec."expirationDate" as "emailExpirationDate",
         ec."isConfirmed",
@@ -76,7 +76,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE u."id" = '${userId}';
@@ -96,9 +96,9 @@ export class UserRepository {
         u."email",
         u."passwordHash",
         u."createdAt",
-        bi."isBanned", 
-        bi."banDate", 
-        bi."banReason",
+        bui."isBanned", 
+        bui."banDate", 
+        bui."banReason",
         ec."confirmationCode",
         ec."expirationDate" as "emailExpirationDate",
         ec."isConfirmed",
@@ -106,7 +106,7 @@ export class UserRepository {
         pr."expirationDate" as "passwordExpirationDate",
         pr."isRecovered"
       FROM users as u
-      LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
       LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE ec."confirmationCode" = '${code}';
@@ -126,9 +126,9 @@ export class UserRepository {
       u."email",
       u."passwordHash",
       u."createdAt",
-      bi."isBanned", 
-      bi."banDate", 
-      bi."banReason",
+      bui."isBanned", 
+      bui."banDate", 
+      bui."banReason",
       ec."confirmationCode",
       ec."expirationDate" as "emailExpirationDate",
       ec."isConfirmed",
@@ -136,7 +136,7 @@ export class UserRepository {
       pr."expirationDate" as "passwordExpirationDate",
       pr."isRecovered"
     FROM users as u
-    LEFT JOIN ban_user_info as bi ON bi."userId" = u."id"
+    LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
     LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
     LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
     WHERE pr."recoveryCode" = '${recoveryCode}';
@@ -322,22 +322,6 @@ export class UserRepository {
     `;
 
     await this.dataSource.query(query);
-
-    return true;
-  }
-  // Очистка таблицы
-  async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`
-      TRUNCATE TABLE 
-        email_confirmation,
-        password_recovery,
-        ban_user_info,
-        sessions,
-        devices,
-        blogs,
-        posts,
-        users;
-    `);
 
     return true;
   }

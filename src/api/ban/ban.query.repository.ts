@@ -28,15 +28,15 @@ export class BanQueryRepository {
     }
 
     const where = !isEmpty(terms)
-      ? `WHERE bui."blogId" = '${blogId}' AND bui."isBanned" = true AND ${terms.join(
+      ? `WHERE bufb."blogId" = '${blogId}' AND bufb."isBanned" = true AND ${terms.join(
           ' OR ',
         )}`
-      : `WHERE bui."blogId" = '${blogId}' AND bui."isBanned" = true`;
+      : `WHERE bufb."blogId" = '${blogId}' AND bufb."isBanned" = true`;
 
     const totalCountResponse = await this.dataSource.query(`
       SELECT COUNT(*) 
-      FROM ban_user_info as bui
-      LEFT JOIN users as u ON u."id" = bui."userId"
+      FROM ban_user_for_blog as bufb
+      LEFT JOIN users as u ON u."id" = bufb."userId"
       ${where};
     `);
 
@@ -50,15 +50,15 @@ export class BanQueryRepository {
 
     const query = `
       SELECT 
-        bui."id", 
-        bui."isBanned", 
-        bui."banDate",
-        bui."banReason",
-        bui."createdAt",
+        bufb."id", 
+        bufb."isBanned", 
+        bufb."banDate",
+        bufb."banReason",
+        bufb."createdAt",
         u."login" as "userLogin",
         u."id" as "userId"
-      FROM ban_user_info as bui
-      LEFT JOIN users as u ON u."id" = bui."userId"
+      FROM ban_user_for_blog as bufb
+      LEFT JOIN users as u ON u."id" = bufb."userId"
       ${where}
       ORDER BY "${sortBy}" ${sortDirection}
       ${offset}
