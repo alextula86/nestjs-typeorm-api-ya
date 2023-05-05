@@ -31,7 +31,7 @@ export class Blogs {
   @Column({ nullable: true })
   banDate: Date;
 
-  @CreateDateColumn({ type: 'time with time zone' })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
   @ManyToOne(() => Users, { nullable: false })

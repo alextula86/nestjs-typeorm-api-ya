@@ -16,13 +16,13 @@ export class BanUserForBlog {
   @Column({ default: false, nullable: true })
   isBanned: boolean;
 
-  @Column({ type: 'time with time zone', nullable: true })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   banDate: Date;
 
   @Column({ nullable: true })
   banReason: string;
 
-  @CreateDateColumn({ type: 'time with time zone' })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
   @ManyToOne(() => Blogs, { nullable: false })
