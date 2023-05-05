@@ -38,10 +38,13 @@ export class BanRepository {
     isBanned,
     banReason,
   }: MakeBanModel): Promise<any> {
+    const banReasonResult = isBanned ? `'${banReason}'` : null;
+    const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
+
     const madeBan = await this.dataSource.query(`
       INSERT INTO ban_user_for_blog
-        ("userId", "blogId", "isBanned", "banReason")
-        VALUES ('${userId}', '${blogId}', ${isBanned}, '${banReason}')
+        ("userId", "blogId", "isBanned", "banReason", "banDate")
+        VALUES ('${userId}', '${blogId}', ${isBanned}, '${banReasonResult}', '${banDateResult}')
         RETURNING *;
     `);
 
