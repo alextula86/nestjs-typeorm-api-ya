@@ -15,7 +15,7 @@ export class Devices {
   @Column()
   title: string;
 
-  @Column({ nullable: false })
+  @Column({ type: 'time with time zone', nullable: false })
   lastActiveDate: Date;
 
   @Column({ default: true, nullable: true })
