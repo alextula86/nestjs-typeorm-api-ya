@@ -22,6 +22,6 @@ export class Users {
   @Column({ nullable: true })
   refreshToken: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }

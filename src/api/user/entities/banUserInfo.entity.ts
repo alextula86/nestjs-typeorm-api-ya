@@ -22,7 +22,7 @@ export class BanUserInfo {
   @Column({ nullable: true })
   banReason: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @OneToOne(() => Users, { nullable: false })
