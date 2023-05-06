@@ -30,7 +30,6 @@ export class BanRepository {
 
     return foundbanUser[0];
   }
-
   // Баним пользователя для конкретного блога
   async createBanUserForBlogId({
     userId,
@@ -41,12 +40,14 @@ export class BanRepository {
     const banReasonResult = isBanned ? `'${banReason}'` : null;
     const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
 
-    const madeBan = await this.dataSource.query(`
+    const query = `
       INSERT INTO ban_user_for_blog
         ("userId", "blogId", "isBanned", "banReason", "banDate")
-        VALUES ('${userId}', '${blogId}', ${isBanned}, '${banReasonResult}', '${banDateResult}')
+        VALUES ('${userId}', '${blogId}', ${isBanned}, ${banReasonResult}, ${banDateResult})
         RETURNING *;
-    `);
+    `;
+
+    const madeBan = await this.dataSource.query(query);
 
     return madeBan[0];
   }
@@ -61,21 +62,15 @@ export class BanRepository {
     const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
 
     const query = `
-        UPDATE ban_user_for_blog
-        SET 
-          "isBanned" = ${isBanned},
-          "banReason" = ${banReasonResult},
-          "banDate" = ${banDateResult}
-        WHERE "userId" = '${userId}' AND "blogId" = '${blogId}';
-      `;
+      UPDATE ban_user_for_blog
+      SET 
+        "isBanned" = ${isBanned},
+        "banReason" = ${banReasonResult},
+        "banDate" = ${banDateResult}
+      WHERE "userId" = '${userId}' AND "blogId" = '${blogId}';
+    `;
 
     await this.dataSource.query(query);
-
-    return true;
-  }
-  // Очистить таблицу баннов
-  async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`TRUNCATE TABLE ban_user_for_blog;`);
 
     return true;
   }
