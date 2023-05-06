@@ -223,46 +223,7 @@ export class CommentQueryRepository {
       ${limit};
     `;
 
-    console.log('query', query);
-
     const comments = await this.dataSource.query(query);
-
-    /*const totalCount = await this.CommentModel.countDocuments();
-    const pagesCount = Math.ceil(totalCount / size);
-    const skip = (number - 1) * size;
-
-    const comments = await this.CommentModel.aggregate([
-      { $sort: { [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1 } },
-      { $skip: skip },
-      { $limit: size },
-      {
-        $lookup: {
-          from: 'posts',
-          localField: 'postId',
-          foreignField: 'id',
-          as: 'post',
-        },
-      },
-      { $unwind: '$post' },
-      {
-        $project: {
-          _id: 0,
-          id: 1,
-          content: 1,
-          createdAt: 1,
-          commentatorInfo: {
-            userId: '$userId',
-            userLogin: '$userLogin',
-          },
-          postInfo: {
-            id: '$post.id',
-            title: '$post.title',
-            blogId: '$post.blogId',
-            blogName: '$post.blogName',
-          },
-        },
-      },
-    ]);*/
 
     return this._getCommentByPostViewModelDetail({
       pagesCount,
@@ -342,19 +303,12 @@ export class CommentQueryRepository {
           blogId: item.blogId,
           blogName: item.blogName,
         },
-        /*likesInfo: {
-          likesCount: 0,
-          dislikesCount: 0,
-          myStatus: LikeStatuses.NONE,
-        },*/
+        likesInfo: {
+          likesCount: +item.likesCount,
+          dislikesCount: +item.dislikesCount,
+          myStatus: item.likeStatus,
+        },
       })),
     };
   }
-  /*getOrderBy(sortBy: string, sortDirection: SortDirection) {
-    if (sortBy === 'createdAt') {
-      return `ORDER BY "${sortBy}" ${sortDirection}`;
-    }
-
-    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
-  }*/
 }
