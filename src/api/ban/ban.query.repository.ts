@@ -22,6 +22,7 @@ export class BanQueryRepository {
     const size = pageSize ? Number(pageSize) : 10;
 
     const terms: string[] = [];
+    const orderBy = this.getOrderBy(sortBy, sortDirection);
 
     if (searchLoginTerm) {
       terms.push(`u."login" ILIKE '%${searchLoginTerm}%'`);
@@ -60,11 +61,11 @@ export class BanQueryRepository {
       FROM ban_user_for_blog as bufb
       LEFT JOIN users as u ON u."id" = bufb."userId"
       ${where}
-      ORDER BY "${sortBy}" ${sortDirection}
+      ${orderBy}
       ${offset}
       ${limit};
     `;
-
+    console.log('query', query);
     const foundBanUserForBlog = await this.dataSource.query(query);
 
     return this._getBlogsViewModelDetail({
@@ -97,5 +98,16 @@ export class BanQueryRepository {
         },
       })),
     };
+  }
+  getOrderBy(sortBy: string, sortDirection: SortDirection) {
+    if (sortBy === 'createdAt' || sortBy === 'banDate') {
+      return `ORDER BY bufb."${sortBy}" ${sortDirection}`;
+    }
+
+    if (sortBy === 'login') {
+      return `ORDER BY u."${sortBy}" COLLATE \"C\" ${sortDirection}`;
+    }
+
+    return '';
   }
 }

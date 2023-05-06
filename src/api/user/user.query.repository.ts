@@ -141,6 +141,18 @@ export class UserQueryRepository {
       return `ORDER BY u."${sortBy}" ${sortDirection}`;
     }
 
-    return `ORDER BY u."${sortBy}" COLLATE \"C\" ${sortDirection}`;
+    if (sortBy === 'email') {
+      return `ORDER BY u."${sortBy}" ${sortDirection}`;
+    }
+
+    if (sortBy === 'banDate') {
+      return `ORDER BY bui."${sortBy}" ${sortDirection}`;
+    }
+
+    if (sortBy === 'login') {
+      return `ORDER BY u."${sortBy}" COLLATE \"C\" ${sortDirection}`;
+    }
+
+    return '';
   }
 }
