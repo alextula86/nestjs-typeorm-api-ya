@@ -156,14 +156,16 @@ export class CommentQueryRepository {
     return this._getCommentViewModel(foundComment[0]);
   }
   // Поиск комментарий по всем постам
-  async findCommentsByAllPosts({
-    pageNumber,
-    pageSize,
-    sortBy = 'createdAt',
-    sortDirection = SortDirection.DESC,
-  }: QueryCommentModel): Promise<
-    ResponseViewModelDetail<CommentByPostViewModel>
-  > {
+  async findCommentsByAllPosts(
+    userId: string,
+    {
+      pageNumber,
+      pageSize,
+      sortBy = 'createdAt',
+      sortDirection = SortDirection.DESC,
+    }: QueryCommentModel,
+  ): Promise<ResponseViewModelDetail<CommentByPostViewModel>> {
+    const userUUID = userId ? `'${userId}'` : null;
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
@@ -190,7 +192,28 @@ export class CommentQueryRepository {
         posts."id" as "postId",
         posts."title" as "postTitle",
         blogs."id" as "blogId",
-        blogs."name" as "blogName"
+        blogs."name" as "blogName",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.LIKE}' AND cls."isBanned" = false
+        ) as "likesCount",
+        (
+          SELECT COUNT(*)
+          FROM comment_like_status as cls
+          WHERE cls."commentId" = comments."id" AND "likeStatus" = '${LikeStatuses.DISLIKE}' AND cls."isBanned" = false
+        ) as "dislikesCount",
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL 
+            THEN
+              (
+                SELECT cls."likeStatus"
+                FROM comment_like_status as cls
+                WHERE 
+                  cls."commentId" = comments."id" AND cls."userId" = ${userUUID}
+              ) 
+            ELSE '${LikeStatuses.NONE}'
+        END, '${LikeStatuses.NONE}') as "likeStatus"        
       FROM comments
       LEFT JOIN users ON users."id" = comments."userId"
       LEFT JOIN posts ON posts."id" = comments."postId"
@@ -200,7 +223,46 @@ export class CommentQueryRepository {
       ${limit};
     `;
 
+    console.log('query', query);
+
     const comments = await this.dataSource.query(query);
+
+    /*const totalCount = await this.CommentModel.countDocuments();
+    const pagesCount = Math.ceil(totalCount / size);
+    const skip = (number - 1) * size;
+
+    const comments = await this.CommentModel.aggregate([
+      { $sort: { [sortBy]: sortDirection === SortDirection.ASC ? 1 : -1 } },
+      { $skip: skip },
+      { $limit: size },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: 'postId',
+          foreignField: 'id',
+          as: 'post',
+        },
+      },
+      { $unwind: '$post' },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          content: 1,
+          createdAt: 1,
+          commentatorInfo: {
+            userId: '$userId',
+            userLogin: '$userLogin',
+          },
+          postInfo: {
+            id: '$post.id',
+            title: '$post.title',
+            blogId: '$post.blogId',
+            blogName: '$post.blogName',
+          },
+        },
+      },
+    ]);*/
 
     return this._getCommentByPostViewModelDetail({
       pagesCount,
@@ -280,7 +342,19 @@ export class CommentQueryRepository {
           blogId: item.blogId,
           blogName: item.blogName,
         },
+        /*likesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: LikeStatuses.NONE,
+        },*/
       })),
     };
   }
+  /*getOrderBy(sortBy: string, sortDirection: SortDirection) {
+    if (sortBy === 'createdAt') {
+      return `ORDER BY "${sortBy}" ${sortDirection}`;
+    }
+
+    return `ORDER BY "${sortBy}" COLLATE \"C\" ${sortDirection}`;
+  }*/
 }

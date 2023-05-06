@@ -86,11 +86,12 @@ export class BloggerController {
   @HttpCode(HttpStatus.OK)
   @Get('blogs/comments')
   async findCommentsByAllPosts(
+    @Req() request: Request & { userId: string },
     @Query()
     { pageNumber, pageSize, sortBy, sortDirection }: QueryCommentModel,
   ): Promise<ResponseViewModelDetail<CommentByPostViewModel>> {
     const commentsByAllPosts =
-      await this.commentQueryRepository.findCommentsByAllPosts({
+      await this.commentQueryRepository.findCommentsByAllPosts(request.userId, {
         pageNumber,
         pageSize,
         sortBy,
