@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEqual } from 'date-fns';
 
 import { UserRepository } from '../../user/user.repository';
-import { DeviceSqlRepository } from '../../device/device.sql.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 export class LogoutCommand {
   constructor(
@@ -17,7 +17,7 @@ export class LogoutCommand {
 export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly deviceSqlRepository: DeviceSqlRepository,
+    private readonly deviceRepository: DeviceRepository,
   ) {}
   // Logout пользователя
   async execute(command: LogoutCommand): Promise<{ statusCode: HttpStatus }> {
@@ -25,7 +25,7 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
     // Ищем пользователя по его идентификатору
     const user = await this.userRepository.findUserById(userId);
     // Ищем устройство пользователя по его идентификатору
-    const device = await this.deviceSqlRepository.findDeviceById(deviceId);
+    const device = await this.deviceRepository.findDeviceById(deviceId);
     // Если пользователь не найден, возвращаем ошибку 401
     if (!user || !device) {
       return { statusCode: HttpStatus.UNAUTHORIZED };
@@ -37,7 +37,7 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
     // Очищаем refreshToken пользователя
     await this.userRepository.updateRefreshToken(user.id, '');
     // Удаляем устройство
-    await this.deviceSqlRepository.deleteDeviceById(device.deviceId, user.id);
+    await this.deviceRepository.deleteDeviceById(device.deviceId, user.id);
     // Возвращаем статус 204
     return { statusCode: HttpStatus.NO_CONTENT };
   }

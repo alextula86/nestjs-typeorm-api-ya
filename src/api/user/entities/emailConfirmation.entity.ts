@@ -21,7 +21,10 @@ export class EmailConfirmation {
   @Column({ default: true, nullable: true })
   isConfirmed: boolean;
 
-  @OneToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @Column({ nullable: true })
+  userId: string;
+
+  @OneToOne(() => Users, (user) => user.emailConfirmation, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   user: Users;
 }

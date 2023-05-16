@@ -1,2 +1,2 @@
-export * from './delete-sql-device-by-id-use-case';
-export * from './delete-sql-all-devices-use-case';
+export * from './delete-device-by-id-use-case';
+export * from './delete-all-devices-use-case';

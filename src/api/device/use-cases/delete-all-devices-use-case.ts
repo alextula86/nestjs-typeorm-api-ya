@@ -1,19 +1,19 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { DeviceSqlRepository } from '../device.sql.repository';
+import { DeviceRepository } from '../device.repository';
 
-export class DeleteSqlAllDevicesCommand {
+export class DeleteAllDevicesCommand {
   constructor(public currentDeviceId: string, public userId: string) {}
 }
 
-@CommandHandler(DeleteSqlAllDevicesCommand)
-export class DeleteSqlAllDevicesUseCase
-  implements ICommandHandler<DeleteSqlAllDevicesCommand>
+@CommandHandler(DeleteAllDevicesCommand)
+export class DeleteAllDevicesUseCase
+  implements ICommandHandler<DeleteAllDevicesCommand>
 {
-  constructor(private readonly deviceSqlRepository: DeviceSqlRepository) {}
+  constructor(private readonly deviceRepository: DeviceRepository) {}
   // Удаление всех устройств, кроме текущего устройства
-  async execute(command: DeleteSqlAllDevicesCommand): Promise<{
+  async execute(command: DeleteAllDevicesCommand): Promise<{
     statusCode: HttpStatus;
   }> {
     const { currentDeviceId, userId } = command;
@@ -23,7 +23,7 @@ export class DeleteSqlAllDevicesUseCase
       return { statusCode: HttpStatus.UNAUTHORIZED };
     }
     // Удаляем все устройства, кроме текущего устройства
-    const isDeleteAllDevices = await this.deviceSqlRepository.deleteAllDevices(
+    const isDeleteAllDevices = await this.deviceRepository.deleteAllDevices(
       currentDeviceId,
       userId,
     );

@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { validateOrRejectModel } from '../../../validate';
 import { validateUUID } from '../../../utils';
 
-import { DeviceSqlRepository } from '../../device/device.sql.repository';
+import { DeviceRepository } from '../../device/device.repository';
 import { CommentRepository } from '../../comment/comment.repository';
 import { PostLikeStatusRepository } from '../../postLikeStatus/postLikeStatus.repository';
 import { CommentLikeStatusRepository } from '../../commentLikeStatus/commentLikeStatus.repository';
@@ -20,7 +20,7 @@ export class BanUserCommand {
 export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly deviceSqlRepository: DeviceSqlRepository,
+    private readonly deviceRepository: DeviceRepository,
     private readonly commentRepository: CommentRepository,
     private readonly postLikeStatusRepository: PostLikeStatusRepository,
     private readonly commentLikeStatusRepository: CommentLikeStatusRepository,
@@ -56,7 +56,7 @@ export class BanUserUseCase implements ICommandHandler<BanUserCommand> {
       isBanned,
     );
     // Удаляем все устройства пользователя
-    await this.deviceSqlRepository.deleteAllUserDevices(userId);
+    await this.deviceRepository.deleteAllUserDevices(userId);
     // Возвращаем статус 204
     return { statusCode: HttpStatus.NO_CONTENT };
   }

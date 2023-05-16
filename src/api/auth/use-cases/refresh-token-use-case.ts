@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEqual } from 'date-fns';
 import { AuthService } from '../../auth/auth.service';
 import { UserRepository } from '../../user/user.repository';
-import { DeviceSqlRepository } from '../../device/device.sql.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 export class RefreshTokenCommand {
   constructor(
@@ -19,7 +19,7 @@ export class RefreshTokenUseCase
   constructor(
     private readonly authService: AuthService,
     private readonly userRepository: UserRepository,
-    private readonly deviceSqlRepository: DeviceSqlRepository,
+    private readonly deviceRepository: DeviceRepository,
   ) {}
   // Получение access и refresh токена
   async execute(
@@ -29,7 +29,7 @@ export class RefreshTokenUseCase
     // Ищем пользователя по его идентификатору
     const user = await this.userRepository.findUserById(userId);
     // Ищем устройство пользователя по его идентификатору
-    const device = await this.deviceSqlRepository.findDeviceById(deviceId);
+    const device = await this.deviceRepository.findDeviceById(deviceId);
     // Если пользователь не найден, то вернем null для возрвата 401 ошибки
     if (!user || !device) {
       return null;
@@ -51,7 +51,7 @@ export class RefreshTokenUseCase
     // Обновляем refresh токен пользователя
     await this.userRepository.updateRefreshToken(user.id, refreshToken);
     // Обновляем дату у устройства
-    this.deviceSqlRepository.updateLastActiveDate(
+    this.deviceRepository.updateLastActiveDate(
       device.deviceId,
       new Date(iatRefreshToken).toISOString(),
     );

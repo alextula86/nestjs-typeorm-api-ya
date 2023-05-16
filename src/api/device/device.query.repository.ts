@@ -5,7 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DeviceViewModel } from './types';
 
 @Injectable()
-export class DeviceSqlQueryRepository {
+export class DeviceQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
   async findAllDevices(userId: string): Promise<DeviceViewModel[]> {
     const devices = await this.dataSource.query(`

@@ -2,19 +2,19 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-import { DeviceSqlRepository } from '../device.sql.repository';
+import { DeviceRepository } from '../device.repository';
 
-export class DeleteSqlDeviceByIdCommand {
+export class DeleteDeviceByIdCommand {
   constructor(public deviceId: string, public userId: string) {}
 }
 
-@CommandHandler(DeleteSqlDeviceByIdCommand)
-export class DeleteSqlDeviceByIdUseCase
-  implements ICommandHandler<DeleteSqlDeviceByIdCommand>
+@CommandHandler(DeleteDeviceByIdCommand)
+export class DeleteDeviceByIdUseCase
+  implements ICommandHandler<DeleteDeviceByIdCommand>
 {
-  constructor(private readonly deviceSqlRepository: DeviceSqlRepository) {}
+  constructor(private readonly deviceRepository: DeviceRepository) {}
   // Удаление устройства
-  async execute(command: DeleteSqlDeviceByIdCommand): Promise<{
+  async execute(command: DeleteDeviceByIdCommand): Promise<{
     statusCode: HttpStatus;
   }> {
     const { deviceId, userId } = command;
@@ -27,7 +27,7 @@ export class DeleteSqlDeviceByIdUseCase
       return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Ищем устройство по его идентификатору
-    const foundDevice = await this.deviceSqlRepository.findDeviceById(deviceId);
+    const foundDevice = await this.deviceRepository.findDeviceById(deviceId);
     // Если устройство не найдено, возвращаем ошибку 404
     if (isEmpty(foundDevice)) {
       return { statusCode: HttpStatus.NOT_FOUND };
@@ -37,7 +37,7 @@ export class DeleteSqlDeviceByIdUseCase
       return { statusCode: HttpStatus.FORBIDDEN };
     }
     // Удаляем устройство
-    const isDeletedDevice = await this.deviceSqlRepository.deleteDeviceById(
+    const isDeletedDevice = await this.deviceRepository.deleteDeviceById(
       deviceId,
       userId,
     );

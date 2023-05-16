@@ -5,7 +5,7 @@ import { getNextStrId } from '../../../utils';
 
 import { AuthService } from '../auth.service';
 import { UserRepository } from '../../user/user.repository';
-import { DeviceSqlRepository } from '../../device/device.sql.repository';
+import { DeviceRepository } from '../../device/device.repository';
 
 import { AuthUserDto } from '../dto';
 
@@ -22,7 +22,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
   constructor(
     private readonly authService: AuthService,
     private readonly userRepository: UserRepository,
-    private readonly deviceSqlRepository: DeviceSqlRepository,
+    private readonly deviceRepository: DeviceRepository,
   ) {}
   // Аутентификация пользователя
   async execute(
@@ -64,7 +64,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
     }
     const { accessToken, refreshToken, iatRefreshToken } = authTokens;
     // Создаем документ устройства
-    await this.deviceSqlRepository.createDevice({
+    await this.deviceRepository.createDevice({
       deviceId,
       ip: ip,
       title: deviceTitle,

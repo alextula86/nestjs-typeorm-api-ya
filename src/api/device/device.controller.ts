@@ -15,11 +15,8 @@ import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthRefreshTokenGuard } from '../../guards';
 
-import {
-  DeleteSqlAllDevicesCommand,
-  DeleteSqlDeviceByIdCommand,
-} from './use-cases';
-import { DeviceSqlQueryRepository } from './device.sql.query.repository';
+import { DeleteAllDevicesCommand, DeleteDeviceByIdCommand } from './use-cases';
+import { DeviceQueryRepository } from './device.query.repository';
 import { DeviceViewModel } from './types';
 
 @UseGuards(AuthRefreshTokenGuard)
@@ -27,7 +24,7 @@ import { DeviceViewModel } from './types';
 export class DeviceSqlController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly deviceSqlQueryRepository: DeviceSqlQueryRepository,
+    private readonly deviceSqlQueryRepository: DeviceQueryRepository,
   ) {}
   // Получение списка устройств
   @Get()
@@ -59,7 +56,7 @@ export class DeviceSqlController {
     const userId = request.userId;
     // Удаляем устройство
     const { statusCode } = await this.commandBus.execute(
-      new DeleteSqlDeviceByIdCommand(deviceId, userId),
+      new DeleteDeviceByIdCommand(deviceId, userId),
     );
     if (statusCode === HttpStatus.UNAUTHORIZED) {
       throw new UnauthorizedException();
@@ -85,7 +82,7 @@ export class DeviceSqlController {
     const currentDeviceId = request.deviceId;
     // Удаляем устройства
     const { statusCode } = await this.commandBus.execute(
-      new DeleteSqlAllDevicesCommand(currentDeviceId, userId),
+      new DeleteAllDevicesCommand(currentDeviceId, userId),
     );
     // Если при удалении устройств вернулась ошибка, возвращаем ее
     if (statusCode === HttpStatus.UNAUTHORIZED) {

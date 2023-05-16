@@ -4,7 +4,7 @@ import { settings } from '../settings';
 export const jwtService = {
   async createAccessToken(userId: string) {
     const accessToken = jwt.sign({ userId }, settings.ACCESS_TOKEN_SECRET, {
-      expiresIn: '10d',
+      expiresIn: '10s',
     });
     return accessToken;
   },
@@ -12,7 +12,7 @@ export const jwtService = {
     const refreshToken = jwt.sign(
       { userId, deviceId },
       settings.REFRESH_TOKEN_SECRET,
-      { expiresIn: '20d' },
+      { expiresIn: '20s' },
     );
     return refreshToken;
   },

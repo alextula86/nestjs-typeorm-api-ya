@@ -4,9 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 
 @Controller('api/testing')
 export class TestingController {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource, // private readonly userRepository: UserRepository, // private readonly blogRepository: BlogRepository, // private readonly postRepository: PostRepository, // private readonly commentRepository: CommentRepository, // private readonly sessionRepository: SessionRepository, // private readonly likeStatusRepository: LikeStatusRepository, // private readonly banRepository: BanRepository, // private readonly deviceSqlRepository: DeviceSqlRepository,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {

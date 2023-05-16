@@ -5,7 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { MakeDeviceModel } from './types';
 
 @Injectable()
-export class DeviceSqlRepository {
+export class DeviceRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
   // Поиск документа конкретного устройства по его идентификатору
   async findDeviceById(deviceId: string): Promise<{

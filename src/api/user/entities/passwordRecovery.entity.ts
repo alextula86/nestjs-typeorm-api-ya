@@ -21,7 +21,10 @@ export class PasswordRecovery {
   @Column({ default: true, nullable: true })
   isRecovered: boolean;
 
-  @OneToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @Column({ nullable: true })
+  userId: string;
+
+  @OneToOne(() => Users, (user) => user.passwordRecovery, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   user: Users;
 }

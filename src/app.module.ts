@@ -13,7 +13,7 @@ import { BlogController } from './api/blog/blog.controller';
 import { BloggerController } from './api/blog/blogger.controller';
 import { SABlogController } from './api/blog/sa-blog.controller';
 import { PostController } from './api/post/post.controller';
-import { DeviceSqlController } from './api/device/device.sql.controller';
+import { DeviceSqlController } from './api/device/device.controller';
 import { CommentController } from './api/comment/comment.controller';
 import { TestingController } from './api/testing/testing.controller';
 
@@ -61,8 +61,8 @@ import {
   DeleteCommentUseCase,
 } from './api/comment/use-cases';
 import {
-  DeleteSqlAllDevicesUseCase,
-  DeleteSqlDeviceByIdUseCase,
+  DeleteAllDevicesUseCase,
+  DeleteDeviceByIdUseCase,
 } from './api/device/use-cases';
 import {
   CreateSessionUseCase,
@@ -76,7 +76,7 @@ import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
 import { PostRepository } from './api/post/post.repository';
 import { CommentRepository } from './api/comment/comment.repository';
-import { DeviceSqlRepository } from './api/device/device.sql.repository';
+import { DeviceRepository } from './api/device/device.repository';
 import { SessionRepository } from './api/session/session.repository';
 import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLikeStatus.repository';
 import { PostLikeStatusRepository } from './api/postLikeStatus/postLikeStatus.repository';
@@ -86,7 +86,7 @@ import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
 import { PostQueryRepository } from './api/post/post.query.repository';
 import { CommentQueryRepository } from './api/comment/comment.query.repository';
-import { DeviceSqlQueryRepository } from './api/device/device.sql.query.repository';
+import { DeviceQueryRepository } from './api/device/device.query.repository';
 import { AuthQueryRepository } from './api/auth/auth.query.repository';
 import { BanQueryRepository } from './api/ban/ban.query.repository';
 
@@ -160,10 +160,10 @@ const commentProviders = [
 ];
 const deviceProviders = [
   DeviceService,
-  DeviceSqlRepository,
-  DeviceSqlQueryRepository,
-  DeleteSqlAllDevicesUseCase,
-  DeleteSqlDeviceByIdUseCase,
+  DeviceRepository,
+  DeviceQueryRepository,
+  DeleteAllDevicesUseCase,
+  DeleteDeviceByIdUseCase,
 ];
 const sessionSProviders = [
   SessionService,
@@ -253,28 +253,5 @@ const adapters = [EmailManager, EmailAdapter];
     ...banSProviders,
     ...adapters,
   ],
-  /*exports: [
-    BlogService,
-    BlogRepository,
-    BlogQueryRepository,
-
-    PostService,
-    PostRepository,
-    PostQueryRepository,
-
-    CommentService,
-    CommentRepository,
-    CommentQueryRepository,
-
-    DeviceService,
-    DeviceRepository,
-    DeviceQueryRepository,
-
-    SessionService,
-    SessionRepository,
-
-    LikeStatusService,
-    LikeStatusRepository,
-  ],*/
 })
 export class AppModule {}
