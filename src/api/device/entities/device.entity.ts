@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Users } from '../../user/entities';
 
 @Entity()
@@ -21,6 +27,10 @@ export class Devices {
   @Column({ default: true, nullable: true })
   active: boolean;
 
-  @ManyToOne(() => Users, { nullable: false })
+  @Column({ nullable: true })
+  userId: string;
+
+  @ManyToOne(() => Users, (user) => user.device, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   user: Users;
 }

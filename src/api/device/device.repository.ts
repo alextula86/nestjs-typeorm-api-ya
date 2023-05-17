@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
-
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Devices } from './entities';
 import { MakeDeviceModel } from './types';
 
 @Injectable()
 export class DeviceRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Devices)
+    private readonly deviceRepository: Repository<Devices>,
+  ) {}
   // Поиск документа конкретного устройства по его идентификатору
   async findDeviceById(deviceId: string): Promise<{
     deviceId: string;
@@ -15,7 +18,7 @@ export class DeviceRepository {
     userId: string;
     lastActiveDate: string;
   } | null> {
-    const foundDevice = await this.dataSource.query(
+    const foundDevice = await this.deviceRepository.query(
       `SELECT * FROM devices WHERE "deviceId" = '${deviceId}';`,
     );
 
@@ -39,23 +42,31 @@ export class DeviceRepository {
     userId: string;
     lastActiveDate: string;
   }> {
-    const query = `
-      INSERT INTO devices
-        ("deviceId", "ip", "title", "lastActiveDate", "userId")
-        VALUES ('${deviceId}', '${ip}', '${title}', '${lastActiveDate}', '${userId}')
-        RETURNING *;
-    `;
+    const madeDevice = await this.deviceRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Devices)
+      .values({
+        deviceId,
+        ip,
+        title,
+        lastActiveDate,
+        userId,
+      })
+      .returning(['deviceId', 'ip', 'title', 'lastActiveDate'])
+      .execute();
 
-    const madeDevice = await this.dataSource.query(query);
-
-    return madeDevice[0];
+    return madeDevice.raw[0];
   }
   // Удаление устройства
   async deleteDeviceById(deviceId: string, userId: string): Promise<boolean> {
-    await this.dataSource.query(`
-      DELETE FROM devices
-      WHERE "deviceId" = '${deviceId}' AND "userId" = '${userId}';
-    `);
+    await this.deviceRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Devices)
+      .where('deviceId = :deviceId', { deviceId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -64,19 +75,29 @@ export class DeviceRepository {
     currentDeviceId: string,
     userId: string,
   ): Promise<boolean> {
-    await this.dataSource.query(`
-      DELETE FROM devices
-      WHERE "deviceId" != '${currentDeviceId}' AND "userId" = '${userId}';
-    `);
+    await this.deviceRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Devices)
+      .where('deviceId != :currentDeviceId', { currentDeviceId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
   // Удаление всех устройств пользователя
   async deleteAllUserDevices(userId: string): Promise<boolean> {
-    await this.dataSource.query(`
+    /*await this.deviceRepository.query(`
       DELETE FROM devices
       WHERE "userId" = '${userId}';
-    `);
+    `);*/
+
+    await this.deviceRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Devices)
+      .andWhere('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -85,18 +106,19 @@ export class DeviceRepository {
     deviceId: string,
     lastActiveDate: string,
   ): Promise<boolean> {
-    const query = `
+    /*const query = `
       UPDATE devices
       SET "lastActiveDate" = '${lastActiveDate}'
       WHERE "deviceId" = '${deviceId}';
     `;
-    await this.dataSource.query(query);
+    await this.deviceRepository.query(query);*/
 
-    return true;
-  }
-  // Очистка таблицы
-  async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`TRUNCATE TABLE devices;`);
+    await this.deviceRepository
+      .createQueryBuilder()
+      .update(Devices)
+      .set({ lastActiveDate })
+      .where('deviceId = :deviceId', { deviceId })
+      .execute();
 
     return true;
   }

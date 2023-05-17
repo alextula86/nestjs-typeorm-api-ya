@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { EmailConfirmation } from './emailConfirmation.entity';
 import { PasswordRecovery } from './passwordRecovery.entity';
 import { BanUserInfo } from './banUserInfo.entity';
+import { Devices } from '../../device/entities';
 
 @Entity()
 export class Users {
@@ -47,4 +49,9 @@ export class Users {
     onDelete: 'CASCADE',
   })
   banUserInfo: BanUserInfo;
+
+  @OneToMany(() => Devices, (device) => device.user, {
+    onDelete: 'CASCADE',
+  })
+  device: Devices;
 }

@@ -1,18 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { add } from 'date-fns';
 import { isEmpty } from 'lodash';
 import { bcryptService } from '../../application';
 import { MakeUserModel } from './types';
 import { generateUUID, formatSqlChar } from '../../utils';
+import {
+  Users,
+  EmailConfirmation,
+  PasswordRecovery,
+  BanUserInfo,
+} from './entities';
 
 @Injectable()
 export class UserRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+  ) {}
   // Поиск пользователя по логину или email
   async findByLoginOrEmail(loginOrEmail: string): Promise<any> {
-    const foundUser = await this.dataSource.query(`
+    const foundUser = await this.userRepository.query(`
       SELECT 
         u."id", 
         u."login", 
@@ -34,6 +42,13 @@ export class UserRepository {
       LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
       WHERE u."login" = '${loginOrEmail}' OR u."email" = '${loginOrEmail}';
     `);
+
+    /*const foundUser1 = await this.userRepository
+      .createQueryBuilder('u')
+      .leftJoinAndSelect('u.emailConfirmation', 'ec')
+      .where('u.login = :loginOrEmail', { loginOrEmail })
+      .orWhere('u.email = :loginOrEmail', { loginOrEmail })
+      .getOne();*/
 
     if (isEmpty(foundUser)) {
       return null;
@@ -59,7 +74,7 @@ export class UserRepository {
     passwordExpirationDate: Date;
     isRecovered: boolean;
   }> {
-    const foundUser = await this.dataSource.query(`
+    const foundUser = await this.userRepository.query(`
       SELECT 
         u."id", 
         u."login", 
@@ -89,7 +104,7 @@ export class UserRepository {
     return foundUser[0];
   }
   async findByConfirmationCode(code: string) {
-    const foundUser = await this.dataSource.query(`
+    const foundUser = await this.userRepository.query(`
       SELECT 
         u."id", 
         u."login", 
@@ -119,28 +134,28 @@ export class UserRepository {
     return foundUser[0];
   }
   async findByRecoveryCode(recoveryCode: string) {
-    const foundUser = await this.dataSource.query(`
-    SELECT 
-      u."id", 
-      u."login", 
-      u."email",
-      u."passwordHash",
-      u."createdAt",
-      bui."isBanned", 
-      bui."banDate", 
-      bui."banReason",
-      ec."confirmationCode",
-      ec."expirationDate" as "emailExpirationDate",
-      ec."isConfirmed",
-      pr."recoveryCode",
-      pr."expirationDate" as "passwordExpirationDate",
-      pr."isRecovered"
-    FROM users as u
-    LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
-    LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
-    LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
-    WHERE pr."recoveryCode" = '${recoveryCode}';
-  `);
+    const foundUser = await this.userRepository.query(`
+      SELECT 
+        u."id", 
+        u."login", 
+        u."email",
+        u."passwordHash",
+        u."createdAt",
+        bui."isBanned", 
+        bui."banDate", 
+        bui."banReason",
+        ec."confirmationCode",
+        ec."expirationDate" as "emailExpirationDate",
+        ec."isConfirmed",
+        pr."recoveryCode",
+        pr."expirationDate" as "passwordExpirationDate",
+        pr."isRecovered"
+      FROM users as u
+      LEFT JOIN ban_user_info as bui ON bui."userId" = u."id"
+      LEFT JOIN email_confirmation as ec ON ec."userId" = u."id"
+      LEFT JOIN password_recovery as pr ON pr."userId" = u."id"
+      WHERE pr."recoveryCode" = '${recoveryCode}';
+    `);
 
     if (!foundUser) {
       return null;
@@ -157,8 +172,6 @@ export class UserRepository {
     refreshToken: string;
     createdAt: Date;
   }> {
-    // Генерируем код для подтверждения email
-    const confirmationCode = generateUUID();
     // Генерируем соль
     const passwordSalt = bcryptService.generateSaltSync(10);
     // Генерируем хэш пароля
@@ -166,38 +179,61 @@ export class UserRepository {
       password,
       passwordSalt,
     );
-    const expirationDateEmailConfirmation = add(new Date(), {
+    const expirationDate = add(new Date(), {
       hours: 1,
       minutes: 30,
     }).toISOString();
-    const dateNow = new Date().toISOString();
 
-    const createdUser = await this.dataSource.query(`
-      INSERT INTO users
-        ("login", "email", "passwordHash")
-        VALUES ('${login}', '${email}', '${passwordHash}')
-        RETURNING *;
-    `);
+    const createdUser = await this.userRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Users)
+      .values({
+        login,
+        email,
+        passwordHash,
+      })
+      .returning(['id'])
+      .execute();
 
-    const userId = createdUser[0].id;
+    const userId = createdUser.raw[0].id;
 
-    await this.dataSource.query(`
-      INSERT INTO
-        email_confirmation("confirmationCode", "expirationDate", "isConfirmed", "userId")
-        VALUES ('${confirmationCode}', '${expirationDateEmailConfirmation}', false, '${userId}');
-        
-      INSERT INTO
-        password_recovery("recoveryCode", "expirationDate", "isRecovered", "userId")
-        VALUES ('${confirmationCode}', '${dateNow}', true, '${userId}');
+    await this.userRepository
+      .createQueryBuilder()
+      .insert()
+      .into(EmailConfirmation)
+      .values({
+        confirmationCode: generateUUID(),
+        expirationDate,
+        isConfirmed: false,
+        userId,
+      })
+      .execute();
 
-      INSERT INTO ban_user_info("userId") VALUES ('${userId}');
-    `);
+    await this.userRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PasswordRecovery)
+      .values({
+        recoveryCode: generateUUID(),
+        expirationDate: new Date().toISOString(),
+        isRecovered: true,
+        userId,
+      })
+      .execute();
 
-    return createdUser[0];
+    await this.userRepository
+      .createQueryBuilder()
+      .insert()
+      .into(BanUserInfo)
+      .values({ userId })
+      .execute();
+
+    return createdUser.raw[0];
   }
   // Удаление пользователя
   async deleteUserById(userId: string): Promise<boolean> {
-    await this.dataSource.query(`
+    await this.userRepository.query(`
       DELETE FROM email_confirmation WHERE "userId" = '${userId}';
       DELETE FROM password_recovery WHERE "userId" = '${userId}';
       DELETE FROM ban_user_info WHERE "userId" = '${userId}';
@@ -218,12 +254,19 @@ export class UserRepository {
     userId: string,
     refreshToken: string,
   ): Promise<boolean> {
-    const query = `
+    /*const query = `
       UPDATE users
       SET "refreshToken" = '${refreshToken}'
       WHERE "id" = '${userId}';
     `;
-    await this.dataSource.query(query);
+    await this.userRepository.query(query);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(Users)
+      .set({ refreshToken })
+      .where('id = :id', { id: userId })
+      .execute();
 
     return true;
   }
@@ -232,12 +275,19 @@ export class UserRepository {
     userId: string,
     isConfirmed: boolean,
   ): Promise<boolean> {
-    const query = `
+    /*const query = `
       UPDATE email_confirmation
       SET "isConfirmed" = ${isConfirmed}
       WHERE "userId" = '${userId}';
     `;
-    await this.dataSource.query(query);
+    await this.userRepository.query(query);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(EmailConfirmation)
+      .set({ isConfirmed })
+      .where('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -246,12 +296,19 @@ export class UserRepository {
     userId: string,
     confirmationCode: string,
   ): Promise<boolean> {
-    const query = `
+    /*const query = `
       UPDATE email_confirmation
       SET "confirmationCode" = '${confirmationCode}'
       WHERE "userId" = '${userId}';
     `;
-    await this.dataSource.query(query);
+    await this.userRepository.query(query);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(EmailConfirmation)
+      .set({ confirmationCode })
+      .where('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -265,15 +322,22 @@ export class UserRepository {
       hours: 1,
       minutes: 30,
     }).toISOString();
-    const query = `
+    /*const query = `
       UPDATE password_recovery
       SET 
         "recoveryCode" = '${recoveryCode}',
         "expirationDate" = '${expirationDate}',
-        "recoveryCode" = false
+        "isRecovered" = false
       WHERE "userId" = '${userId}';
     `;
-    await this.dataSource.query(query);
+    await this.userRepository.query(query);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(PasswordRecovery)
+      .set({ recoveryCode, expirationDate, isRecovered: false })
+      .where('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -290,7 +354,7 @@ export class UserRepository {
     // Обновляем пароль
     // Подтверждаем востановление пароля
     // Очищаем код востановления пароля
-    await this.dataSource.query(`
+    /*await this.userRepository.query(`
       UPDATE users
       SET "passwordHash" = '${passwordHash}'
       WHERE "id" = '${userId}';
@@ -300,7 +364,21 @@ export class UserRepository {
         "isRecovered" = true,
         "recoveryCode" = ''
       WHERE "userId" = '${userId}';      
-    `);
+    `);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(Users)
+      .set({ passwordHash })
+      .where('id = :id', { id: userId })
+      .execute();
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(PasswordRecovery)
+      .set({ isRecovered: true, recoveryCode: '' })
+      .where('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
@@ -311,7 +389,7 @@ export class UserRepository {
     userId: string,
   ): Promise<boolean> {
     const dateNow = new Date().toISOString();
-    const query = `
+    /*const query = `
       UPDATE ban_user_info
       SET 
         "isBanned" = ${isBanned}, 
@@ -321,7 +399,18 @@ export class UserRepository {
         "userId" = '${userId}';
     `;
 
-    await this.dataSource.query(query);
+    await this.userRepository.query(query);*/
+
+    await this.userRepository
+      .createQueryBuilder()
+      .update(BanUserInfo)
+      .set({
+        isBanned,
+        banDate: isBanned ? formatSqlChar(dateNow) : null,
+        banReason: isBanned ? formatSqlChar(banReason) : null,
+      })
+      .where('userId = :userId', { userId })
+      .execute();
 
     return true;
   }
