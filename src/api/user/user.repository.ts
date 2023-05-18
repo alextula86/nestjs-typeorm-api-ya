@@ -5,7 +5,7 @@ import { add } from 'date-fns';
 import { isEmpty } from 'lodash';
 import { bcryptService } from '../../application';
 import { MakeUserModel } from './types';
-import { generateUUID, formatSqlChar } from '../../utils';
+import { generateUUID } from '../../utils';
 import {
   Users,
   EmailConfirmation,
@@ -254,13 +254,6 @@ export class UserRepository {
     userId: string,
     refreshToken: string,
   ): Promise<boolean> {
-    /*const query = `
-      UPDATE users
-      SET "refreshToken" = '${refreshToken}'
-      WHERE "id" = '${userId}';
-    `;
-    await this.userRepository.query(query);*/
-
     await this.userRepository
       .createQueryBuilder()
       .update(Users)
@@ -275,13 +268,6 @@ export class UserRepository {
     userId: string,
     isConfirmed: boolean,
   ): Promise<boolean> {
-    /*const query = `
-      UPDATE email_confirmation
-      SET "isConfirmed" = ${isConfirmed}
-      WHERE "userId" = '${userId}';
-    `;
-    await this.userRepository.query(query);*/
-
     await this.userRepository
       .createQueryBuilder()
       .update(EmailConfirmation)
@@ -296,13 +282,6 @@ export class UserRepository {
     userId: string,
     confirmationCode: string,
   ): Promise<boolean> {
-    /*const query = `
-      UPDATE email_confirmation
-      SET "confirmationCode" = '${confirmationCode}'
-      WHERE "userId" = '${userId}';
-    `;
-    await this.userRepository.query(query);*/
-
     await this.userRepository
       .createQueryBuilder()
       .update(EmailConfirmation)
@@ -322,15 +301,6 @@ export class UserRepository {
       hours: 1,
       minutes: 30,
     }).toISOString();
-    /*const query = `
-      UPDATE password_recovery
-      SET 
-        "recoveryCode" = '${recoveryCode}',
-        "expirationDate" = '${expirationDate}',
-        "isRecovered" = false
-      WHERE "userId" = '${userId}';
-    `;
-    await this.userRepository.query(query);*/
 
     await this.userRepository
       .createQueryBuilder()
@@ -350,21 +320,6 @@ export class UserRepository {
       newPassword,
       passwordSalt,
     );
-
-    // Обновляем пароль
-    // Подтверждаем востановление пароля
-    // Очищаем код востановления пароля
-    /*await this.userRepository.query(`
-      UPDATE users
-      SET "passwordHash" = '${passwordHash}'
-      WHERE "id" = '${userId}';
-
-      UPDATE password_recovery
-      SET 
-        "isRecovered" = true,
-        "recoveryCode" = ''
-      WHERE "userId" = '${userId}';      
-    `);*/
 
     await this.userRepository
       .createQueryBuilder()
@@ -389,25 +344,14 @@ export class UserRepository {
     userId: string,
   ): Promise<boolean> {
     const dateNow = new Date().toISOString();
-    /*const query = `
-      UPDATE ban_user_info
-      SET 
-        "isBanned" = ${isBanned}, 
-        "banDate" = ${isBanned ? formatSqlChar(dateNow) : null}, 
-        "banReason" = ${isBanned ? formatSqlChar(banReason) : null}
-      WHERE 
-        "userId" = '${userId}';
-    `;
-
-    await this.userRepository.query(query);*/
 
     await this.userRepository
       .createQueryBuilder()
       .update(BanUserInfo)
       .set({
         isBanned,
-        banDate: isBanned ? formatSqlChar(dateNow) : null,
-        banReason: isBanned ? formatSqlChar(banReason) : null,
+        banDate: isBanned ? dateNow : null,
+        banReason: isBanned ? banReason : null,
       })
       .where('userId = :userId', { userId })
       .execute();
