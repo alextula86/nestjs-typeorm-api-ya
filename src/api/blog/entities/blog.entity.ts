@@ -34,7 +34,10 @@ export class Blogs {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @ManyToOne(() => Users, { nullable: false })
-  @JoinColumn()
+  @Column({ nullable: true })
+  userId: string;
+
+  @ManyToOne(() => Users, (user) => user.blog, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   user: Users;
 }

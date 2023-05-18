@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
 import { MakeBlogModel, UpdateBlogModel } from './types';
-
+import { Blogs } from './entities';
 @Injectable()
 export class BlogRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Blogs) private readonly blogRepository: Repository<Blogs>,
+  ) {}
   // Поиск документа конкретного блогера по его идентификатору
   async findBlogById(blogId: string): Promise<{
     id: string;
@@ -34,7 +36,7 @@ export class BlogRepository {
       WHERE "id" = '${blogId}';
     `;
 
-    const foundBlog = await this.dataSource.query(query);
+    const foundBlog = await this.blogRepository.query(query);
 
     if (isEmpty(foundBlog)) {
       return null;
@@ -59,23 +61,27 @@ export class BlogRepository {
     banDate: Date;
     createdAt: string;
   }> {
-    const query = `
-      INSERT INTO blogs
-        ("name", "description", "websiteUrl", "userId")
-        VALUES ('${name}', '${description}', '${websiteUrl}', '${userId}')
-        RETURNING *;
-    `;
+    const madeBlog = await this.blogRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Blogs)
+      .values({
+        name,
+        description,
+        websiteUrl,
+        userId,
+      })
+      .returning(['id'])
+      .execute();
 
-    const madeBlog = await this.dataSource.query(query);
-
-    return madeBlog[0];
+    return madeBlog.raw[0];
   }
   // Обновление блогера
   async updateBlog(
     blogId: string,
     { name, description, websiteUrl }: UpdateBlogModel,
   ): Promise<boolean> {
-    const query = `
+    /*const query = `
         UPDATE blogs
         SET
           "name" = '${name}',
@@ -83,13 +89,20 @@ export class BlogRepository {
           "websiteUrl" = '${websiteUrl}'
         WHERE "id" = '${blogId}';
       `;
-    await this.dataSource.query(query);
+    await this.blogRepository.query(query);*/
+
+    await this.blogRepository
+      .createQueryBuilder()
+      .update(Blogs)
+      .set({ name, description, websiteUrl })
+      .where('id = :blogId', { blogId })
+      .execute();
 
     return true;
   }
   // Удаление блогера
   async deleteBlogById(blogId: string): Promise<boolean> {
-    await this.dataSource.query(`
+    await this.blogRepository.query(`
       DELETE FROM posts WHERE "blogId" = '${blogId}';
       DELETE FROM ban_user_for_blog WHERE "blogId" = '${blogId}';
       DELETE FROM blogs WHERE "id" = '${blogId}';
@@ -101,7 +114,7 @@ export class BlogRepository {
   async banBlog(blogId: string, isBanned: boolean): Promise<boolean> {
     const banDate = isBanned ? `'${new Date().toISOString()}'` : null;
 
-    const query = `
+    /*const query = `
       UPDATE blogs
       SET 
         "isBanned" = ${isBanned},
@@ -109,26 +122,34 @@ export class BlogRepository {
       WHERE "id" = '${blogId}';
     `;
 
-    await this.dataSource.query(query);
+    await this.blogRepository.query(query);*/
+
+    await this.blogRepository
+      .createQueryBuilder()
+      .update(Blogs)
+      .set({ isBanned, banDate })
+      .where('id = :blogId', { blogId })
+      .execute();
 
     return true;
   }
   // Привязка пользователя к блогу
   async bindWithUser(userId: string, blogId: string): Promise<boolean> {
-    const query = `
+    /*const query = `
       UPDATE blogs
       SET 
         "userId" = '${userId}'
       WHERE "id" = '${blogId}';
     `;
 
-    await this.dataSource.query(query);
+    await this.blogRepository.query(query);*/
 
-    return true;
-  }
-  // Очистить таблицу блогеров
-  async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`TRUNCATE TABLE blogs;`);
+    await this.blogRepository
+      .createQueryBuilder()
+      .update(Blogs)
+      .set({ userId })
+      .where('id = :blogId', { blogId })
+      .execute();
 
     return true;
   }

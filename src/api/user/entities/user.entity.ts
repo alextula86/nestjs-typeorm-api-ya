@@ -10,6 +10,7 @@ import { EmailConfirmation } from './emailConfirmation.entity';
 import { PasswordRecovery } from './passwordRecovery.entity';
 import { BanUserInfo } from './banUserInfo.entity';
 import { Devices } from '../../device/entities';
+import { Blogs } from '../../blog/entities';
 
 @Entity()
 export class Users {
@@ -54,4 +55,9 @@ export class Users {
     onDelete: 'CASCADE',
   })
   device: Devices;
+
+  @OneToMany(() => Blogs, (blog) => blog.user, {
+    onDelete: 'CASCADE',
+  })
+  blog: Blogs;
 }
