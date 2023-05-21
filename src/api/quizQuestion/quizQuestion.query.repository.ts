@@ -32,8 +32,12 @@ export class QuizQuestionQueryRepository {
       terms.push(`"body" ILIKE '%${bodySearchTerm}%'`);
     }
 
-    if (publishedStatus) {
-      terms.push(`"published" = '${publishedStatus}'`);
+    if (publishedStatus === PublishedStatus.PUBLISHED) {
+      terms.push(`"published" = true`);
+    }
+
+    if (publishedStatus === PublishedStatus.NOTPUBLISHED) {
+      terms.push(`"published" = false`);
     }
 
     const where = !isEmpty(terms) ? `WHERE ${terms.join(' OR ')}` : '';
@@ -79,7 +83,7 @@ export class QuizQuestionQueryRepository {
     id: string;
     body: string;
     correctAnswers: string[];
-    published: PublishedStatus;
+    published: boolean;
     createdAt: string;
     updatedAt: string;
   } | null> {

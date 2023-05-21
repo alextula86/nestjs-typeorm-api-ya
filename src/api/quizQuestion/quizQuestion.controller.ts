@@ -123,7 +123,7 @@ export class QuizQuestionController {
     return true;
   }
   // Публикация вопроса для квиза
-  @Put('users/:userId/ban')
+  @Put(':quizQuestionId/publish')
   @HttpCode(HttpStatus.NO_CONTENT)
   async publishQuizQuestion(
     @Param('quizQuestionId') quizQuestionId: string,

@@ -94,7 +94,7 @@ export class QuizQuestionRepository {
   // Публикация вопроса для квиза
   async publishQuizQuestion(
     quizQuestionId: string,
-    published: PublishedStatus,
+    published: boolean,
   ): Promise<boolean> {
     await this.quizQuestionRepository
       .createQueryBuilder()

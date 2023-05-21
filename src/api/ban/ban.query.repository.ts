@@ -65,7 +65,7 @@ export class BanQueryRepository {
       ${offset}
       ${limit};
     `;
-    console.log('query', query);
+
     const foundBanUserForBlog = await this.dataSource.query(query);
 
     return this._getBlogsViewModelDetail({

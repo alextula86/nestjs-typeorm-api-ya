@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
-import { PublishedStatus } from '../../../types';
 
 @Entity()
 export class QuizQuestions {
@@ -17,12 +16,8 @@ export class QuizQuestions {
   @Column('simple-json')
   correctAnswers: { answers: string[] };
 
-  @Column({
-    type: 'enum',
-    enum: PublishedStatus,
-    default: PublishedStatus.NOTPUBLISHED,
-  })
-  published: PublishedStatus;
+  @Column({ default: false, nullable: true })
+  published: boolean;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

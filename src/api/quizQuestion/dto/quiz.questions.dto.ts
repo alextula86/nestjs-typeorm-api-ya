@@ -2,7 +2,7 @@ import {
   ArrayMinSize,
   ArrayNotEmpty,
   IsArray,
-  IsEnum,
+  IsBoolean,
   IsNotEmpty,
   IsString,
   MaxLength,
@@ -11,7 +11,6 @@ import {
 
 import { Transform } from 'class-transformer';
 import { isString } from 'lodash';
-import { PublishedStatus } from '../../../types';
 
 export class CreateQuizQuestionDto {
   @IsNotEmpty({
@@ -45,6 +44,8 @@ export class CreateQuizQuestionDto {
 export class UpdateQuizQuestionDto extends CreateQuizQuestionDto {}
 
 export class PublishQuizQuestionDto {
-  @IsEnum(PublishedStatus)
-  published: PublishedStatus;
+  @IsBoolean({
+    message: 'The published field contains a logical type',
+  })
+  published: boolean;
 }

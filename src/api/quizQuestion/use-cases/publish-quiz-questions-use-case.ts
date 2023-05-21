@@ -4,8 +4,6 @@ import { isEmpty } from 'lodash';
 
 import { validateOrRejectModel } from '../../../validate';
 
-import { UserRepository } from '../../user/user.repository';
-
 import { QuizQuestionRepository } from '../quizQuestion.repository';
 import { PublishQuizQuestionDto } from '../dto';
 
@@ -22,7 +20,6 @@ export class PublishQuizQuestionUseCase
 {
   constructor(
     private readonly quizQuestionRepository: QuizQuestionRepository,
-    private readonly userRepository: UserRepository,
   ) {}
   // Публикация вопроса для квиза
   async execute(command: PublishQuizQuestionCommand): Promise<{
