@@ -15,6 +15,7 @@ import { SABlogController } from './api/blog/sa-blog.controller';
 import { PostController } from './api/post/post.controller';
 import { DeviceSqlController } from './api/device/device.controller';
 import { CommentController } from './api/comment/comment.controller';
+import { QuizQuestionController } from './api/quizQuestion/quizQuestion.controller';
 import { TestingController } from './api/testing/testing.controller';
 
 import { AuthService } from './api/auth/auth.service';
@@ -26,6 +27,7 @@ import { DeviceService } from './api/device/device.service';
 import { SessionService } from './api/session/session.service';
 import { CommentLikeStatusService } from './api/commentLikeStatus/commentlikeStatus.service';
 import { PostLikeStatusService } from './api/postLikeStatus/postLikeStatus.service';
+import { QuizQuestionService } from './api/quizQuestion/quizQuestion.service';
 
 import {
   LoginUseCase,
@@ -71,6 +73,12 @@ import {
 } from './api/session/use-cases';
 import { UpdateLikeStatusCommentUseCase } from './api/commentLikeStatus/use-cases';
 import { UpdateLikeStatusPostUseCase } from './api/postLikeStatus/use-cases';
+import {
+  CreateQuizQuestionUseCase,
+  UpdateQuizQuestionUseCase,
+  DeleteQuizQuestionUseCase,
+  PublishQuizQuestionUseCase,
+} from './api/quizQuestion/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -81,6 +89,7 @@ import { SessionRepository } from './api/session/session.repository';
 import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLikeStatus.repository';
 import { PostLikeStatusRepository } from './api/postLikeStatus/postLikeStatus.repository';
 import { BanRepository } from './api/ban/ban.repository';
+import { QuizQuestionRepository } from './api/quizQuestion/quizQuestion.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -89,6 +98,7 @@ import { CommentQueryRepository } from './api/comment/comment.query.repository';
 import { DeviceQueryRepository } from './api/device/device.query.repository';
 import { AuthQueryRepository } from './api/auth/auth.query.repository';
 import { BanQueryRepository } from './api/ban/ban.query.repository';
+import { QuizQuestionQueryRepository } from './api/quizQuestion/quizQuestion.query.repository';
 
 import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
@@ -109,6 +119,7 @@ import { Sessions } from './api/session/entities';
 import { CommentLikeStatus } from './api/commentLikeStatus/entities';
 import { PostLikeStatus } from './api/postLikeStatus/entities';
 import { BanUserForBlog } from './api/ban/entities';
+import { QuizQuestions } from './api/quizQuestion/entities';
 
 const authProviders = [
   AuthService,
@@ -165,7 +176,7 @@ const deviceProviders = [
   DeleteAllDevicesUseCase,
   DeleteDeviceByIdUseCase,
 ];
-const sessionSProviders = [
+const sessionProviders = [
   SessionService,
   SessionRepository,
   CreateSessionUseCase,
@@ -183,6 +194,15 @@ const postLikeStatusProviders = [
   UpdateLikeStatusPostUseCase,
 ];
 const banSProviders = [BanRepository, BanQueryRepository];
+const quizQuestionProviders = [
+  QuizQuestionService,
+  QuizQuestionRepository,
+  QuizQuestionQueryRepository,
+  CreateQuizQuestionUseCase,
+  UpdateQuizQuestionUseCase,
+  DeleteQuizQuestionUseCase,
+  PublishQuizQuestionUseCase,
+];
 
 const adapters = [EmailManager, EmailAdapter];
 
@@ -212,6 +232,7 @@ const adapters = [EmailManager, EmailAdapter];
       CommentLikeStatus,
       PostLikeStatus,
       BanUserForBlog,
+      QuizQuestions,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -237,6 +258,7 @@ const adapters = [EmailManager, EmailAdapter];
     PostController,
     CommentController,
     DeviceSqlController,
+    QuizQuestionController,
     TestingController,
   ],
   providers: [
@@ -247,10 +269,11 @@ const adapters = [EmailManager, EmailAdapter];
     ...postProviders,
     ...commentProviders,
     ...deviceProviders,
-    ...sessionSProviders,
+    ...sessionProviders,
     ...commentLikeStatusProviders,
     ...postLikeStatusProviders,
     ...banSProviders,
+    ...quizQuestionProviders,
     ...adapters,
   ],
 })

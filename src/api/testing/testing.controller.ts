@@ -21,6 +21,7 @@ export class TestingController {
         post_like_status,
         posts,
         blogs,
+        quiz_questions,
         users;
     `);
   }
