@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -22,6 +23,6 @@ export class QuizQuestions {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
   updatedAt: Date;
 }
