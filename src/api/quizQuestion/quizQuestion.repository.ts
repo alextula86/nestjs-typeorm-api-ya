@@ -60,6 +60,7 @@ export class QuizQuestionRepository {
       .values({
         body,
         correctAnswers: { answers: correctAnswers },
+        updatedAt: null,
       })
       .returning(['id'])
       .execute();
@@ -77,6 +78,7 @@ export class QuizQuestionRepository {
       .set({
         body,
         correctAnswers: { answers: correctAnswers },
+        updatedAt: new Date(),
       })
       .where('id = :quizQuestionId', { quizQuestionId })
       .execute();
@@ -99,7 +101,7 @@ export class QuizQuestionRepository {
     await this.quizQuestionRepository
       .createQueryBuilder()
       .update(QuizQuestions)
-      .set({ published })
+      .set({ published, updatedAt: new Date() })
       .where('id = :quizQuestionId', { quizQuestionId })
       .execute();
 
