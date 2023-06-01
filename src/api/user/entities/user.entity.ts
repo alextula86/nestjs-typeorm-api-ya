@@ -5,12 +5,14 @@ import {
   CreateDateColumn,
   OneToOne,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { EmailConfirmation } from './emailConfirmation.entity';
 import { PasswordRecovery } from './passwordRecovery.entity';
 import { BanUserInfo } from './banUserInfo.entity';
 import { Devices } from '../../device/entities';
 import { Blogs } from '../../blog/entities';
+import { PairQuizGame } from '../../pairQuizGame/entities';
 
 @Entity()
 export class Users {
@@ -60,4 +62,14 @@ export class Users {
     onDelete: 'CASCADE',
   })
   blog: Blogs;
+
+  @ManyToMany(() => PairQuizGame, (pairQuizGame) => pairQuizGame.firstPlayer, {
+    onDelete: 'CASCADE',
+  })
+  firstPlayer: PairQuizGame;
+
+  @ManyToMany(() => PairQuizGame, (pairQuizGame) => pairQuizGame.secondPlayer, {
+    onDelete: 'CASCADE',
+  })
+  secondPlayer: PairQuizGame;
 }

@@ -2,11 +2,8 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-// import { PageType } from '../../../types';
-
 import { UserRepository } from '../../user/user.repository';
 import { BlogRepository } from '../../blog/blog.repository';
-// import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';
 
 import { PostRepository } from '../post.repository';
 
@@ -45,7 +42,7 @@ export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
     }
     // Ищем пользователя
     const foundUser = await this.userRepository.findUserById(userId);
-    // Если пользователь не найден, возвращаем ошибку 400
+    // Если пользователь не найден, возвращаем ошибку 403
     if (isEmpty(foundUser)) {
       return { statusCode: HttpStatus.FORBIDDEN };
     }
@@ -59,11 +56,6 @@ export class DeletePostUseCase implements ICommandHandler<DeletePostCommand> {
     if (!isDeletePostById) {
       return { statusCode: HttpStatus.NOT_FOUND };
     }
-    // Удаляем лайк статусы, привязанные к посту
-    /*await this.likeStatusRepository.deleteLikeStatusesByParentId(
-      postId,
-      PageType.POST,
-    );*/
     // Возвращаем статус 204
     return { statusCode: HttpStatus.NO_CONTENT };
   }

@@ -2,10 +2,6 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
-// import { PageType } from '../../../types';
-
-// import { LikeStatusRepository } from '../../likeStatus/likeStatus.repository';
-
 import { CommentRepository } from '../comment.repository';
 
 export class DeleteCommentCommand {
@@ -39,11 +35,6 @@ export class DeleteCommentUseCase
     }
 
     await this.commentRepository.deleteCommentById(commentId);
-
-    /*await this.likeStatusRepository.deleteLikeStatusesByParentId(
-      commentId,
-      PageType.COMMENT,
-    );*/
 
     return { statusCode: HttpStatus.NO_CONTENT };
   }

@@ -3,8 +3,3 @@ export enum LikeStatuses {
   LIKE = 'Like',
   DISLIKE = 'Dislike',
 }
-
-export enum PageType {
-  COMMENT = 'COMMENT',
-  POST = 'POST',
-}

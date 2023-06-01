@@ -22,6 +22,7 @@ export class TestingController {
         posts,
         blogs,
         quiz_questions,
+        pair_quiz_game,
         users;
     `);
   }

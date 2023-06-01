@@ -7,6 +7,23 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import {
+  Users,
+  EmailConfirmation,
+  PasswordRecovery,
+  BanUserInfo,
+} from './api/user/entities';
+import { Blogs } from './api/blog/entities';
+import { Posts } from './api/post/entities';
+import { Comments } from './api/comment/entities';
+import { Devices } from './api/device/entities';
+import { Sessions } from './api/session/entities';
+import { CommentLikeStatus } from './api/commentLikeStatus/entities';
+import { PostLikeStatus } from './api/postLikeStatus/entities';
+import { BanUserForBlog } from './api/ban/entities';
+import { QuizQuestions } from './api/quizQuestion/entities';
+import { PairQuizGame } from './api/pairQuizGame/entities';
+
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
 import { BlogController } from './api/blog/blog.controller';
@@ -16,10 +33,10 @@ import { PostController } from './api/post/post.controller';
 import { DeviceSqlController } from './api/device/device.controller';
 import { CommentController } from './api/comment/comment.controller';
 import { QuizQuestionController } from './api/quizQuestion/quizQuestion.controller';
+import { PairQuizGameController } from './api/pairQuizGame/pairQuizGame.controller';
 import { TestingController } from './api/testing/testing.controller';
 
 import { AuthService } from './api/auth/auth.service';
-// import { UserService } from './api/user/user.service';
 import { BlogService } from './api/blog/blog.service';
 import { PostService } from './api/post/post.service';
 import { CommentService } from './api/comment/comment.service';
@@ -79,6 +96,7 @@ import {
   DeleteQuizQuestionUseCase,
   PublishQuizQuestionUseCase,
 } from './api/quizQuestion/use-cases';
+import { ConnectionPairQuizGameUseCase } from './api/pairQuizGame/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -90,6 +108,7 @@ import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLike
 import { PostLikeStatusRepository } from './api/postLikeStatus/postLikeStatus.repository';
 import { BanRepository } from './api/ban/ban.repository';
 import { QuizQuestionRepository } from './api/quizQuestion/quizQuestion.repository';
+import { PairQuizGameRepository } from './api/pairQuizGame/pairQuizGame.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -99,27 +118,11 @@ import { DeviceQueryRepository } from './api/device/device.query.repository';
 import { AuthQueryRepository } from './api/auth/auth.query.repository';
 import { BanQueryRepository } from './api/ban/ban.query.repository';
 import { QuizQuestionQueryRepository } from './api/quizQuestion/quizQuestion.query.repository';
+import { PairQuizGameQueryRepository } from './api/pairQuizGame/pairQuizGame.query.repository';
 
 import { EmailAdapter } from './adapters';
 import { EmailManager } from './managers';
 import { IsBlogExistConstraint } from './api/blog/custom-validators/customValidateBlog';
-
-import {
-  Users,
-  EmailConfirmation,
-  PasswordRecovery,
-  BanUserInfo,
-} from './api/user/entities';
-
-import { Blogs } from './api/blog/entities';
-import { Posts } from './api/post/entities';
-import { Comments } from './api/comment/entities';
-import { Devices } from './api/device/entities';
-import { Sessions } from './api/session/entities';
-import { CommentLikeStatus } from './api/commentLikeStatus/entities';
-import { PostLikeStatus } from './api/postLikeStatus/entities';
-import { BanUserForBlog } from './api/ban/entities';
-import { QuizQuestions } from './api/quizQuestion/entities';
 
 const authProviders = [
   AuthService,
@@ -203,6 +206,11 @@ const quizQuestionProviders = [
   DeleteQuizQuestionUseCase,
   PublishQuizQuestionUseCase,
 ];
+const pairQuizGameProviders = [
+  PairQuizGameRepository,
+  PairQuizGameQueryRepository,
+  ConnectionPairQuizGameUseCase,
+];
 
 const adapters = [EmailManager, EmailAdapter];
 
@@ -233,6 +241,7 @@ const adapters = [EmailManager, EmailAdapter];
       PostLikeStatus,
       BanUserForBlog,
       QuizQuestions,
+      PairQuizGame,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -259,6 +268,7 @@ const adapters = [EmailManager, EmailAdapter];
     CommentController,
     DeviceSqlController,
     QuizQuestionController,
+    PairQuizGameController,
     TestingController,
   ],
   providers: [
@@ -274,6 +284,7 @@ const adapters = [EmailManager, EmailAdapter];
     ...postLikeStatusProviders,
     ...banSProviders,
     ...quizQuestionProviders,
+    ...pairQuizGameProviders,
     ...adapters,
   ],
 })
