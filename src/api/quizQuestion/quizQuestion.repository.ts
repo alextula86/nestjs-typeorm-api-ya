@@ -12,6 +12,25 @@ export class QuizQuestionRepository {
     @InjectRepository(QuizQuestions)
     private readonly quizQuestionRepository: Repository<QuizQuestions>,
   ) {}
+  // Поиск n-количества рандомных вопросов
+  async findRandomQuizQuestions(limit: number): Promise<QuizQuestions[]> {
+    const query = `
+      SELECT 
+        "id", 
+        "body",
+        "correctAnswers"
+      FROM quiz_questions
+      WHERE "published" = true
+      ORDER BY RANDOM()
+      LIMIT ${limit}
+    `;
+
+    const foundRandomQuizQuestions = await this.quizQuestionRepository.query(
+      query,
+    );
+
+    return foundRandomQuizQuestions;
+  }
   // Поиск конкретного вопроса для квиза по его идентификатору
   async findQuizQuestionById(quizQuestionId: string): Promise<{
     id: string;

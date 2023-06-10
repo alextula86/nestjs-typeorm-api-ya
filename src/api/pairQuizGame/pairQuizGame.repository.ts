@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
 import { GameStatuses } from '../../types';
 import { PairQuizGame } from './entities';
+import { QuizQuestions } from '../quizQuestion/entities';
 
 @Injectable()
 export class PairQuizGameRepository {
@@ -11,12 +12,13 @@ export class PairQuizGameRepository {
     @InjectRepository(PairQuizGame)
     private readonly pairQuizGameRepository: Repository<PairQuizGame>,
   ) {}
-  async findPairQuizGameByCurrentUser(userId: string): Promise<{
+  async connectedUserToPairQuizGame(userId: string): Promise<{
     id: string;
     pairCreatedDate: Date;
     startGameDate: Date;
     finishGameDate: Date;
     status: GameStatuses;
+    questions: QuizQuestions[];
     firstPlayerId: string;
     secondPlayerId: string;
   }> {
@@ -27,10 +29,11 @@ export class PairQuizGameRepository {
         "startGameDate",
         "finishGameDate",
         "status",
+        "questions",
         "firstPlayerId",
         "secondPlayerId"
       FROM pair_quiz_game
-      WHERE "firstPlayerId" = '${userId}'
+      WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
       AND ("status" = '${GameStatuses.ACTIVE}' OR "status" = '${GameStatuses.PENDINGSECONDPLAYER}')
     `;
 
@@ -42,7 +45,7 @@ export class PairQuizGameRepository {
 
     return foundPairQuizGame[0];
   }
-  async findActivePairQuizGame(): Promise<any> {
+  async findPendingSecondPlayerPairQuizGame(): Promise<any> {
     const query = `
       SELECT 
         "id", 
@@ -67,12 +70,70 @@ export class PairQuizGameRepository {
 
     return foundActivePairQuizGame[0];
   }
-  async createPairQuizGame(userId: string): Promise<{
+  async findActivePairQuizGame(userId: string): Promise<any> {
+    const query = `
+      SELECT 
+        pqg."id", 
+        pqg."pairCreatedDate", 
+        pqg."startGameDate",
+        pqg."finishGameDate",
+        pqg."status",
+        pqg."questions",
+        fp."id" as "firstPlayerId",
+        fp."login" as "firstPlayerLogin",
+        sp."id" as "secondPlayerId",
+        sp."login" as "secondPlayerLogin",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answer",
+              qqa."answerStatus",
+              qqa."score",              
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+          ) e
+        ) as "firstPlayerQuizQuestionAnswer",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+          ) e
+        ) as "secondPlayerQuizQuestionAnswer"       
+      FROM pair_quiz_game AS pqg
+      LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
+      LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
+      AND "status" = '${GameStatuses.ACTIVE}'
+    `;
+
+    const foundActivePairQuizGame = await this.pairQuizGameRepository.query(
+      query,
+    );
+
+    if (isEmpty(foundActivePairQuizGame)) {
+      return null;
+    }
+
+    return foundActivePairQuizGame[0];
+  }
+  async createPairQuizGame(
+    userId: string,
+    questions: QuizQuestions[],
+  ): Promise<{
     id: string;
     pairCreatedDate: Date;
     startGameDate: Date;
     finishGameDate: Date;
     status: GameStatuses;
+    questions: QuizQuestions[];
     firstPlayerId: string;
     secondPlayerId: string;
   }> {
@@ -80,7 +141,10 @@ export class PairQuizGameRepository {
       .createQueryBuilder()
       .insert()
       .into(PairQuizGame)
-      .values({ firstPlayerId: userId })
+      .values({
+        firstPlayerId: userId,
+        questions: { quizQuestions: questions },
+      })
       .returning(['id'])
       .execute();
 

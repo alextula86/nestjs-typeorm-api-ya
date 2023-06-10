@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Req,
-  // Body,
+  Body,
   Param,
   ForbiddenException,
   NotFoundException,
@@ -16,8 +16,11 @@ import { CommandBus } from '@nestjs/cqrs';
 import { AuthBearerGuard } from '../../guards';
 
 import { ConnectionPairQuizGameCommand } from './use-cases';
+import { CreateQuizQuestionAnswerCommand } from '../quizQuestionAnswers/use-cases';
+import { QuizQuestionAnswerQueryRepository } from '../quizQuestionAnswers/quizQuestionAnswer.query.repository';
 import { PairQuizGameQueryRepository } from './pairQuizGame.query.repository';
 import { PairQuizGameViewModel } from './types';
+import { AnswerPairQuizGameDto } from './dto';
 
 @UseGuards(AuthBearerGuard)
 @Controller('api/pair-game-quiz/pairs')
@@ -25,6 +28,7 @@ export class PairQuizGameController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly pairQuizGameQueryRepository: PairQuizGameQueryRepository,
+    private readonly quizQuestionAnswerQueryRepository: QuizQuestionAnswerQueryRepository,
   ) {}
   // Получание активной или ожидающей игровой пары пользователя
   @Get()
@@ -36,6 +40,10 @@ export class PairQuizGameController {
       await this.pairQuizGameQueryRepository.findMyCurrentPairQuizGame(
         request.userId,
       );
+
+    if (!myCurrentPairQuizGame) {
+      throw new NotFoundException();
+    }
 
     return myCurrentPairQuizGame;
   }
@@ -62,7 +70,7 @@ export class PairQuizGameController {
   @HttpCode(HttpStatus.CREATED)
   async connectionPairQuizGame(
     @Req() request: Request & { userId: string },
-  ): Promise</*PairQuizGameViewModel*/ any> {
+  ): Promise<PairQuizGameViewModel> {
     // Подключение текущего пользователя к игровой паре
     const { pairQuizGameId, statusCode } = await this.commandBus.execute(
       new ConnectionPairQuizGameCommand(request.userId),
@@ -78,5 +86,31 @@ export class PairQuizGameController {
       );
     // Возвращаем подключенную игровую пару
     return foundPairQuizGameById;
+  }
+  @Post('my-current/answers')
+  @HttpCode(HttpStatus.CREATED)
+  async answerPairQuizGame(
+    @Req() request: Request & { userId: string },
+    @Body() answerPairQuizGameDto: AnswerPairQuizGameDto,
+  ): Promise</*PairQuizGameViewModel*/ any> {
+    // Подключение текущего пользователя к игровой паре
+    const { quizQuestionAnswerId, statusCode } = await this.commandBus.execute(
+      new CreateQuizQuestionAnswerCommand(
+        request.userId,
+        answerPairQuizGameDto,
+      ),
+    );
+    // Если пользователь подключается к существующей с ним игровой паре, возращаем статус ошибки 403
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+
+    // Получаем подключенную игровую пару по идентификатору
+    const foundQuizQuestionAnswerById =
+      await this.quizQuestionAnswerQueryRepository.findQuizQuestionAnswerById(
+        quizQuestionAnswerId,
+      );
+    // Возвращаем подключенную игровую пару
+    return foundQuizQuestionAnswerById;
   }
 }

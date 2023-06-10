@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { isEmpty } from 'lodash';
+
 import { GameStatuses } from '../../types';
 import { PairQuizGameQuestionType, PairQuizGameViewModel } from './types';
-import { isEmpty } from 'lodash';
 
 @Injectable()
 export class PairQuizGameQueryRepository {
@@ -18,6 +19,7 @@ export class PairQuizGameQueryRepository {
         pqg."startGameDate",
         pqg."finishGameDate",
         pqg."status",
+        pqg."questions",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
@@ -26,11 +28,34 @@ export class PairQuizGameQueryRepository {
           SELECT json_agg(e)
           FROM (
             SELECT 
-              qq."id",
-              qq."body"
-            FROM quiz_questions AS qq
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
           ) e
-        ) as "questions"
+        ) as "firstPlayerQuizQuestionAnswer",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+          ) e
+        ) as "secondPlayerQuizQuestionAnswer",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+        ) as "firstPlayerScore",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+        ) as "secondPlayerScore"        
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
@@ -56,19 +81,11 @@ export class PairQuizGameQueryRepository {
         pqg."startGameDate",
         pqg."finishGameDate",
         pqg."status",
+        pqg."questions",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
-        sp."login" as "secondPlayerLogin",
-        (
-          SELECT json_agg(e)
-          FROM (
-            SELECT 
-              qq."id",
-              qq."body"
-            FROM quiz_questions AS qq
-          ) e
-        ) as "questions"
+        sp."login" as "secondPlayerLogin"
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
@@ -84,28 +101,46 @@ export class PairQuizGameQueryRepository {
     return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
   }
   _getPairQuizGameViewModel(pairQuizGame: any): PairQuizGameViewModel {
+    console.log('pairQuizGame', pairQuizGame);
+    const questions = JSON.parse(pairQuizGame.questions);
     return {
       id: pairQuizGame.id,
       firstPlayerProgress: {
-        answers: [],
+        answers: !isEmpty(pairQuizGame.firstPlayerQuizQuestionAnswer)
+          ? pairQuizGame.firstPlayerQuizQuestionAnswer.map((i) => ({
+              questionId: i.quizQuestionId,
+              answerStatus: i.answerStatus,
+              addedAt: i.addedAt,
+            }))
+          : [],
         player: {
           id: pairQuizGame.firstPlayerId,
           login: pairQuizGame.firstPlayerLogin,
         },
-        score: 0,
+        score: pairQuizGame.firstPlayerScore
+          ? Number(pairQuizGame.firstPlayerScore)
+          : 0,
       },
       secondPlayerProgress: pairQuizGame.secondPlayerId
         ? {
-            answers: [],
+            answers: !isEmpty(pairQuizGame.secondPlayerQuizQuestionAnswer)
+              ? pairQuizGame.secondPlayerQuizQuestionAnswer.map((i) => ({
+                  questionId: i.quizQuestionId,
+                  answerStatus: i.answerStatus,
+                  addedAt: i.addedAt,
+                }))
+              : [],
             player: {
               id: pairQuizGame.secondPlayerId,
               login: pairQuizGame.secondPlayerLogin,
             },
-            score: 0,
+            score: pairQuizGame.secondPlayerScore
+              ? Number(pairQuizGame.secondPlayerScore)
+              : 0,
           }
         : null,
-      questions: !isEmpty(pairQuizGame.questions)
-        ? pairQuizGame.questions.map((i: PairQuizGameQuestionType) => ({
+      questions: !isEmpty(questions.quizQuestions)
+        ? questions.quizQuestions.map((i: PairQuizGameQuestionType) => ({
             id: i.id,
             body: i.body,
           }))

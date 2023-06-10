@@ -22,6 +22,7 @@ import { CommentLikeStatus } from './api/commentLikeStatus/entities';
 import { PostLikeStatus } from './api/postLikeStatus/entities';
 import { BanUserForBlog } from './api/ban/entities';
 import { QuizQuestions } from './api/quizQuestion/entities';
+import { QuizQuestionAnswer } from './api/quizQuestionAnswers/entities';
 import { PairQuizGame } from './api/pairQuizGame/entities';
 
 import { AuthController } from './api/auth/auth.controller';
@@ -97,6 +98,7 @@ import {
   PublishQuizQuestionUseCase,
 } from './api/quizQuestion/use-cases';
 import { ConnectionPairQuizGameUseCase } from './api/pairQuizGame/use-cases';
+import { CreateQuizQuestionAnswerUseCase } from './api/quizQuestionAnswers/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -108,6 +110,7 @@ import { CommentLikeStatusRepository } from './api/commentLikeStatus/commentLike
 import { PostLikeStatusRepository } from './api/postLikeStatus/postLikeStatus.repository';
 import { BanRepository } from './api/ban/ban.repository';
 import { QuizQuestionRepository } from './api/quizQuestion/quizQuestion.repository';
+import { QuizQuestionAnswerRepository } from './api/quizQuestionAnswers/quizQuestionAnswer.repository';
 import { PairQuizGameRepository } from './api/pairQuizGame/pairQuizGame.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
@@ -118,6 +121,7 @@ import { DeviceQueryRepository } from './api/device/device.query.repository';
 import { AuthQueryRepository } from './api/auth/auth.query.repository';
 import { BanQueryRepository } from './api/ban/ban.query.repository';
 import { QuizQuestionQueryRepository } from './api/quizQuestion/quizQuestion.query.repository';
+import { QuizQuestionAnswerQueryRepository } from './api/quizQuestionAnswers/quizQuestionAnswer.query.repository';
 import { PairQuizGameQueryRepository } from './api/pairQuizGame/pairQuizGame.query.repository';
 
 import { EmailAdapter } from './adapters';
@@ -206,12 +210,16 @@ const quizQuestionProviders = [
   DeleteQuizQuestionUseCase,
   PublishQuizQuestionUseCase,
 ];
+const quizQuestionAnswerProviders = [
+  QuizQuestionAnswerRepository,
+  QuizQuestionAnswerQueryRepository,
+  CreateQuizQuestionAnswerUseCase,
+];
 const pairQuizGameProviders = [
   PairQuizGameRepository,
   PairQuizGameQueryRepository,
   ConnectionPairQuizGameUseCase,
 ];
-
 const adapters = [EmailManager, EmailAdapter];
 
 @Module({
@@ -241,6 +249,7 @@ const adapters = [EmailManager, EmailAdapter];
       PostLikeStatus,
       BanUserForBlog,
       QuizQuestions,
+      QuizQuestionAnswer,
       PairQuizGame,
     ]),
     MailerModule.forRoot({
@@ -284,6 +293,7 @@ const adapters = [EmailManager, EmailAdapter];
     ...postLikeStatusProviders,
     ...banSProviders,
     ...quizQuestionProviders,
+    ...quizQuestionAnswerProviders,
     ...pairQuizGameProviders,
     ...adapters,
   ],

@@ -3,7 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+
+import { QuizQuestionAnswer } from '../../quizQuestionAnswers/entities';
 
 @Entity()
 export class QuizQuestions {
@@ -24,4 +27,13 @@ export class QuizQuestions {
 
   @Column({ type: 'timestamp with time zone', nullable: true })
   updatedAt: Date;
+
+  @OneToMany(
+    () => QuizQuestionAnswer,
+    (quizQuestionAnswer) => quizQuestionAnswer.quizQuestion,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  quizQuestionAnswer: QuizQuestionAnswer;
 }
