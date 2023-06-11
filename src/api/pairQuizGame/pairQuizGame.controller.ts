@@ -51,18 +51,24 @@ export class PairQuizGameController {
   @Get(':pairQuizGameId')
   @HttpCode(HttpStatus.OK)
   async findPairQuizGameById(
+    @Req() request: Request & { userId: string },
     @Param('pairQuizGameId') pairQuizGameId: string,
   ): Promise<PairQuizGameViewModel> {
-    const foundPairQuizGameById =
+    const { data, statusCode } =
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
+        request.userId,
         pairQuizGameId,
       );
 
-    if (!foundPairQuizGameById) {
+    if (statusCode === HttpStatus.NOT_FOUND) {
       throw new NotFoundException();
     }
 
-    return foundPairQuizGameById;
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+
+    return data;
   }
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока
@@ -80,12 +86,13 @@ export class PairQuizGameController {
       throw new ForbiddenException();
     }
     // Получаем подключенную игровую пару по идентификатору
-    const foundPairQuizGameById =
+    const { data } =
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
+        request.userId,
         pairQuizGameId,
       );
     // Возвращаем подключенную игровую пару
-    return foundPairQuizGameById;
+    return data;
   }
   @Post('my-current/answers')
   @HttpCode(HttpStatus.CREATED)
