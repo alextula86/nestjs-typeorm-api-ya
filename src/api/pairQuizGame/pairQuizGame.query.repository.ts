@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
@@ -72,12 +72,8 @@ export class PairQuizGameQueryRepository {
     return this._getPairQuizGameViewModel(myCurrentPairQuizGame[0]);
   }
   async findPairQuizGameById(
-    userId: string,
     pairQuizGameId: string,
-  ): Promise<{
-    data: PairQuizGameViewModel;
-    statusCode: HttpStatus;
-  }> {
+  ): Promise<PairQuizGameViewModel> {
     const query = `
       SELECT 
         pqg."id", 
@@ -99,26 +95,12 @@ export class PairQuizGameQueryRepository {
     const foundPairQuizGameById = await this.dataSource.query(query);
 
     if (isEmpty(foundPairQuizGameById)) {
-      return {
-        data: null,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      return null;
     }
 
-    if (
-      foundPairQuizGameById[0].firstPlayerId !== userId ||
-      foundPairQuizGameById[0].secondPlayerId !== userId
-    ) {
-      return { data: null, statusCode: HttpStatus.FORBIDDEN };
-    }
-
-    return {
-      data: this._getPairQuizGameViewModel(foundPairQuizGameById[0]),
-      statusCode: HttpStatus.OK,
-    };
+    return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
   }
   _getPairQuizGameViewModel(pairQuizGame: any): PairQuizGameViewModel {
-    console.log('pairQuizGame', pairQuizGame);
     const questions = JSON.parse(pairQuizGame.questions);
     return {
       id: pairQuizGame.id,

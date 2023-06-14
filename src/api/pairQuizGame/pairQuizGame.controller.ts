@@ -54,21 +54,26 @@ export class PairQuizGameController {
     @Req() request: Request & { userId: string },
     @Param('pairQuizGameId') pairQuizGameId: string,
   ): Promise<PairQuizGameViewModel> {
-    const { data, statusCode } =
+    const foundPairQuizGameById =
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
-        request.userId,
         pairQuizGameId,
       );
 
-    if (statusCode === HttpStatus.NOT_FOUND) {
+    if (!foundPairQuizGameById) {
       throw new NotFoundException();
     }
 
-    if (statusCode === HttpStatus.FORBIDDEN) {
+    if (
+      (foundPairQuizGameById.firstPlayerProgress &&
+        foundPairQuizGameById.firstPlayerProgress.player.id !==
+          request.userId) ||
+      (foundPairQuizGameById.secondPlayerProgress &&
+        foundPairQuizGameById.secondPlayerProgress.player.id !== request.userId)
+    ) {
       throw new ForbiddenException();
     }
 
-    return data;
+    return foundPairQuizGameById;
   }
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока
@@ -86,13 +91,12 @@ export class PairQuizGameController {
       throw new ForbiddenException();
     }
     // Получаем подключенную игровую пару по идентификатору
-    const { data } =
+    const foundPairQuizGameById =
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
-        request.userId,
         pairQuizGameId,
       );
     // Возвращаем подключенную игровую пару
-    return data;
+    return foundPairQuizGameById;
   }
   @Post('my-current/answers')
   @HttpCode(HttpStatus.CREATED)
