@@ -32,33 +32,30 @@ export class ConnectionPairQuizGameUseCase
       return { pairQuizGameId: null, statusCode: HttpStatus.FORBIDDEN };
     }
     // Ищем любую пару в режиме ожидания для создания коннекта
-    const foundPendingSecondPlayerPairQuizGame =
+    const foundPendingPairQuizGame =
       await this.pairQuizGameRepository.findPendingSecondPlayerPairQuizGame();
-    // Если пара в ожидании есть, устанавливаем текущего пользователя в качестве второго игрока,
-    // устанавливаем статус пары активный, добавляем дату старта игры
-    if (!isEmpty(foundPendingSecondPlayerPairQuizGame)) {
-      await this.pairQuizGameRepository.activatePairQuizGame(
-        userId,
-        foundPendingSecondPlayerPairQuizGame.id,
-      );
-
+    if (isEmpty(foundPendingPairQuizGame)) {
+      // Если пары в ожидании нет, то создаем пару, где первый игрок будет текущий пользователь
+      const createdPairQuizGame =
+        await this.pairQuizGameRepository.createPairQuizGame(userId);
       return {
-        pairQuizGameId: foundPendingSecondPlayerPairQuizGame.id,
+        pairQuizGameId: createdPairQuizGame.id,
         statusCode: HttpStatus.CREATED,
       };
     }
-    // Находим рандомно до 5 вопросов для игровой пары
+    // Если пара в ожидании есть, находим рандомно до 5 вопросов для игровой пары,
+    // устанавливаем текущего пользователя в качестве второго игрока,
+    // устанавливаем статус пары активный, добавляем дату старта игры
     const foundRandomQuizQuestions =
       await this.quizQuestionRepository.findRandomQuizQuestions(5);
-    // Если пары в ожидании нет, то создаем пару, где первый игрок будет текущий пользователь
-    const createdPairQuizGame =
-      await this.pairQuizGameRepository.createPairQuizGame(
-        userId,
-        foundRandomQuizQuestions,
-      );
+    await this.pairQuizGameRepository.activatePairQuizGame(
+      userId,
+      foundPendingPairQuizGame.id,
+      foundRandomQuizQuestions,
+    );
 
     return {
-      pairQuizGameId: createdPairQuizGame.id,
+      pairQuizGameId: foundPendingPairQuizGame.id,
       statusCode: HttpStatus.CREATED,
     };
   }

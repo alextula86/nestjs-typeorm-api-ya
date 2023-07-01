@@ -101,7 +101,9 @@ export class PairQuizGameQueryRepository {
     return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
   }
   _getPairQuizGameViewModel(pairQuizGame: any): PairQuizGameViewModel {
-    const questions = JSON.parse(pairQuizGame.questions);
+    const questions = !isEmpty(pairQuizGame.questions)
+      ? JSON.parse(pairQuizGame.questions)
+      : null;
     return {
       id: pairQuizGame.id,
       firstPlayerProgress: {
@@ -138,12 +140,13 @@ export class PairQuizGameQueryRepository {
               : 0,
           }
         : null,
-      questions: !isEmpty(questions.quizQuestions)
-        ? questions.quizQuestions.map((i: PairQuizGameQuestionType) => ({
-            id: i.id,
-            body: i.body,
-          }))
-        : null,
+      questions:
+        !isEmpty(questions) && !isEmpty(questions.quizQuestions)
+          ? questions.quizQuestions.map((i: PairQuizGameQuestionType) => ({
+              id: i.id,
+              body: i.body,
+            }))
+          : null,
       status: pairQuizGame.status,
       pairCreatedDate: pairQuizGame.pairCreatedDate,
       startGameDate: pairQuizGame.startGameDate,

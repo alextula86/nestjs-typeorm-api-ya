@@ -58,22 +58,28 @@ export class PairQuizGameController {
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
         pairQuizGameId,
       );
-
+    // Если игровая пара по идентификатору не найдена, возвращаем ошибку 404
     if (!foundPairQuizGameById) {
       throw new NotFoundException();
     }
-
+    // Если идентификатор первого игрока равен идентификатору пользователя возвращаем игровую пару
     if (
-      (foundPairQuizGameById.firstPlayerProgress &&
-        foundPairQuizGameById.firstPlayerProgress.player.id !==
-          request.userId) ||
-      (foundPairQuizGameById.secondPlayerProgress &&
-        foundPairQuizGameById.secondPlayerProgress.player.id !== request.userId)
+      foundPairQuizGameById.firstPlayerProgress &&
+      foundPairQuizGameById.firstPlayerProgress.player.id === request.userId
     ) {
-      throw new ForbiddenException();
+      return foundPairQuizGameById;
     }
-
-    return foundPairQuizGameById;
+    // Если идентификатор второго игрока равен идентификатору пользователя возвращаем игровую пару
+    if (
+      foundPairQuizGameById.secondPlayerProgress &&
+      foundPairQuizGameById.secondPlayerProgress.player.id === request.userId
+    ) {
+      return foundPairQuizGameById;
+    }
+    // Если идентификаторы первого и второго игроков не совпадают с идентификатором пользователя,
+    // Значит игровую пару запрашивает пользователь не участвующий в игре
+    // Возвращаем ошибку 403
+    throw new ForbiddenException();
   }
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока

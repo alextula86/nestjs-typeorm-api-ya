@@ -33,7 +33,7 @@ export class PairQuizGame {
   })
   status: GameStatuses;
 
-  @Column('simple-json')
+  @Column({ type: 'simple-json', nullable: true })
   questions: { quizQuestions: QuizQuestions[] };
 
   @Column({ nullable: false })
