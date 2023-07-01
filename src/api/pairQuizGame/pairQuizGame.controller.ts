@@ -110,24 +110,24 @@ export class PairQuizGameController {
     @Req() request: Request & { userId: string },
     @Body() answerPairQuizGameDto: AnswerPairQuizGameDto,
   ): Promise</*PairQuizGameViewModel*/ any> {
-    // Подключение текущего пользователя к игровой паре
+    // Создаем ответ на вопрос
     const { quizQuestionAnswerId, statusCode } = await this.commandBus.execute(
       new CreateQuizQuestionAnswerCommand(
         request.userId,
         answerPairQuizGameDto,
       ),
     );
-    // Если пользователь подключается к существующей с ним игровой паре, возращаем статус ошибки 403
+    // Если при ответе на вопрос возникли ошибки, возращаем статус ошибки 403
     if (statusCode === HttpStatus.FORBIDDEN) {
       throw new ForbiddenException();
     }
 
-    // Получаем подключенную игровую пару по идентификатору
+    // Получаем ответ на вопрос по его идентификатору
     const foundQuizQuestionAnswerById =
       await this.quizQuestionAnswerQueryRepository.findQuizQuestionAnswerById(
         quizQuestionAnswerId,
       );
-    // Возвращаем подключенную игровую пару
+    // Возвращаем ответ на вопрос
     return foundQuizQuestionAnswerById;
   }
 }
