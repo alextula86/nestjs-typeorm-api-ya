@@ -25,7 +25,7 @@ export class QuizQuestionAnswer {
   })
   answerStatus: AnswerStatus;
 
-  @CreateDateColumn({ type: 'timestamp without time zone' })
+  @CreateDateColumn({ type: 'timestamp' })
   addedAt: Date;
 
   @Column({ default: 0 })
