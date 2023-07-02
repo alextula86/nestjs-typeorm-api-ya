@@ -31,7 +31,7 @@ export class PairQuizGameController {
     private readonly quizQuestionAnswerQueryRepository: QuizQuestionAnswerQueryRepository,
   ) {}
   // Получание активной или ожидающей игровой пары пользователя
-  @Get()
+  @Get('my-current')
   @HttpCode(HttpStatus.OK)
   async findMyCurrentPairQuizGame(
     @Req() request: Request & { userId: string },
