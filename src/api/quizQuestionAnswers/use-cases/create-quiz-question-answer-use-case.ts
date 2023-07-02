@@ -9,6 +9,7 @@ import { AnswerPairQuizGameDto } from '../../pairQuizGame/dto';
 import { PairQuizGameRepository } from '../../pairQuizGame/pairQuizGame.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
+import { getBonus } from '../utils';
 
 export class CreateQuizQuestionAnswerCommand {
   constructor(
@@ -97,27 +98,15 @@ export class CreateQuizQuestionAnswerUseCase
     // Начисляем баллы за ответ
     const score = isCorrectAnswer ? 1 : 0;
     // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
-    // значит первый игрок закончил игру быстрее и ему начисляется бонусный бал
-    /*console.log(
-      'currentPlayerAnswersCount === questionsCount - 1',
-      currentPlayerAnswersCount === questionsCount - 1,
+    // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
+    const bonus = getBonus(
+      currentPlayerAnswersCount,
+      secondPlayerAnswersCount,
+      questionsCount,
+      currentPlayerAnswers,
     );
-    console.log(
-      'secondPlayerAnswersCount !== questionsCount',
-      secondPlayerAnswersCount !== questionsCount,
-    );*/
-    /*console.log(
-      'currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)',
-      currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT),
-    );
-    const bonus =
-      currentPlayerAnswersCount === questionsCount - 1 &&
-      secondPlayerAnswersCount !== questionsCount &&
-      currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)
-        ? 1
-        : 0;*/
-    const bonus = 0;
-    // console.log('bonus', bonus);
+
+    console.log('bonus', bonus);
     const resultScore = score + bonus;
     // console.log('resultScore', resultScore);
     // Сохраняем ответ в таблице ответов и начисляем баллы за ответ
