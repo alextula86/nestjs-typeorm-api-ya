@@ -121,12 +121,13 @@ export class CreateQuizQuestionAnswerUseCase
       'currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)',
       currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT),
     );
-    const bonus =
+    /*const bonus =
       currentPlayerAnswersCount === questionsCount - 1 &&
       secondPlayerAnswersCount !== questionsCount &&
       currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)
         ? 1
-        : 0;
+        : 0;*/
+    const bonus = 0;
     console.log('bonus', bonus);
     const resultScore = score + bonus;
     console.log('resultScore', resultScore);

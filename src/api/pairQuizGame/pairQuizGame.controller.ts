@@ -121,7 +121,6 @@ export class PairQuizGameController {
     if (statusCode === HttpStatus.FORBIDDEN) {
       throw new ForbiddenException();
     }
-
     // Получаем ответ на вопрос по его идентификатору
     const foundQuizQuestionAnswerById =
       await this.quizQuestionAnswerQueryRepository.findQuizQuestionAnswerById(
