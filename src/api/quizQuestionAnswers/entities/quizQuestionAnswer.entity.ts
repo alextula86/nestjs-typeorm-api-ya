@@ -25,8 +25,8 @@ export class QuizQuestionAnswer {
   })
   answerStatus: AnswerStatus;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  addedAt: Date;
+  @Column({ default: new Date().toISOString() })
+  addedAt: string;
 
   @Column({ default: 0 })
   score: number;
