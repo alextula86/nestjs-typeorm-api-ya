@@ -5,6 +5,7 @@ import {
   Req,
   Body,
   Param,
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
   HttpCode,
@@ -14,6 +15,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthBearerGuard } from '../../guards';
+import { validateUUID } from '../../utils';
 
 import { ConnectionPairQuizGameCommand } from './use-cases';
 import { CreateQuizQuestionAnswerCommand } from '../quizQuestionAnswers/use-cases';
@@ -54,6 +56,10 @@ export class PairQuizGameController {
     @Req() request: Request & { userId: string },
     @Param('pairQuizGameId') pairQuizGameId: string,
   ): Promise<PairQuizGameViewModel> {
+    if (!validateUUID(pairQuizGameId)) {
+      throw new BadRequestException();
+    }
+    // Получаем игровую пару по идентификатору
     const foundPairQuizGameById =
       await this.pairQuizGameQueryRepository.findPairQuizGameById(
         pairQuizGameId,
