@@ -84,7 +84,7 @@ export class PairQuizGameController {
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока
   @Post('connection')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   async connectionPairQuizGame(
     @Req() request: Request & { userId: string },
   ): Promise<PairQuizGameViewModel> {
@@ -105,7 +105,7 @@ export class PairQuizGameController {
     return foundPairQuizGameById;
   }
   @Post('my-current/answers')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   async answerPairQuizGame(
     @Req() request: Request & { userId: string },
     @Body() answerPairQuizGameDto: AnswerPairQuizGameDto,
