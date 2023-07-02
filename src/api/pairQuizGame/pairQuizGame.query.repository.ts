@@ -85,7 +85,39 @@ export class PairQuizGameQueryRepository {
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
-        sp."login" as "secondPlayerLogin"
+        sp."login" as "secondPlayerLogin",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+          ) e
+        ) as "firstPlayerQuizQuestionAnswer",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+          ) e
+        ) as "secondPlayerQuizQuestionAnswer",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+        ) as "firstPlayerScore",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+        ) as "secondPlayerScore"
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
