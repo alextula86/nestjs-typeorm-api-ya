@@ -36,7 +36,6 @@ export class CreateQuizQuestionAnswerUseCase
     // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
     const foundActivePairQuizGame =
       await this.pairQuizGameRepository.findActivePairQuizGame(userId);
-    console.log('foundActivePairQuizGame', foundActivePairQuizGame);
     // Если активной игровой пары нет, т.е. игровая пара еще не создана или ее статус еще не активен
     // Возвращаем ошибку 403
     if (!foundActivePairQuizGame) {
@@ -51,7 +50,6 @@ export class CreateQuizQuestionAnswerUseCase
       !isEmpty(questionsModel) && !isEmpty(questionsModel.quizQuestions)
         ? questionsModel.quizQuestions
         : [];
-    console.log('questions', questions);
     // Если вопросов нет, то возвращаем ошибку 403
     if (isEmpty(questions)) {
       return {
@@ -76,47 +74,38 @@ export class CreateQuizQuestionAnswerUseCase
     const currentPlayerAnswersCount = !isEmpty(currentPlayerAnswers)
       ? currentPlayerAnswers.length
       : 0;
-    console.log('currentPlayerAnswersCount', currentPlayerAnswersCount);
     const secondPlayerAnswersCount = !isEmpty(secondPlayerAnswers)
       ? secondPlayerAnswers.length
       : 0;
     const questionsCount = questions.length;
-    console.log('questionsCount', questionsCount);
     if (currentPlayerAnswersCount === questionsCount) {
       return {
-        quizQuestionAnswerId: '',
+        quizQuestionAnswerId: null,
         statusCode: HttpStatus.FORBIDDEN,
       };
     }
     // Получаем текущий вопрос, в зависимости от количества ответов, т.е. если ответов 0,
     // то получаем вопрос под индексом 0
     const questionItem = questions[currentPlayerAnswersCount];
-    console.log('questionItem', questionItem);
     // Из текущего вопроса получаем ответы
     const correctAnswersModel = JSON.parse(questionItem.correctAnswers);
-    console.log('correctAnswersModel', correctAnswersModel);
     const correctAnswers = correctAnswersModel.answers;
-    console.log('correctAnswers', correctAnswers);
     // Получаем поля из DTO
     const { answer } = answerPairQuizGameDto;
-    console.log('answer', answer);
     // Производим сравнение ответа пользователя с вариантом ответов в вопросе
     const isCorrectAnswer = correctAnswers.includes(answer);
-    console.log('isCorrectAnswer', isCorrectAnswer);
     // Начисляем баллы за ответ
     const score = isCorrectAnswer ? 1 : 0;
-
-    console.log('score', score);
     // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
     // значит первый игрок закончил игру быстрее и ему начисляется бонусный бал
-    console.log(
+    /*console.log(
       'currentPlayerAnswersCount === questionsCount - 1',
       currentPlayerAnswersCount === questionsCount - 1,
     );
     console.log(
       'secondPlayerAnswersCount !== questionsCount',
       secondPlayerAnswersCount !== questionsCount,
-    );
+    );*/
     /*console.log(
       'currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)',
       currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT),
@@ -128,9 +117,9 @@ export class CreateQuizQuestionAnswerUseCase
         ? 1
         : 0;*/
     const bonus = 0;
-    console.log('bonus', bonus);
+    // console.log('bonus', bonus);
     const resultScore = score + bonus;
-    console.log('resultScore', resultScore);
+    // console.log('resultScore', resultScore);
     // Сохраняем ответ в таблице ответов и начисляем баллы за ответ
     const createdQuizQuestionAnswers =
       await this.quizQuestionAnswerRepository.createQuizQuestionAnswers({
@@ -144,9 +133,23 @@ export class CreateQuizQuestionAnswerUseCase
         score: resultScore,
       });
 
+    // Если количество ответов текущего игрока и количество ответов второго игрока равна количесмтву вопросов
+    // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
+    // Запканчиваем игру, записав дату окончания игры и статус Finished
+    console.log('currentPlayerAnswersCount', currentPlayerAnswersCount + 1);
+    console.log('secondPlayerAnswersCount', secondPlayerAnswersCount);
+    if (
+      currentPlayerAnswersCount + 1 === questionsCount &&
+      secondPlayerAnswersCount === questionsCount
+    ) {
+      await this.pairQuizGameRepository.finishedPairQuizGame(
+        foundActivePairQuizGame.id,
+      );
+    }
+
     return {
       quizQuestionAnswerId: createdQuizQuestionAnswers.id,
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
     };
   }
 }

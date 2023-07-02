@@ -36,9 +36,8 @@ export class PairQuizGameRepository {
       WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
       AND ("status" = '${GameStatuses.ACTIVE}' OR "status" = '${GameStatuses.PENDINGSECONDPLAYER}')
     `;
-    console.log('query', query);
     const foundPairQuizGame = await this.pairQuizGameRepository.query(query);
-    console.log('foundPairQuizGame', foundPairQuizGame);
+
     if (isEmpty(foundPairQuizGame)) {
       return null;
     }
@@ -155,7 +154,20 @@ export class PairQuizGameRepository {
         secondPlayerId: userId,
         questions: { quizQuestions: questions },
         status: GameStatuses.ACTIVE,
-        startGameDate: new Date().toISOString(),
+        startGameDate: new Date(),
+      })
+      .where('id = :pairQuizGameId', { pairQuizGameId })
+      .execute();
+
+    return true;
+  }
+  async finishedPairQuizGame(pairQuizGameId: string): Promise<boolean> {
+    await this.pairQuizGameRepository
+      .createQueryBuilder()
+      .update(PairQuizGame)
+      .set({
+        status: GameStatuses.FINISHED,
+        finishGameDate: new Date(),
       })
       .where('id = :pairQuizGameId', { pairQuizGameId })
       .execute();

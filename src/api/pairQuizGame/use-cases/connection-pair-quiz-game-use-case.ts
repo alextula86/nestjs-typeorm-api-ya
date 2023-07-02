@@ -40,7 +40,7 @@ export class ConnectionPairQuizGameUseCase
         await this.pairQuizGameRepository.createPairQuizGame(userId);
       return {
         pairQuizGameId: createdPairQuizGame.id,
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
       };
     }
     // Если пара в ожидании есть, находим рандомно до 5 вопросов для игровой пары,
@@ -56,7 +56,7 @@ export class ConnectionPairQuizGameUseCase
 
     return {
       pairQuizGameId: foundPendingPairQuizGame.id,
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
     };
   }
 }
