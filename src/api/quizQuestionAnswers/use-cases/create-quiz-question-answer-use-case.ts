@@ -117,11 +117,11 @@ export class CreateQuizQuestionAnswerUseCase
       'secondPlayerAnswersCount !== questionsCount',
       secondPlayerAnswersCount !== questionsCount,
     );
-    console.log(
+    /*console.log(
       'currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)',
       currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT),
     );
-    /*const bonus =
+    const bonus =
       currentPlayerAnswersCount === questionsCount - 1 &&
       secondPlayerAnswersCount !== questionsCount &&
       currentPlayerAnswers.find((i) => i.answerStatus === AnswerStatus.CORRECT)
