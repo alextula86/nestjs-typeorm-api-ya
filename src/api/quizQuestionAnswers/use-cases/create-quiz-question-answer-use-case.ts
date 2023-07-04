@@ -9,7 +9,6 @@ import { AnswerPairQuizGameDto } from '../../pairQuizGame/dto';
 import { PairQuizGameRepository } from '../../pairQuizGame/pairQuizGame.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
-import { getBonus } from '../utils';
 
 export class CreateQuizQuestionAnswerCommand {
   constructor(
@@ -63,13 +62,11 @@ export class CreateQuizQuestionAnswerUseCase
       foundActivePairQuizGame.firstPlayerId === userId
         ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
         : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
-    console.log('currentPlayerAnswers', currentPlayerAnswers);
     // Получаем ответы второго игрока
     const secondPlayerAnswers =
       foundActivePairQuizGame.firstPlayerId !== userId
         ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
         : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
-    console.log('secondPlayerAnswers', secondPlayerAnswers);
     // Если количество ответов текущего пользователя равно количеству вопросов
     // Значит на все вопросы были уже данны ответы, возвращаем ошибку 403
     const currentPlayerAnswersCount = !isEmpty(currentPlayerAnswers)
@@ -99,16 +96,12 @@ export class CreateQuizQuestionAnswerUseCase
     const score = isCorrectAnswer ? 1 : 0;
     // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
     // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-    const bonus = getBonus(
+    /*const bonus = getBonus(
       currentPlayerAnswersCount,
       secondPlayerAnswersCount,
       questionsCount,
       currentPlayerAnswers,
-    );
-
-    console.log('bonus', bonus);
-    const resultScore = score + bonus;
-    // console.log('resultScore', resultScore);
+    );*/
     // Сохраняем ответ в таблице ответов и начисляем баллы за ответ
     const createdQuizQuestionAnswers =
       await this.quizQuestionAnswerRepository.createQuizQuestionAnswers({
@@ -119,14 +112,12 @@ export class CreateQuizQuestionAnswerUseCase
         answerStatus: isCorrectAnswer
           ? AnswerStatus.CORRECT
           : AnswerStatus.INCORRECT,
-        score: resultScore,
+        score,
       });
 
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количесмтву вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
     // Запканчиваем игру, записав дату окончания игры и статус Finished
-    console.log('currentPlayerAnswersCount', currentPlayerAnswersCount + 1);
-    console.log('secondPlayerAnswersCount', secondPlayerAnswersCount);
     if (
       currentPlayerAnswersCount + 1 === questionsCount &&
       secondPlayerAnswersCount === questionsCount
