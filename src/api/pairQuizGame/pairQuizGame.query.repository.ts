@@ -20,6 +20,8 @@ export class PairQuizGameQueryRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
+        pqg."firstPlayerBonus",
+        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
@@ -82,6 +84,8 @@ export class PairQuizGameQueryRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
+        pqg."firstPlayerBonus",
+        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
@@ -151,7 +155,8 @@ export class PairQuizGameQueryRepository {
           login: pairQuizGame.firstPlayerLogin,
         },
         score: pairQuizGame.firstPlayerScore
-          ? Number(pairQuizGame.firstPlayerScore)
+          ? Number(pairQuizGame.firstPlayerScore) +
+            Number(pairQuizGame.firstPlayerBonus)
           : 0,
       },
       secondPlayerProgress: pairQuizGame.secondPlayerId
@@ -168,7 +173,8 @@ export class PairQuizGameQueryRepository {
               login: pairQuizGame.secondPlayerLogin,
             },
             score: pairQuizGame.secondPlayerScore
-              ? Number(pairQuizGame.secondPlayerScore)
+              ? Number(pairQuizGame.secondPlayerScore) +
+                Number(pairQuizGame.secondPlayerBonus)
               : 0,
           }
         : null,

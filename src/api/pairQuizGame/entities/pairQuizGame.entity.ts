@@ -58,4 +58,10 @@ export class PairQuizGame {
     },
   )
   quizQuestionAnswer: QuizQuestionAnswer;
+
+  @Column({ default: 0 })
+  firstPlayerBonus: number;
+
+  @Column({ default: 0 })
+  secondPlayerBonus: number;
 }

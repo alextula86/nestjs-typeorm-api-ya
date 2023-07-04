@@ -94,14 +94,6 @@ export class CreateQuizQuestionAnswerUseCase
     const isCorrectAnswer = correctAnswers.includes(answer);
     // Начисляем баллы за ответ
     const score = isCorrectAnswer ? 1 : 0;
-    // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
-    // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-    /*const bonus = getBonus(
-      currentPlayerAnswersCount,
-      secondPlayerAnswersCount,
-      questionsCount,
-      currentPlayerAnswers,
-    );*/
     // Сохраняем ответ в таблице ответов и начисляем баллы за ответ
     const createdQuizQuestionAnswers =
       await this.quizQuestionAnswerRepository.createQuizQuestionAnswers({
@@ -125,6 +117,37 @@ export class CreateQuizQuestionAnswerUseCase
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
       );
+
+      // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
+      // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
+      if (!isEmpty(currentPlayerAnswers)) {
+        const correctAnswer = currentPlayerAnswers.find(
+          (i: any) => i.answerStatus === AnswerStatus.CORRECT,
+        );
+
+        const currentPlayerBonusKey =
+          foundActivePairQuizGame.firstPlayerId === userId
+            ? 'firstPlayerBonus'
+            : 'secondPlayerBonus';
+
+        const secondPlayerBonusKey =
+          foundActivePairQuizGame.firstPlayerId !== userId
+            ? 'firstPlayerBonus'
+            : 'secondPlayerBonus';
+
+        if (
+          currentPlayerAnswersCount === questionsCount - 1 &&
+          secondPlayerAnswersCount !== questionsCount &&
+          !isEmpty(correctAnswer)
+        ) {
+          // Сохраняем бонус для текущего игрока
+          await this.pairQuizGameRepository.addPairQuizGameBonus({
+            pairQuizGameId: foundActivePairQuizGame.id,
+            [currentPlayerBonusKey]: 1,
+            [secondPlayerBonusKey]: 0,
+          });
+        }
+      }
     }
 
     return {
