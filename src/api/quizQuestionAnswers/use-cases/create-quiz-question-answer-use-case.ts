@@ -123,29 +123,28 @@ export class CreateQuizQuestionAnswerUseCase
         !!currentPlayerAnswers.find(
           (i: any) => i.answerStatus === AnswerStatus.CORRECT,
         );
-      console.log('isCorrectCurrentPlayerAnswer', isCorrectCurrentPlayerAnswer);
       // Определяем есть ли хоть один правильный ответ у второго игрока
       const isCorrectSecondPlayerAnswer =
         !isEmpty(secondPlayerAnswers) &&
         !!secondPlayerAnswers.find(
           (i: any) => i.answerStatus === AnswerStatus.CORRECT,
         );
-      console.log('isCorrectCurrentPlayerAnswer', isCorrectCurrentPlayerAnswer);
       // Определяем поле в БД для начисления бонуса текущему игроку
       const currentPlayerBonusKey =
         foundActivePairQuizGame.firstPlayerId === userId
           ? 'firstPlayerBonus'
           : 'secondPlayerBonus';
-      console.log('currentPlayerBonusKey', currentPlayerBonusKey);
       // Определяем поле в БД для начисления бонуса второму игроку
       const secondPlayerBonusKey =
         foundActivePairQuizGame.firstPlayerId !== userId
           ? 'firstPlayerBonus'
           : 'secondPlayerBonus';
-      console.log('secondPlayerBonusKey', secondPlayerBonusKey);
       // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
       // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-      let bonusResultData = {};
+      let bonusResultData = {
+        [currentPlayerBonusKey]: 0,
+        [secondPlayerBonusKey]: 0,
+      };
       // Если у текущего игрока есть хоть один правильный ответ
       // И второй игрок еще не ответил на все вопросы
       // Бонус начисляется текущему игроку
@@ -170,7 +169,6 @@ export class CreateQuizQuestionAnswerUseCase
           [secondPlayerBonusKey]: 1,
         };
       }
-      console.log('bonusResultData', bonusResultData);
       // Сохраняем бонус для текущего игрока
       await this.pairQuizGameRepository.addPairQuizGameBonus({
         pairQuizGameId: foundActivePairQuizGame.id,
