@@ -79,6 +79,8 @@ export class PairQuizGameRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
+        pqg."firstPlayerBonus",
+        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
@@ -180,6 +182,10 @@ export class PairQuizGameRepository {
     firstPlayerBonus,
     secondPlayerBonus,
   }: any): Promise<boolean> {
+    console.log('------------------------------');
+    console.log('pairQuizGameId', pairQuizGameId);
+    console.log('firstPlayerBonus', firstPlayerBonus);
+    console.log('secondPlayerBonus', secondPlayerBonus);
     await this.pairQuizGameRepository
       .createQueryBuilder()
       .update(PairQuizGame)

@@ -117,37 +117,65 @@ export class CreateQuizQuestionAnswerUseCase
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
       );
-
-      // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
-      // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-      if (!isEmpty(currentPlayerAnswers)) {
-        const correctAnswer = currentPlayerAnswers.find(
+      // Определяем есть ли хоть один правильный ответ у текущего игрока
+      const isCorrectCurrentPlayerAnswer =
+        !isEmpty(currentPlayerAnswers) &&
+        !!currentPlayerAnswers.find(
           (i: any) => i.answerStatus === AnswerStatus.CORRECT,
         );
-
-        const currentPlayerBonusKey =
-          foundActivePairQuizGame.firstPlayerId === userId
-            ? 'firstPlayerBonus'
-            : 'secondPlayerBonus';
-
-        const secondPlayerBonusKey =
-          foundActivePairQuizGame.firstPlayerId !== userId
-            ? 'firstPlayerBonus'
-            : 'secondPlayerBonus';
-
-        if (
-          currentPlayerAnswersCount === questionsCount - 1 &&
-          secondPlayerAnswersCount !== questionsCount &&
-          !isEmpty(correctAnswer)
-        ) {
-          // Сохраняем бонус для текущего игрока
-          await this.pairQuizGameRepository.addPairQuizGameBonus({
-            pairQuizGameId: foundActivePairQuizGame.id,
-            [currentPlayerBonusKey]: 1,
-            [secondPlayerBonusKey]: 0,
-          });
-        }
+      console.log('isCorrectCurrentPlayerAnswer', isCorrectCurrentPlayerAnswer);
+      // Определяем есть ли хоть один правильный ответ у второго игрока
+      const isCorrectSecondPlayerAnswer =
+        !isEmpty(secondPlayerAnswers) &&
+        !!secondPlayerAnswers.find(
+          (i: any) => i.answerStatus === AnswerStatus.CORRECT,
+        );
+      console.log('isCorrectCurrentPlayerAnswer', isCorrectCurrentPlayerAnswer);
+      // Определяем поле в БД для начисления бонуса текущему игроку
+      const currentPlayerBonusKey =
+        foundActivePairQuizGame.firstPlayerId === userId
+          ? 'firstPlayerBonus'
+          : 'secondPlayerBonus';
+      console.log('currentPlayerBonusKey', currentPlayerBonusKey);
+      // Определяем поле в БД для начисления бонуса второму игроку
+      const secondPlayerBonusKey =
+        foundActivePairQuizGame.firstPlayerId !== userId
+          ? 'firstPlayerBonus'
+          : 'secondPlayerBonus';
+      console.log('secondPlayerBonusKey', secondPlayerBonusKey);
+      // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
+      // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
+      let bonusResultData = {};
+      // Если у текущего игрока есть хоть один правильный ответ
+      // И второй игрок еще не ответил на все вопросы
+      // Бонус начисляется текущему игроку
+      if (
+        isCorrectCurrentPlayerAnswer &&
+        secondPlayerAnswersCount !== questionsCount
+      ) {
+        bonusResultData = {
+          [currentPlayerBonusKey]: 1,
+          [secondPlayerBonusKey]: 0,
+        };
       }
+      // Если у второго игрока есть хоть один правильный ответ
+      // И второй игрок уже ответил на все вопросы
+      // Бонус начисляется второму игроку
+      if (
+        isCorrectSecondPlayerAnswer &&
+        secondPlayerAnswersCount === questionsCount
+      ) {
+        bonusResultData = {
+          [currentPlayerBonusKey]: 0,
+          [secondPlayerBonusKey]: 1,
+        };
+      }
+      console.log('bonusResultData', bonusResultData);
+      // Сохраняем бонус для текущего игрока
+      await this.pairQuizGameRepository.addPairQuizGameBonus({
+        pairQuizGameId: foundActivePairQuizGame.id,
+        ...bonusResultData,
+      });
     }
 
     return {
