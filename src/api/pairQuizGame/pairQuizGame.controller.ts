@@ -3,8 +3,9 @@ import {
   Get,
   Post,
   Req,
-  Body,
+  Query,
   Param,
+  Body,
   BadRequestException,
   ForbiddenException,
   NotFoundException,
@@ -15,13 +16,14 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 
 import { AuthBearerGuard } from '../../guards';
+import { ResponseViewModelDetail } from '../../types';
 import { validateUUID } from '../../utils';
 
 import { ConnectionPairQuizGameCommand } from './use-cases';
 import { CreateQuizQuestionAnswerCommand } from '../quizQuestionAnswers/use-cases';
 import { QuizQuestionAnswerQueryRepository } from '../quizQuestionAnswers/quizQuestionAnswer.query.repository';
 import { PairQuizGameQueryRepository } from './pairQuizGame.query.repository';
-import { PairQuizGameViewModel } from './types';
+import { QueryPairQuizGameModel, PairQuizGameViewModel } from './types';
 import { AnswerPairQuizGameDto } from './dto';
 
 @UseGuards(AuthBearerGuard)
@@ -32,6 +34,26 @@ export class PairQuizGameController {
     private readonly pairQuizGameQueryRepository: PairQuizGameQueryRepository,
     private readonly quizQuestionAnswerQueryRepository: QuizQuestionAnswerQueryRepository,
   ) {}
+  @Get('my')
+  @HttpCode(HttpStatus.OK)
+  async findMyPairQuizGames(
+    @Req() request: Request & { userId: string },
+    @Query()
+    { pageNumber, pageSize, sortBy, sortDirection }: QueryPairQuizGameModel,
+  ): Promise<ResponseViewModelDetail<PairQuizGameViewModel>> {
+    const allMyPairQuizGames =
+      await this.pairQuizGameQueryRepository.findMyPairQuizGames(
+        request.userId,
+        {
+          pageNumber,
+          pageSize,
+          sortBy,
+          sortDirection,
+        },
+      );
+
+    return allMyPairQuizGames;
+  }
   // Получание активной или ожидающей игровой пары пользователя
   @Get('my-current')
   @HttpCode(HttpStatus.OK)

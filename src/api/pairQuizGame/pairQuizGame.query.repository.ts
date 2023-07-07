@@ -3,12 +3,115 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
 
-import { GameStatuses } from '../../types';
-import { PairQuizGameQuestionType, PairQuizGameViewModel } from './types';
+import {
+  GameStatuses,
+  ResponseViewModelDetail,
+  SortDirection,
+} from '../../types';
+import {
+  QueryPairQuizGameModel,
+  PairQuizGameQuestionType,
+  PairQuizGameViewModel,
+} from './types';
 
 @Injectable()
 export class PairQuizGameQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
+  async findMyPairQuizGames(
+    userId: string,
+    {
+      pageNumber,
+      pageSize,
+      sortBy = 'pairCreatedDate',
+      sortDirection = SortDirection.DESC,
+    }: QueryPairQuizGameModel,
+  ): Promise<ResponseViewModelDetail<PairQuizGameViewModel>> {
+    const number = pageNumber ? Number(pageNumber) : 1;
+    const size = pageSize ? Number(pageSize) : 10;
+
+    const where = `     
+      WHERE (pqg."firstPlayerId" = '${userId}' OR pqg."secondPlayerId" = '${userId}')
+      AND (pqg."status" = '${GameStatuses.ACTIVE}' OR pqg."status" = '${GameStatuses.FINISHED}')
+    `;
+
+    const totalCountResponse = await this.dataSource.query(`
+      SELECT COUNT(*) FROM pair_quiz_game AS pqg ${where};
+    `);
+
+    const totalCount = +totalCountResponse[0].count;
+
+    const pagesCount = Math.ceil(totalCount / size);
+    const skip = (number - 1) * size;
+
+    const offset = `OFFSET ${skip}`;
+    const limit = `LIMIT ${size}`;
+
+    const query = `
+      SELECT 
+        pqg."id", 
+        pqg."pairCreatedDate", 
+        pqg."startGameDate",
+        pqg."finishGameDate",
+        pqg."status",
+        pqg."questions",
+        pqg."firstPlayerBonus",
+        pqg."secondPlayerBonus",
+        fp."id" as "firstPlayerId",
+        fp."login" as "firstPlayerLogin",
+        sp."id" as "secondPlayerId",
+        sp."login" as "secondPlayerLogin",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+          ) e
+        ) as "firstPlayerQuizQuestionAnswer",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              qqa."quizQuestionId",
+              qqa."answerStatus",
+              qqa."addedAt"
+            FROM quiz_question_answer AS qqa
+            WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+          ) e
+        ) as "secondPlayerQuizQuestionAnswer",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND fp."id" = qqa."userId"
+        ) as "firstPlayerScore",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE pqg."id" = qqa."pairQuizGameId" AND sp."id" = qqa."userId"
+        ) as "secondPlayerScore"
+      FROM pair_quiz_game AS pqg
+      LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
+      LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      ${where}
+      ORDER BY "${sortBy}" ${sortDirection}
+      ${offset}
+      ${limit};
+    `;
+
+    const pairQuizGame = await this.dataSource.query(query);
+
+    return this._getMyPairQuizGamesViewModelDetail({
+      items: pairQuizGame,
+      totalCount,
+      pagesCount,
+      page: number,
+      pageSize: size,
+    });
+  }
+
   async findMyCurrentPairQuizGame(
     userId: string,
   ): Promise<PairQuizGameViewModel> {
@@ -135,6 +238,75 @@ export class PairQuizGameQueryRepository {
     }
 
     return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
+  }
+  _getMyPairQuizGamesViewModelDetail({
+    items,
+    totalCount,
+    pagesCount,
+    page,
+    pageSize,
+  }: ResponseViewModelDetail<any>): ResponseViewModelDetail<PairQuizGameViewModel> {
+    return {
+      pagesCount,
+      page,
+      pageSize,
+      totalCount,
+      items: items.map((item) => {
+        const questions = !isEmpty(item.questions)
+          ? JSON.parse(item.questions)
+          : null;
+
+        return {
+          id: item.id,
+          firstPlayerProgress: {
+            answers: !isEmpty(item.firstPlayerQuizQuestionAnswer)
+              ? item.firstPlayerQuizQuestionAnswer.map((i) => ({
+                  questionId: i.quizQuestionId,
+                  answerStatus: i.answerStatus,
+                  addedAt: i.addedAt,
+                }))
+              : [],
+            player: {
+              id: item.firstPlayerId,
+              login: item.firstPlayerLogin,
+            },
+            score: item.firstPlayerScore
+              ? Number(item.firstPlayerScore) + Number(item.firstPlayerBonus)
+              : 0,
+          },
+          secondPlayerProgress: item.secondPlayerId
+            ? {
+                answers: !isEmpty(item.secondPlayerQuizQuestionAnswer)
+                  ? item.secondPlayerQuizQuestionAnswer.map((i) => ({
+                      questionId: i.quizQuestionId,
+                      answerStatus: i.answerStatus,
+                      addedAt: i.addedAt,
+                    }))
+                  : [],
+                player: {
+                  id: item.secondPlayerId,
+                  login: item.secondPlayerLogin,
+                },
+                score: item.secondPlayerScore
+                  ? Number(item.secondPlayerScore) +
+                    Number(item.secondPlayerBonus)
+                  : 0,
+              }
+            : null,
+          questions:
+            !isEmpty(questions) && !isEmpty(questions.quizQuestions)
+              ? questions.quizQuestions.map((i: PairQuizGameQuestionType) => ({
+                  id: i.id,
+                  body: i.body,
+                }))
+              : null,
+          status: item.status,
+          pairCreatedDate: item.pairCreatedDate,
+          startGameDate: item.startGameDate,
+          finishGameDate: item.finishGameDate,
+        };
+      }),
+    };
   }
   _getPairQuizGameViewModel(pairQuizGame: any): PairQuizGameViewModel {
     const questions = !isEmpty(pairQuizGame.questions)
