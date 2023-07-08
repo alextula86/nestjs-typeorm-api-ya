@@ -8,6 +8,7 @@ import {
   ResponseViewModelDetail,
   SortDirection,
 } from '../../types';
+
 import {
   QueryPairQuizGameModel,
   PairQuizGameQuestionType,
@@ -45,6 +46,10 @@ export class PairQuizGameQueryRepository {
 
     const offset = `OFFSET ${skip}`;
     const limit = `LIMIT ${size}`;
+    const orderBy =
+      sortBy === 'status'
+        ? `ORDER BY "${sortBy}" ${sortDirection}, "pairCreatedDate" desc`
+        : `ORDER BY "${sortBy}" ${sortDirection}`;
 
     const query = `
       SELECT 
@@ -96,7 +101,7 @@ export class PairQuizGameQueryRepository {
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
       ${where}
-      ORDER BY "${sortBy}" ${sortDirection}
+      ${orderBy}
       ${offset}
       ${limit};
     `;
@@ -111,7 +116,6 @@ export class PairQuizGameQueryRepository {
       pageSize: size,
     });
   }
-
   async findMyCurrentPairQuizGame(
     userId: string,
   ): Promise<PairQuizGameViewModel> {
