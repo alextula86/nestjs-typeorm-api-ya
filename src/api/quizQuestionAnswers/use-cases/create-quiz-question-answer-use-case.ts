@@ -168,12 +168,6 @@ export class CreateQuizQuestionAnswerUseCase
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
         });
-
-        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
-          userId: secondPlayerId,
-          pairQuizGameId: foundActivePairQuizGame.id,
-          bonus: 0,
-        });
       }
       // Если у второго игрока есть хоть один правильный ответ
       // И второй игрок уже ответил на все вопросы
@@ -182,12 +176,6 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectSecondPlayerAnswer &&
         secondPlayerAnswersCount === questionsCount
       ) {
-        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
-          userId: currentPlayerId,
-          pairQuizGameId: foundActivePairQuizGame.id,
-          bonus: 0,
-        });
-
         await this.pairQuizGameBonusRepository.createResultPairQuizGame({
           userId: secondPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
