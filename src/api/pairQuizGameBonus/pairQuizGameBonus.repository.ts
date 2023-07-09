@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePairQuizGameBonus } from './types';
+import { CreatePairQuizGameBonus, UpdatePairQuizGameBonus } from './types';
 import { PairQuizGameBonus } from './entities';
 
 @Injectable()
@@ -28,5 +28,20 @@ export class PairQuizGameBonusRepository {
       .execute();
 
     return madePairQuizGameBonus.raw[0];
+  }
+  async updateResultPairQuizGame({
+    userId,
+    pairQuizGameId,
+    bonus,
+  }: UpdatePairQuizGameBonus): Promise<boolean> {
+    await this.pairQuizGameBonusRepository
+      .createQueryBuilder()
+      .update()
+      .set({ bonus })
+      .where('userId = :userId', { userId })
+      .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
+      .execute();
+
+    return true;
   }
 }
