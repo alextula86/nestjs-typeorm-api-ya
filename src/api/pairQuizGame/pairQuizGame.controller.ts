@@ -73,7 +73,7 @@ export class PairQuizGameController {
     return myCurrentPairQuizGame;
   }
   // Получание статистики игр текущего пользователя
-  @Get('my-statistic')
+  @Get('users/my-statistic')
   @HttpCode(HttpStatus.OK)
   async findMyStatisticPairQuizGame(
     @Req() request: Request & { userId: string },
