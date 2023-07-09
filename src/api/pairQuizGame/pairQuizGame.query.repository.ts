@@ -269,33 +269,32 @@ export class PairQuizGameQueryRepository {
   }
   async findMyStatisticPairQuizGame(userId: string): Promise<any> {
     const query = `
-      SELECT 
-        pqg."id", 
-        pqg."pairCreatedDate", 
-        pqg."startGameDate",
-        pqg."finishGameDate",
-        pqg."status",
-        pqg."questions",
-        pqg."firstPlayerBonus",
-        pqg."secondPlayerBonus",
-        fp."id" as "firstPlayerId",
-        fp."login" as "firstPlayerLogin",
-        sp."id" as "secondPlayerId",
-        sp."login" as "secondPlayerLogin"
-      FROM pair_quiz_game AS pqg
-      LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
-      LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
-      WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
-      AND ("status" = '${GameStatuses.FINISHED}')
+      SELECT	  
+        COUNT(pqg."id") AS "gamesCount",
+        (
+          SELECT SUM(qqa."score")
+          FROM quiz_question_answer AS qqa
+          WHERE qqa."userId" = '${userId}'
+        ) AS "sumScore",
+        (		
+          SELECT AVG("sumScore")
+          FROM (
+            SELECT qqa."pairQuizGameId", SUM(qqa."score") AS "sumScore"
+            FROM quiz_question_answer AS qqa
+            WHERE qqa."userId" = '${userId}'
+            GROUP BY qqa."pairQuizGameId"
+          ) as "avgScore"			
+        )
+        FROM pair_quiz_game AS pqg
+        WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
+        AND ("status" = '${GameStatuses.FINISHED}')
     `;
+
+    console.log('query', query);
 
     const myCurrentPairQuizGame = await this.dataSource.query(query);
 
-    if (isEmpty(myCurrentPairQuizGame)) {
-      return null;
-    }
-
-    return myCurrentPairQuizGame[0];
+    return this._getPairQuizGameStaticViewModel(myCurrentPairQuizGame[0]);
   }
   _getMyPairQuizGamesViewModelDetail({
     items,
@@ -422,6 +421,22 @@ export class PairQuizGameQueryRepository {
       pairCreatedDate: pairQuizGame.pairCreatedDate,
       startGameDate: pairQuizGame.startGameDate,
       finishGameDate: pairQuizGame.finishGameDate,
+    };
+  }
+  _getPairQuizGameStaticViewModel(pairQuizGameStatic: any): any {
+    return {
+      gamesCount: pairQuizGameStatic.gamesCount
+        ? Number(pairQuizGameStatic.gamesCount)
+        : 0,
+      sumScore: pairQuizGameStatic.sumScore
+        ? Number(pairQuizGameStatic.sumScore)
+        : 0,
+      avgScore: pairQuizGameStatic.avgScore
+        ? Number(pairQuizGameStatic.avgScore)
+        : 0,
+      winsCount: 1,
+      lossesCount: 2,
+      drawsCount: 3,
     };
   }
 }
