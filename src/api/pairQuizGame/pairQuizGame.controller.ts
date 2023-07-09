@@ -27,14 +27,14 @@ import { QueryPairQuizGameModel, PairQuizGameViewModel } from './types';
 import { AnswerPairQuizGameDto } from './dto';
 
 @UseGuards(AuthBearerGuard)
-@Controller('api/pair-game-quiz/pairs')
+@Controller('api/pair-game-quiz')
 export class PairQuizGameController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly pairQuizGameQueryRepository: PairQuizGameQueryRepository,
     private readonly quizQuestionAnswerQueryRepository: QuizQuestionAnswerQueryRepository,
   ) {}
-  @Get('my')
+  @Get('pairs/my')
   @HttpCode(HttpStatus.OK)
   // Получание всех активных и завершенных игр текущего пользователя
   async findMyPairQuizGames(
@@ -56,7 +56,7 @@ export class PairQuizGameController {
     return allMyPairQuizGames;
   }
   // Получание активной или ожидающей игровой пары пользователя
-  @Get('my-current')
+  @Get('pairs/my-current')
   @HttpCode(HttpStatus.OK)
   async findMyCurrentPairQuizGame(
     @Req() request: Request & { userId: string },
@@ -86,7 +86,7 @@ export class PairQuizGameController {
     return myStatisticPairQuizGame;
   }
   // Получание игровой пары по идентификатору
-  @Get(':pairQuizGameId')
+  @Get('pairs/:pairQuizGameId')
   @HttpCode(HttpStatus.OK)
   async findPairQuizGameById(
     @Req() request: Request & { userId: string },
@@ -125,7 +125,7 @@ export class PairQuizGameController {
   }
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока
-  @Post('connection')
+  @Post('pairs/connection')
   @HttpCode(HttpStatus.OK)
   async connectionPairQuizGame(
     @Req() request: Request & { userId: string },
@@ -146,7 +146,7 @@ export class PairQuizGameController {
     // Возвращаем подключенную игровую пару
     return foundPairQuizGameById;
   }
-  @Post('my-current/answers')
+  @Post('pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
   async answerPairQuizGame(
     @Req() request: Request & { userId: string },
