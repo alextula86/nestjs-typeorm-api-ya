@@ -119,6 +119,19 @@ export class CreateQuizQuestionAnswerUseCase
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
       );
+
+      await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+        userId: foundActivePairQuizGame.firstPlayerId,
+        pairQuizGameId: foundActivePairQuizGame.id,
+        bonus: 0,
+      });
+
+      await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+        userId: foundActivePairQuizGame.secondPlayerId,
+        pairQuizGameId: foundActivePairQuizGame.id,
+        bonus: 0,
+      });
+
       // Определяем есть ли хоть один правильный ответ у текущего игрока
       const isCorrectCurrentPlayerAnswer =
         !isEmpty(currentPlayerAnswers) &&
