@@ -63,8 +63,16 @@ export class PairQuizGameQueryRepository {
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
-        fpb."bonus" as "firstPlayerBonus",
-        spb."bonus" as "secondPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS fpb
+          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
+        ) as "firstPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS spb
+          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
+        ) as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -100,8 +108,6 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       ${where}
       ${orderBy}
       ${offset}
@@ -133,8 +139,16 @@ export class PairQuizGameQueryRepository {
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
-        fpb."bonus" as "firstPlayerBonus",
-        spb."bonus" as "secondPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS fpb
+          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
+        ) as "firstPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS spb
+          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
+        ) as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -170,8 +184,6 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
       AND ("status" = '${GameStatuses.ACTIVE}' OR "status" = '${GameStatuses.PENDINGSECONDPLAYER}')
     `;
@@ -199,8 +211,16 @@ export class PairQuizGameQueryRepository {
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
-        fpb."bonus" as "firstPlayerBonus",
-        spb."bonus" as "secondPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS fpb
+          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
+        ) as "firstPlayerBonus",
+        (
+          SELECT bonus
+          FROM pair_quiz_game_bonus AS spb
+          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
+        ) as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -236,8 +256,6 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
-      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       WHERE pqg."id" = '${pairQuizGameId}'
     `;
 
@@ -371,7 +389,7 @@ export class PairQuizGameQueryRepository {
           login: pairQuizGame.firstPlayerLogin,
         },
         score: pairQuizGame.firstPlayerScore
-          ? Number(pairQuizGame.firstPlayerScore) + firstPlayerBonus
+          ? Number(pairQuizGame.firstPlayerScore) + Number(firstPlayerBonus)
           : 0,
       },
       secondPlayerProgress: pairQuizGame.secondPlayerId
@@ -388,7 +406,8 @@ export class PairQuizGameQueryRepository {
               login: pairQuizGame.secondPlayerLogin,
             },
             score: pairQuizGame.secondPlayerScore
-              ? Number(pairQuizGame.secondPlayerScore) + secondPlayerBonus
+              ? Number(pairQuizGame.secondPlayerScore) +
+                Number(secondPlayerBonus)
               : 0,
           }
         : null,
