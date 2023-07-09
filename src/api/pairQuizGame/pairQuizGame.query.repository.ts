@@ -59,12 +59,12 @@ export class PairQuizGameQueryRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
-        pqg."firstPlayerBonus",
-        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
+        fpb."bonus" as "firstPlayerBonus",
+        spb."bonus" as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -100,6 +100,8 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       ${where}
       ${orderBy}
       ${offset}
@@ -127,12 +129,12 @@ export class PairQuizGameQueryRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
-        pqg."firstPlayerBonus",
-        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
+        fpb."bonus" as "firstPlayerBonus",
+        spb."bonus" as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -168,6 +170,8 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
       AND ("status" = '${GameStatuses.ACTIVE}' OR "status" = '${GameStatuses.PENDINGSECONDPLAYER}')
     `;
@@ -191,12 +195,12 @@ export class PairQuizGameQueryRepository {
         pqg."finishGameDate",
         pqg."status",
         pqg."questions",
-        pqg."firstPlayerBonus",
-        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
+        fpb."bonus" as "firstPlayerBonus",
+        spb."bonus" as "secondPlayerBonus",
         (
           SELECT json_agg(e)
           FROM (
@@ -232,6 +236,8 @@ export class PairQuizGameQueryRepository {
       FROM pair_quiz_game AS pqg
       LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
       LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS fpb ON fpb."userId" = pqg."firstPlayerId"
+      LEFT JOIN pair_quiz_game_bonus AS spb ON spb."userId" = pqg."secondPlayerId"
       WHERE pqg."id" = '${pairQuizGameId}'
     `;
 
@@ -242,6 +248,36 @@ export class PairQuizGameQueryRepository {
     }
 
     return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
+  }
+  async findMyStatisticPairQuizGame(userId: string): Promise<any> {
+    const query = `
+      SELECT 
+        pqg."id", 
+        pqg."pairCreatedDate", 
+        pqg."startGameDate",
+        pqg."finishGameDate",
+        pqg."status",
+        pqg."questions",
+        pqg."firstPlayerBonus",
+        pqg."secondPlayerBonus",
+        fp."id" as "firstPlayerId",
+        fp."login" as "firstPlayerLogin",
+        sp."id" as "secondPlayerId",
+        sp."login" as "secondPlayerLogin"
+      FROM pair_quiz_game AS pqg
+      LEFT JOIN users AS fp ON fp."id" = pqg."firstPlayerId"
+      LEFT JOIN users AS sp ON sp."id" = pqg."secondPlayerId"
+      WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
+      AND ("status" = '${GameStatuses.FINISHED}')
+    `;
+
+    const myCurrentPairQuizGame = await this.dataSource.query(query);
+
+    if (isEmpty(myCurrentPairQuizGame)) {
+      return null;
+    }
+
+    return myCurrentPairQuizGame[0];
   }
   _getMyPairQuizGamesViewModelDetail({
     items,

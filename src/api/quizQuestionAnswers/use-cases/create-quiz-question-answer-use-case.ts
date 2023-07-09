@@ -7,6 +7,7 @@ import { AnswerStatus } from '../../../types';
 
 import { AnswerPairQuizGameDto } from '../../pairQuizGame/dto';
 import { PairQuizGameRepository } from '../../pairQuizGame/pairQuizGame.repository';
+import { PairQuizGameBonusRepository } from '../../pairQuizGameBonus/pairQuizGameBonus.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
 
@@ -24,6 +25,7 @@ export class CreateQuizQuestionAnswerUseCase
   constructor(
     private readonly quizQuestionAnswerRepository: QuizQuestionAnswerRepository,
     private readonly pairQuizGameRepository: PairQuizGameRepository,
+    private readonly pairQuizGameBonusRepository: PairQuizGameBonusRepository,
   ) {}
 
   async execute(command: CreateQuizQuestionAnswerCommand): Promise<{
@@ -130,7 +132,7 @@ export class CreateQuizQuestionAnswerUseCase
           (i: any) => i.answerStatus === AnswerStatus.CORRECT,
         );
       // Определяем поле в БД для начисления бонуса текущему игроку
-      const currentPlayerBonusKey =
+      /*const currentPlayerBonusKey =
         foundActivePairQuizGame.firstPlayerId === userId
           ? 'firstPlayerBonus'
           : 'secondPlayerBonus';
@@ -138,13 +140,24 @@ export class CreateQuizQuestionAnswerUseCase
       const secondPlayerBonusKey =
         foundActivePairQuizGame.firstPlayerId !== userId
           ? 'firstPlayerBonus'
-          : 'secondPlayerBonus';
+          : 'secondPlayerBonus';*/
+
+      const currentPlayerId =
+        foundActivePairQuizGame.firstPlayerId === userId
+          ? foundActivePairQuizGame.firstPlayerId
+          : foundActivePairQuizGame.secondPlayerId;
+      // Определяем поле в БД для начисления бонуса второму игроку
+      const secondPlayerId =
+        foundActivePairQuizGame.firstPlayerId !== userId
+          ? foundActivePairQuizGame.firstPlayerId
+          : foundActivePairQuizGame.secondPlayerId;
+
       // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
       // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-      let bonusResultData = {
+      /*let bonusResultData = {
         [currentPlayerBonusKey]: 0,
         [secondPlayerBonusKey]: 0,
-      };
+      };*/
       // Если у текущего игрока есть хоть один правильный ответ
       // И второй игрок еще не ответил на все вопросы
       // Бонус начисляется текущему игроку
@@ -152,10 +165,22 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectCurrentPlayerAnswer &&
         secondPlayerAnswersCount !== questionsCount
       ) {
-        bonusResultData = {
+        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+          userId: currentPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          bonus: 1,
+        });
+
+        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+          userId: secondPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          bonus: 0,
+        });
+
+        /*bonusResultData = {
           [currentPlayerBonusKey]: 1,
           [secondPlayerBonusKey]: 0,
-        };
+        };*/
       }
       // Если у второго игрока есть хоть один правильный ответ
       // И второй игрок уже ответил на все вопросы
@@ -164,16 +189,28 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectSecondPlayerAnswer &&
         secondPlayerAnswersCount === questionsCount
       ) {
-        bonusResultData = {
+        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+          userId: currentPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          bonus: 0,
+        });
+
+        await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+          userId: secondPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          bonus: 1,
+        });
+
+        /*bonusResultData = {
           [currentPlayerBonusKey]: 0,
           [secondPlayerBonusKey]: 1,
-        };
+        };*/
       }
       // Сохраняем бонус для текущего игрока
-      await this.pairQuizGameRepository.addPairQuizGameBonus({
+      /*await this.pairQuizGameRepository.addPairQuizGameBonus({
         pairQuizGameId: foundActivePairQuizGame.id,
         ...bonusResultData,
-      });
+      });*/
     }
 
     return {

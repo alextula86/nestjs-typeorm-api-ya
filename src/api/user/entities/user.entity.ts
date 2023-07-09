@@ -13,6 +13,8 @@ import { Devices } from '../../device/entities';
 import { Blogs } from '../../blog/entities';
 import { PairQuizGame } from '../../pairQuizGame/entities';
 import { QuizQuestionAnswer } from '../../quizQuestionAnswers/entities';
+import { PairQuizGameResult } from '../../pairQuizGameResult/entities';
+import { PairQuizGameBonus } from '../../pairQuizGameBonus/entities';
 
 @Entity()
 export class Users {
@@ -81,4 +83,22 @@ export class Users {
     },
   )
   quizQuestionAnswer: QuizQuestionAnswer;
+
+  @OneToMany(
+    () => PairQuizGameResult,
+    (pairQuizGameResult) => pairQuizGameResult.user,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  pairQuizGameResult: PairQuizGameResult;
+
+  @OneToMany(
+    () => PairQuizGameBonus,
+    (pairQuizGameBonus) => pairQuizGameBonus.user,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  pairQuizGameBonus: PairQuizGameBonus;
 }

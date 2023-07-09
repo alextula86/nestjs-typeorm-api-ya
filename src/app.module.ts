@@ -24,6 +24,8 @@ import { BanUserForBlog } from './api/ban/entities';
 import { QuizQuestions } from './api/quizQuestion/entities';
 import { QuizQuestionAnswer } from './api/quizQuestionAnswers/entities';
 import { PairQuizGame } from './api/pairQuizGame/entities';
+import { PairQuizGameResult } from './api/pairQuizGameResult/entities';
+import { PairQuizGameBonus } from './api/pairQuizGameBonus/entities';
 
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
@@ -112,6 +114,8 @@ import { BanRepository } from './api/ban/ban.repository';
 import { QuizQuestionRepository } from './api/quizQuestion/quizQuestion.repository';
 import { QuizQuestionAnswerRepository } from './api/quizQuestionAnswers/quizQuestionAnswer.repository';
 import { PairQuizGameRepository } from './api/pairQuizGame/pairQuizGame.repository';
+import { PairQuizGameResultRepository } from './api/pairQuizGameResult/pairQuizGameResult.repository';
+import { PairQuizGameBonusRepository } from './api/pairQuizGameBonus/pairQuizGameBonus.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -220,6 +224,11 @@ const pairQuizGameProviders = [
   PairQuizGameQueryRepository,
   ConnectionPairQuizGameUseCase,
 ];
+
+const pairQuizGameResultProviders = [PairQuizGameResultRepository];
+
+const pairQuizGameBonusProviders = [PairQuizGameBonusRepository];
+
 const adapters = [EmailManager, EmailAdapter];
 
 @Module({
@@ -251,6 +260,8 @@ const adapters = [EmailManager, EmailAdapter];
       QuizQuestions,
       QuizQuestionAnswer,
       PairQuizGame,
+      PairQuizGameResult,
+      PairQuizGameBonus,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -295,6 +306,8 @@ const adapters = [EmailManager, EmailAdapter];
     ...quizQuestionProviders,
     ...quizQuestionAnswerProviders,
     ...pairQuizGameProviders,
+    ...pairQuizGameResultProviders,
+    ...pairQuizGameBonusProviders,
     ...adapters,
   ],
 })

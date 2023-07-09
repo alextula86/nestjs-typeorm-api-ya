@@ -74,13 +74,7 @@ export class PairQuizGameRepository {
     const query = `
       SELECT 
         pqg."id", 
-        pqg."pairCreatedDate", 
-        pqg."startGameDate",
-        pqg."finishGameDate",
-        pqg."status",
         pqg."questions",
-        pqg."firstPlayerBonus",
-        pqg."secondPlayerBonus",
         fp."id" as "firstPlayerId",
         fp."login" as "firstPlayerLogin",
         sp."id" as "secondPlayerId",
@@ -177,7 +171,7 @@ export class PairQuizGameRepository {
 
     return true;
   }
-  async addPairQuizGameBonus({
+  /*async addPairQuizGameBonus({
     pairQuizGameId,
     firstPlayerBonus,
     secondPlayerBonus,
@@ -193,5 +187,5 @@ export class PairQuizGameRepository {
       .execute();
 
     return true;
-  }
+  }*/
 }

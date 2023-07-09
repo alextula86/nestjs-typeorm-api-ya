@@ -36,6 +36,7 @@ export class PairQuizGameController {
   ) {}
   @Get('my')
   @HttpCode(HttpStatus.OK)
+  // Получание всех активных и завершенных игр текущего пользователя
   async findMyPairQuizGames(
     @Req() request: Request & { userId: string },
     @Query()
@@ -70,6 +71,19 @@ export class PairQuizGameController {
     }
 
     return myCurrentPairQuizGame;
+  }
+  // Получание статистики игр текущего пользователя
+  @Get('my-statistic')
+  @HttpCode(HttpStatus.OK)
+  async findMyStatisticPairQuizGame(
+    @Req() request: Request & { userId: string },
+  ): Promise<PairQuizGameViewModel> {
+    const myStatisticPairQuizGame =
+      await this.pairQuizGameQueryRepository.findMyStatisticPairQuizGame(
+        request.userId,
+      );
+
+    return myStatisticPairQuizGame;
   }
   // Получание игровой пары по идентификатору
   @Get(':pairQuizGameId')

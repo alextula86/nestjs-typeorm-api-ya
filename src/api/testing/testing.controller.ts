@@ -24,6 +24,8 @@ export class TestingController {
         quiz_questions,
         quiz_question_answer,
         pair_quiz_game,
+        pair_quiz_game_result,
+        pair_quiz_game_bonus,
         users;
     `);
   }

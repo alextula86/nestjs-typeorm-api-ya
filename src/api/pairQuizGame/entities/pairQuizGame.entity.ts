@@ -11,6 +11,8 @@ import { GameStatuses } from '../../../types';
 import { Users } from '../../user/entities';
 import { QuizQuestions } from '../../quizQuestion/entities';
 import { QuizQuestionAnswer } from '../../quizQuestionAnswers/entities';
+import { PairQuizGameResult } from '../../pairQuizGameResult/entities';
+import { PairQuizGameBonus } from '../../pairQuizGameBonus/entities';
 
 @Entity()
 export class PairQuizGame {
@@ -59,9 +61,21 @@ export class PairQuizGame {
   )
   quizQuestionAnswer: QuizQuestionAnswer;
 
-  @Column({ default: 0 })
-  firstPlayerBonus: number;
+  @OneToMany(
+    () => PairQuizGameResult,
+    (pairQuizGameResult) => pairQuizGameResult.pairQuizGame,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  pairQuizGameResult: PairQuizGameResult;
 
-  @Column({ default: 0 })
-  secondPlayerBonus: number;
+  @OneToMany(
+    () => PairQuizGameBonus,
+    (pairQuizGameBonus) => pairQuizGameBonus.pairQuizGame,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  pairQuizGameBonus: PairQuizGameBonus;
 }
