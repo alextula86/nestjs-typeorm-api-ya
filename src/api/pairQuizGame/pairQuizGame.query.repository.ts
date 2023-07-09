@@ -295,6 +295,8 @@ export class PairQuizGameQueryRepository {
         const questions = !isEmpty(item.questions)
           ? JSON.parse(item.questions)
           : null;
+        const firstPlayerBonus = item.firstPlayerBonus || 0;
+        const secondPlayerBonus = item.secondPlayerBonus || 0;
 
         return {
           id: item.id,
@@ -311,7 +313,7 @@ export class PairQuizGameQueryRepository {
               login: item.firstPlayerLogin,
             },
             score: item.firstPlayerScore
-              ? Number(item.firstPlayerScore) + Number(item.firstPlayerBonus)
+              ? Number(item.firstPlayerScore) + Number(firstPlayerBonus)
               : 0,
           },
           secondPlayerProgress: item.secondPlayerId
@@ -328,8 +330,7 @@ export class PairQuizGameQueryRepository {
                   login: item.secondPlayerLogin,
                 },
                 score: item.secondPlayerScore
-                  ? Number(item.secondPlayerScore) +
-                    Number(item.secondPlayerBonus)
+                  ? Number(item.secondPlayerScore) + Number(secondPlayerBonus)
                   : 0,
               }
             : null,
@@ -352,6 +353,9 @@ export class PairQuizGameQueryRepository {
     const questions = !isEmpty(pairQuizGame.questions)
       ? JSON.parse(pairQuizGame.questions)
       : null;
+    const firstPlayerBonus = pairQuizGame.firstPlayerBonus || 0;
+    const secondPlayerBonus = pairQuizGame.secondPlayerBonus || 0;
+
     return {
       id: pairQuizGame.id,
       firstPlayerProgress: {
@@ -367,8 +371,7 @@ export class PairQuizGameQueryRepository {
           login: pairQuizGame.firstPlayerLogin,
         },
         score: pairQuizGame.firstPlayerScore
-          ? Number(pairQuizGame.firstPlayerScore) +
-            Number(pairQuizGame.firstPlayerBonus)
+          ? Number(pairQuizGame.firstPlayerScore) + firstPlayerBonus
           : 0,
       },
       secondPlayerProgress: pairQuizGame.secondPlayerId
@@ -385,8 +388,7 @@ export class PairQuizGameQueryRepository {
               login: pairQuizGame.secondPlayerLogin,
             },
             score: pairQuizGame.secondPlayerScore
-              ? Number(pairQuizGame.secondPlayerScore) +
-                Number(pairQuizGame.secondPlayerBonus)
+              ? Number(pairQuizGame.secondPlayerScore) + secondPlayerBonus
               : 0,
           }
         : null,
