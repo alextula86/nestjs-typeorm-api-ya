@@ -36,7 +36,7 @@ export class PairQuizGameBonusRepository {
   }: UpdatePairQuizGameBonus): Promise<boolean> {
     await this.pairQuizGameBonusRepository
       .createQueryBuilder()
-      .update()
+      .update(PairQuizGameBonus)
       .set({ bonus })
       .where('userId = :userId', { userId })
       .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
