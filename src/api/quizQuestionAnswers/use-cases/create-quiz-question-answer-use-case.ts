@@ -131,22 +131,11 @@ export class CreateQuizQuestionAnswerUseCase
         !!secondPlayerAnswers.find(
           (i: any) => i.answerStatus === AnswerStatus.CORRECT,
         );
-      // Определяем поле в БД для начисления бонуса текущему игроку
-      /*const currentPlayerBonusKey =
-        foundActivePairQuizGame.firstPlayerId === userId
-          ? 'firstPlayerBonus'
-          : 'secondPlayerBonus';
-      // Определяем поле в БД для начисления бонуса второму игроку
-      const secondPlayerBonusKey =
-        foundActivePairQuizGame.firstPlayerId !== userId
-          ? 'firstPlayerBonus'
-          : 'secondPlayerBonus';*/
 
       const currentPlayerId =
         foundActivePairQuizGame.firstPlayerId === userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
-      // Определяем поле в БД для начисления бонуса второму игроку
       const secondPlayerId =
         foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
@@ -154,10 +143,6 @@ export class CreateQuizQuestionAnswerUseCase
 
       // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
       // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
-      /*let bonusResultData = {
-        [currentPlayerBonusKey]: 0,
-        [secondPlayerBonusKey]: 0,
-      };*/
       // Если у текущего игрока есть хоть один правильный ответ
       // И второй игрок еще не ответил на все вопросы
       // Бонус начисляется текущему игроку
@@ -176,11 +161,6 @@ export class CreateQuizQuestionAnswerUseCase
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 0,
         });
-
-        /*bonusResultData = {
-          [currentPlayerBonusKey]: 1,
-          [secondPlayerBonusKey]: 0,
-        };*/
       }
       // Если у второго игрока есть хоть один правильный ответ
       // И второй игрок уже ответил на все вопросы
@@ -200,17 +180,7 @@ export class CreateQuizQuestionAnswerUseCase
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
         });
-
-        /*bonusResultData = {
-          [currentPlayerBonusKey]: 0,
-          [secondPlayerBonusKey]: 1,
-        };*/
       }
-      // Сохраняем бонус для текущего игрока
-      /*await this.pairQuizGameRepository.addPairQuizGameBonus({
-        pairQuizGameId: foundActivePairQuizGame.id,
-        ...bonusResultData,
-      });*/
     }
 
     return {

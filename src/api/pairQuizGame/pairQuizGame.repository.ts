@@ -171,21 +171,4 @@ export class PairQuizGameRepository {
 
     return true;
   }
-  /*async addPairQuizGameBonus({
-    pairQuizGameId,
-    firstPlayerBonus,
-    secondPlayerBonus,
-  }: any): Promise<boolean> {
-    await this.pairQuizGameRepository
-      .createQueryBuilder()
-      .update(PairQuizGame)
-      .set({
-        firstPlayerBonus,
-        secondPlayerBonus,
-      })
-      .where('id = :pairQuizGameId', { pairQuizGameId })
-      .execute();
-
-    return true;
-  }*/
 }
