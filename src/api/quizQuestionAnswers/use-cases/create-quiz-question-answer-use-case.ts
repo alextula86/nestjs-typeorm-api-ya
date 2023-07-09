@@ -120,13 +120,13 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.id,
       );
 
-      await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+      await this.pairQuizGameBonusRepository.createPairQuizGameResult({
         userId: foundActivePairQuizGame.firstPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
         bonus: 0,
       });
 
-      await this.pairQuizGameBonusRepository.createResultPairQuizGame({
+      await this.pairQuizGameBonusRepository.createPairQuizGameResult({
         userId: foundActivePairQuizGame.secondPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
         bonus: 0,
@@ -163,7 +163,7 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectCurrentPlayerAnswer &&
         secondPlayerAnswersCount !== questionsCount
       ) {
-        await this.pairQuizGameBonusRepository.updateResultPairQuizGame({
+        await this.pairQuizGameBonusRepository.updatePairQuizGameResult({
           userId: currentPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
@@ -176,7 +176,7 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectSecondPlayerAnswer &&
         secondPlayerAnswersCount === questionsCount
       ) {
-        await this.pairQuizGameBonusRepository.updateResultPairQuizGame({
+        await this.pairQuizGameBonusRepository.updatePairQuizGameResult({
           userId: secondPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
