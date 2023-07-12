@@ -64,16 +64,6 @@ export class PairQuizGameQueryRepository {
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
         (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS fpb
-          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
-        ) as "firstPlayerBonus",
-        (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS spb
-          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
-        ) as "secondPlayerBonus",
-        (
           SELECT json_agg(e)
           FROM (
             SELECT 
@@ -140,16 +130,6 @@ export class PairQuizGameQueryRepository {
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
         (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS fpb
-          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
-        ) as "firstPlayerBonus",
-        (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS spb
-          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
-        ) as "secondPlayerBonus",
-        (
           SELECT json_agg(e)
           FROM (
             SELECT 
@@ -212,16 +192,6 @@ export class PairQuizGameQueryRepository {
         sp."id" as "secondPlayerId",
         sp."login" as "secondPlayerLogin",
         (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS fpb
-          WHERE fpb."userId" = pqg."firstPlayerId" AND fpb."pairQuizGameId" = pqg."id"
-        ) as "firstPlayerBonus",
-        (
-          SELECT bonus
-          FROM pair_quiz_game_bonus AS spb
-          WHERE spb."userId" = pqg."secondPlayerId" AND spb."pairQuizGameId" = pqg."id"
-        ) as "secondPlayerBonus",
-        (
           SELECT json_agg(e)
           FROM (
             SELECT 
@@ -276,11 +246,6 @@ export class PairQuizGameQueryRepository {
           FROM quiz_question_answer AS qqa
           WHERE qqa."userId" = '${userId}'
         ) AS "sumScore",
-        (
-          SELECT SUM(pqgb."bonus")
-          FROM pair_quiz_game_bonus AS pqgb
-          WHERE pqgb."userId" = '${userId}'
-        ) AS "sumBonus",        
         (		
           SELECT AVG("sumScore") AS "avgScores"
           FROM (
@@ -294,8 +259,6 @@ export class PairQuizGameQueryRepository {
         WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
         AND ("status" = '${GameStatuses.FINISHED}')
     `;
-
-    console.log('query', query);
 
     const myCurrentPairQuizGame = await this.dataSource.query(query);
 
@@ -317,11 +280,6 @@ export class PairQuizGameQueryRepository {
         const questions = !isEmpty(item.questions)
           ? JSON.parse(item.questions)
           : null;
-        // const firstPlayerBonus = item.firstPlayerBonus || 0;
-        const firstPlayerBonus = 0;
-        // const secondPlayerBonus = item.secondPlayerBonus || 0;
-        const secondPlayerBonus = 0;
-
         return {
           id: item.id,
           firstPlayerProgress: {
@@ -336,9 +294,7 @@ export class PairQuizGameQueryRepository {
               id: item.firstPlayerId,
               login: item.firstPlayerLogin,
             },
-            score: item.firstPlayerScore
-              ? Number(item.firstPlayerScore) + Number(firstPlayerBonus)
-              : 0,
+            score: item.firstPlayerScore ? Number(item.firstPlayerScore) : 0,
           },
           secondPlayerProgress: item.secondPlayerId
             ? {
@@ -354,7 +310,7 @@ export class PairQuizGameQueryRepository {
                   login: item.secondPlayerLogin,
                 },
                 score: item.secondPlayerScore
-                  ? Number(item.secondPlayerScore) + Number(secondPlayerBonus)
+                  ? Number(item.secondPlayerScore)
                   : 0,
               }
             : null,
@@ -377,10 +333,6 @@ export class PairQuizGameQueryRepository {
     const questions = !isEmpty(pairQuizGame.questions)
       ? JSON.parse(pairQuizGame.questions)
       : null;
-    // const firstPlayerBonus = pairQuizGame.firstPlayerBonus || 0;
-    const firstPlayerBonus = 0;
-    // const secondPlayerBonus = pairQuizGame.secondPlayerBonus || 0;
-    const secondPlayerBonus = 0;
 
     return {
       id: pairQuizGame.id,
@@ -397,7 +349,7 @@ export class PairQuizGameQueryRepository {
           login: pairQuizGame.firstPlayerLogin,
         },
         score: pairQuizGame.firstPlayerScore
-          ? Number(pairQuizGame.firstPlayerScore) + Number(firstPlayerBonus)
+          ? Number(pairQuizGame.firstPlayerScore)
           : 0,
       },
       secondPlayerProgress: pairQuizGame.secondPlayerId
@@ -414,8 +366,7 @@ export class PairQuizGameQueryRepository {
               login: pairQuizGame.secondPlayerLogin,
             },
             score: pairQuizGame.secondPlayerScore
-              ? Number(pairQuizGame.secondPlayerScore) +
-                Number(secondPlayerBonus)
+              ? Number(pairQuizGame.secondPlayerScore)
               : 0,
           }
         : null,
