@@ -154,7 +154,7 @@ export class CreateQuizQuestionAnswerUseCase
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
       // Получаем запись моследнего вопроса
-      const questionLastItem = questions[5];
+      const questionLastItem = questions[questions.length - 1];
       // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
       // значит текущий игрок закончил игру быстрее и ему начисляется бонусный балл
       // Если у текущего игрока есть хоть один правильный ответ
@@ -170,7 +170,7 @@ export class CreateQuizQuestionAnswerUseCase
           bonus: 1,
         });
         // Находим балл полученный на ответ последнего вопроса
-        const foundLastAnswersScore =
+        const foundCurrentPlayerLastAnswerScore =
           await this.quizQuestionAnswerRepository.findLastAnswersScore(
             currentPlayerId,
             foundActivePairQuizGame.id,
@@ -181,7 +181,7 @@ export class CreateQuizQuestionAnswerUseCase
           userId: currentPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           quizQuestionId: questionLastItem.id,
-          score: Number(foundLastAnswersScore.score) + 1,
+          score: Number(foundCurrentPlayerLastAnswerScore.score) + 1,
         });
       }
       // Если у второго игрока есть хоть один правильный ответ
@@ -197,7 +197,7 @@ export class CreateQuizQuestionAnswerUseCase
           bonus: 1,
         });
         // Находим балл полученный на ответ последнего вопроса
-        const foundLastAnswersScore =
+        const foundSecondPlayerLastAnswerScore =
           await this.quizQuestionAnswerRepository.findLastAnswersScore(
             secondPlayerId,
             foundActivePairQuizGame.id,
@@ -208,7 +208,7 @@ export class CreateQuizQuestionAnswerUseCase
           userId: secondPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           quizQuestionId: questionLastItem.id,
-          score: Number(foundLastAnswersScore.score) + 1,
+          score: Number(foundSecondPlayerLastAnswerScore.score) + 1,
         });
       }
     }

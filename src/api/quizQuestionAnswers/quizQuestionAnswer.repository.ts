@@ -54,7 +54,7 @@ export class QuizQuestionAnswerRepository {
       query,
     );
 
-    return foundLastAnswersScore;
+    return foundLastAnswersScore[0];
   }
   async createQuizQuestionAnswers({
     userId,
