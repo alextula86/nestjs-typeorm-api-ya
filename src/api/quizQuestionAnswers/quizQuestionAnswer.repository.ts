@@ -37,6 +37,25 @@ export class QuizQuestionAnswerRepository {
 
     return foundQuizQuestionAnswers;
   }
+  async findLastAnswersScore(
+    userId: string,
+    pairQuizGameId: string,
+    quizQuestionId: string,
+  ): Promise<{ score: string }> {
+    const query = `
+      SELECT "score"
+      FROM quiz_question_answer
+      WHERE "userId" = '${userId}'
+      AND "pairQuizGameId" = '${pairQuizGameId}'
+      AND "quizQuestionId" = '${quizQuestionId}'
+    `;
+
+    const foundLastAnswersScore = await this.quizQuestionAnswerRepository.query(
+      query,
+    );
+
+    return foundLastAnswersScore;
+  }
   async createQuizQuestionAnswers({
     userId,
     pairQuizGameId,
@@ -67,6 +86,27 @@ export class QuizQuestionAnswerRepository {
       .returning(['id'])
       .execute();
 
+    return madeQuizQuestionAnswers.raw[0];
+  }
+  async updateQuizQuestionAnswerScore({
+    userId,
+    pairQuizGameId,
+    quizQuestionId,
+    score,
+  }: {
+    userId: string;
+    pairQuizGameId: string;
+    quizQuestionId: string;
+    score: number;
+  }): Promise<{ id: string }> {
+    const madeQuizQuestionAnswers = await this.quizQuestionAnswerRepository
+      .createQueryBuilder()
+      .update(QuizQuestionAnswer)
+      .set({ score })
+      .where('userId = :userId', { userId })
+      .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
+      .andWhere('quizQuestionId = :quizQuestionId', { quizQuestionId })
+      .execute();
     return madeQuizQuestionAnswers.raw[0];
   }
 }

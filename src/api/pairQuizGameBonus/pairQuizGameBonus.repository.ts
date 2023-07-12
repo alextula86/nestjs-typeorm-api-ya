@@ -10,7 +10,7 @@ export class PairQuizGameBonusRepository {
     @InjectRepository(PairQuizGameBonus)
     private readonly pairQuizGameBonusRepository: Repository<PairQuizGameBonus>,
   ) {}
-  async createPairQuizGameResult({
+  async createPairQuizGameBonus({
     userId,
     pairQuizGameId,
     bonus,
@@ -29,7 +29,7 @@ export class PairQuizGameBonusRepository {
 
     return madePairQuizGameBonus.raw[0];
   }
-  async updatePairQuizGameResult({
+  async updatePairQuizGameBonus({
     userId,
     pairQuizGameId,
     bonus,

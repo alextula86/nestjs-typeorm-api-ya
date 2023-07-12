@@ -276,14 +276,19 @@ export class PairQuizGameQueryRepository {
           FROM quiz_question_answer AS qqa
           WHERE qqa."userId" = '${userId}'
         ) AS "sumScore",
+        (
+          SELECT SUM(pqgb."bonus")
+          FROM pair_quiz_game_bonus AS pqgb
+          WHERE pqgb."userId" = '${userId}'
+        ) AS "sumBonus",        
         (		
-          SELECT AVG("sumScore")
+          SELECT AVG("sumScore") AS "avgScores"
           FROM (
             SELECT qqa."pairQuizGameId", SUM(qqa."score") AS "sumScore"
             FROM quiz_question_answer AS qqa
             WHERE qqa."userId" = '${userId}'
             GROUP BY qqa."pairQuizGameId"
-          ) as "avgScore"			
+          ) as "avgScores"			
         )
         FROM pair_quiz_game AS pqg
         WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
@@ -431,8 +436,8 @@ export class PairQuizGameQueryRepository {
       sumScore: pairQuizGameStatic.sumScore
         ? Number(pairQuizGameStatic.sumScore)
         : 0,
-      avgScore: pairQuizGameStatic.avgScore
-        ? Number(pairQuizGameStatic.avgScore)
+      avgScores: pairQuizGameStatic.avgScores
+        ? Number(pairQuizGameStatic.avgScores)
         : 0,
       winsCount: 1,
       lossesCount: 2,

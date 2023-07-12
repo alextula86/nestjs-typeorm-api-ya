@@ -120,13 +120,13 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.id,
       );
 
-      await this.pairQuizGameBonusRepository.createPairQuizGameResult({
+      await this.pairQuizGameBonusRepository.createPairQuizGameBonus({
         userId: foundActivePairQuizGame.firstPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
         bonus: 0,
       });
 
-      await this.pairQuizGameBonusRepository.createPairQuizGameResult({
+      await this.pairQuizGameBonusRepository.createPairQuizGameBonus({
         userId: foundActivePairQuizGame.secondPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
         bonus: 0,
@@ -153,9 +153,10 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
-
+      // Получаем запись моследнего вопроса
+      const questionLastItem = questions[5];
       // Если текущий игрок ответил на последний вопрос и второй игрок еще не отвечал на последний вопрос,
-      // значит текущий игрок закончил игру быстрее и ему начисляется бонусный бал
+      // значит текущий игрок закончил игру быстрее и ему начисляется бонусный балл
       // Если у текущего игрока есть хоть один правильный ответ
       // И второй игрок еще не ответил на все вопросы
       // Бонус начисляется текущему игроку
@@ -163,10 +164,24 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectCurrentPlayerAnswer &&
         secondPlayerAnswersCount !== questionsCount
       ) {
-        await this.pairQuizGameBonusRepository.updatePairQuizGameResult({
+        await this.pairQuizGameBonusRepository.updatePairQuizGameBonus({
           userId: currentPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
+        });
+        // Находим балл полученный на ответ последнего вопроса
+        const foundLastAnswersScore =
+          await this.quizQuestionAnswerRepository.findLastAnswersScore(
+            currentPlayerId,
+            foundActivePairQuizGame.id,
+            questionLastItem.id,
+          );
+        // Обновляем итоговый балл за ответ увеличив его на бонусный балл
+        await this.quizQuestionAnswerRepository.updateQuizQuestionAnswerScore({
+          userId: currentPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          quizQuestionId: questionLastItem.id,
+          score: Number(foundLastAnswersScore.score) + 1,
         });
       }
       // Если у второго игрока есть хоть один правильный ответ
@@ -176,10 +191,24 @@ export class CreateQuizQuestionAnswerUseCase
         isCorrectSecondPlayerAnswer &&
         secondPlayerAnswersCount === questionsCount
       ) {
-        await this.pairQuizGameBonusRepository.updatePairQuizGameResult({
+        await this.pairQuizGameBonusRepository.updatePairQuizGameBonus({
           userId: secondPlayerId,
           pairQuizGameId: foundActivePairQuizGame.id,
           bonus: 1,
+        });
+        // Находим балл полученный на ответ последнего вопроса
+        const foundLastAnswersScore =
+          await this.quizQuestionAnswerRepository.findLastAnswersScore(
+            secondPlayerId,
+            foundActivePairQuizGame.id,
+            questionLastItem.id,
+          );
+        // Обновляем итоговый балл за ответ увеличив его на бонусный балл
+        await this.quizQuestionAnswerRepository.updateQuizQuestionAnswerScore({
+          userId: secondPlayerId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          quizQuestionId: questionLastItem.id,
+          score: Number(foundLastAnswersScore.score) + 1,
         });
       }
     }
