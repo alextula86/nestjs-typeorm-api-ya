@@ -317,8 +317,10 @@ export class PairQuizGameQueryRepository {
         const questions = !isEmpty(item.questions)
           ? JSON.parse(item.questions)
           : null;
-        const firstPlayerBonus = item.firstPlayerBonus || 0;
-        const secondPlayerBonus = item.secondPlayerBonus || 0;
+        // const firstPlayerBonus = item.firstPlayerBonus || 0;
+        const firstPlayerBonus = 0;
+        // const secondPlayerBonus = item.secondPlayerBonus || 0;
+        const secondPlayerBonus = 0;
 
         return {
           id: item.id,
@@ -375,8 +377,10 @@ export class PairQuizGameQueryRepository {
     const questions = !isEmpty(pairQuizGame.questions)
       ? JSON.parse(pairQuizGame.questions)
       : null;
-    const firstPlayerBonus = pairQuizGame.firstPlayerBonus || 0;
-    const secondPlayerBonus = pairQuizGame.secondPlayerBonus || 0;
+    // const firstPlayerBonus = pairQuizGame.firstPlayerBonus || 0;
+    const firstPlayerBonus = 0;
+    // const secondPlayerBonus = pairQuizGame.secondPlayerBonus || 0;
+    const secondPlayerBonus = 0;
 
     return {
       id: pairQuizGame.id,
