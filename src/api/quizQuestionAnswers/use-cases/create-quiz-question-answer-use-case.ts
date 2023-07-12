@@ -3,11 +3,12 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
 import { validateOrRejectModel } from '../../../validate';
-import { AnswerStatus } from '../../../types';
+import { AnswerStatus, ResultGameStatus } from '../../../types';
 
 import { AnswerPairQuizGameDto } from '../../pairQuizGame/dto';
 import { PairQuizGameRepository } from '../../pairQuizGame/pairQuizGame.repository';
 import { PairQuizGameBonusRepository } from '../../pairQuizGameBonus/pairQuizGameBonus.repository';
+import { PairQuizGameResultRepository } from '../../pairQuizGameResult/pairQuizGameResult.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
 
@@ -26,6 +27,7 @@ export class CreateQuizQuestionAnswerUseCase
     private readonly quizQuestionAnswerRepository: QuizQuestionAnswerRepository,
     private readonly pairQuizGameRepository: PairQuizGameRepository,
     private readonly pairQuizGameBonusRepository: PairQuizGameBonusRepository,
+    private readonly pairQuizGameResultRepository: PairQuizGameResultRepository,
   ) {}
 
   async execute(command: CreateQuizQuestionAnswerCommand): Promise<{
@@ -211,11 +213,66 @@ export class CreateQuizQuestionAnswerUseCase
           score: Number(foundSecondPlayerLastAnswerScore.score) + 1,
         });
       }
+
+      const currentPlayerSumScore =
+        await this.quizQuestionAnswerRepository.findPlayerSumScore(
+          currentPlayerId,
+          foundActivePairQuizGame.id,
+        );
+
+      const secondPlayerSumScore =
+        await this.quizQuestionAnswerRepository.findPlayerSumScore(
+          secondPlayerId,
+          foundActivePairQuizGame.id,
+        );
+
+      const resultGameStatus = this._getResultGameStatus(
+        Number(currentPlayerSumScore.sumScore),
+        Number(secondPlayerSumScore.sumScore),
+      );
+
+      await this.pairQuizGameResultRepository.createResultPairQuizGame({
+        userId: currentPlayerId,
+        pairQuizGameId: foundActivePairQuizGame.id,
+        status: resultGameStatus.currentPlayer,
+      });
+
+      await this.pairQuizGameResultRepository.createResultPairQuizGame({
+        userId: secondPlayerId,
+        pairQuizGameId: foundActivePairQuizGame.id,
+        status: resultGameStatus.secondPlayer,
+      });
     }
 
     return {
       quizQuestionAnswerId: createdQuizQuestionAnswers.id,
       statusCode: HttpStatus.OK,
+    };
+  }
+  _getResultGameStatus(
+    currentPlayerSumScore: number,
+    secondPlayerSumScore: number,
+  ): {
+    currentPlayer: ResultGameStatus;
+    secondPlayer: ResultGameStatus;
+  } {
+    if (currentPlayerSumScore > secondPlayerSumScore) {
+      return {
+        currentPlayer: ResultGameStatus.WIN,
+        secondPlayer: ResultGameStatus.LOSSES,
+      };
+    }
+
+    if (currentPlayerSumScore < secondPlayerSumScore) {
+      return {
+        currentPlayer: ResultGameStatus.LOSSES,
+        secondPlayer: ResultGameStatus.WIN,
+      };
+    }
+
+    return {
+      currentPlayer: ResultGameStatus.DRAW,
+      secondPlayer: ResultGameStatus.DRAW,
     };
   }
 }

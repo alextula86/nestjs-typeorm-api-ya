@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isEmpty } from 'lodash';
 import { AnswerStatus } from '../../types';
 import { QuizQuestionAnswer } from './entities';
 
@@ -55,6 +56,28 @@ export class QuizQuestionAnswerRepository {
     );
 
     return foundLastAnswersScore[0];
+  }
+  async findPlayerSumScore(
+    userId: string,
+    pairQuizGameId: string,
+  ): Promise<{
+    sumScore: string;
+  }> {
+    const query = `
+      SELECT SUM("score") AS "sumScore"
+      FROM quiz_question_answer
+      WHERE "userId" = '${userId}' AND "pairQuizGameId" = '${pairQuizGameId}'
+    `;
+
+    const foundPlayerSumScore = await this.quizQuestionAnswerRepository.query(
+      query,
+    );
+
+    if (isEmpty(foundPlayerSumScore)) {
+      return null;
+    }
+
+    return foundPlayerSumScore[0];
   }
   async createQuizQuestionAnswers({
     userId,

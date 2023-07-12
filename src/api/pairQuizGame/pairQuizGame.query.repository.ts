@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 
 import {
   GameStatuses,
+  ResultGameStatus,
   ResponseViewModelDetail,
   SortDirection,
 } from '../../types';
@@ -254,7 +255,25 @@ export class PairQuizGameQueryRepository {
             WHERE qqa."userId" = '${userId}'
             GROUP BY qqa."pairQuizGameId"
           ) as "avgScores"			
-        )
+        ),
+        (
+          SELECT COUNT(pqgr."id")
+          FROM pair_quiz_game_result AS pqgr
+          WHERE pqgr."userId" = '${userId}'
+          AND pqgr."status" = '${ResultGameStatus.WIN}'
+        ) AS "winsCount",
+        (
+          SELECT COUNT(pqgr."id")
+          FROM pair_quiz_game_result AS pqgr
+          WHERE pqgr."userId" = '${userId}'
+          AND pqgr."status" = '${ResultGameStatus.LOSSES}'
+        ) AS "lossesCount",
+        (
+          SELECT COUNT(pqgr."id")
+          FROM pair_quiz_game_result AS pqgr
+          WHERE pqgr."userId" = '${userId}'
+          AND pqgr."status" = '${ResultGameStatus.DRAW}'
+        ) AS "drawsCount"        
         FROM pair_quiz_game AS pqg
         WHERE ("firstPlayerId" = '${userId}' OR "secondPlayerId" = '${userId}')
         AND ("status" = '${GameStatuses.FINISHED}')
@@ -394,9 +413,9 @@ export class PairQuizGameQueryRepository {
       avgScores: pairQuizGameStatic.avgScores
         ? Math.round(Number(pairQuizGameStatic.avgScores) * 100) / 100
         : 0,
-      winsCount: 1,
-      lossesCount: 2,
-      drawsCount: 3,
+      winsCount: pairQuizGameStatic.winsCount,
+      lossesCount: pairQuizGameStatic.lossesCount,
+      drawsCount: pairQuizGameStatic.drawsCount,
     };
   }
 }
