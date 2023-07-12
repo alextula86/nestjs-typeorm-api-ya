@@ -413,9 +413,15 @@ export class PairQuizGameQueryRepository {
       avgScores: pairQuizGameStatic.avgScores
         ? Math.round(Number(pairQuizGameStatic.avgScores) * 100) / 100
         : 0,
-      winsCount: pairQuizGameStatic.winsCount,
-      lossesCount: pairQuizGameStatic.lossesCount,
-      drawsCount: pairQuizGameStatic.drawsCount,
+      winsCount: pairQuizGameStatic.winsCount
+        ? Number(pairQuizGameStatic.winsCount)
+        : 0,
+      lossesCount: pairQuizGameStatic.lossesCount
+        ? Number(pairQuizGameStatic.lossesCount)
+        : 0,
+      drawsCount: pairQuizGameStatic.drawsCount
+        ? Number(pairQuizGameStatic.drawsCount)
+        : 0,
     };
   }
 }
