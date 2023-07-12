@@ -392,7 +392,7 @@ export class PairQuizGameQueryRepository {
         ? Number(pairQuizGameStatic.sumScore)
         : 0,
       avgScores: pairQuizGameStatic.avgScores
-        ? Number(pairQuizGameStatic.avgScores)
+        ? Math.round(Number(pairQuizGameStatic.avgScores) * 100) / 100
         : 0,
       winsCount: 1,
       lossesCount: 2,
