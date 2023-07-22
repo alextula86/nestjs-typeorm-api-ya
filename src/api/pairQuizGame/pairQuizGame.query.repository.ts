@@ -336,7 +336,7 @@ export class PairQuizGameQueryRepository {
           AND "status" = '${ResultGameStatus.LOSSES}'
         ),
         (
-          SELECT COUNT(*) AS "drawCount"
+          SELECT COUNT(*) AS "drawsCount"
           FROM pair_quiz_game_result
           WHERE "userId" = qqa."userId"
           AND "status" = '${ResultGameStatus.DRAW}'
@@ -362,11 +362,24 @@ export class PairQuizGameQueryRepository {
       ${offset}
       ${limit}
     ;`;
-
+    console.log(query);
     const topStatisticPairQuizGame = await this.dataSource.query(query);
-
+    console.log('topStatisticPairQuizGame', topStatisticPairQuizGame);
     return {
-      items: topStatisticPairQuizGame,
+      items: topStatisticPairQuizGame.map((item) => {
+        return {
+          player: {
+            id: item.userId,
+            login: item.userId,
+          },
+          gamesCount: +item.gamesCount,
+          winsCount: +item.winsCount,
+          lossesCount: +item.lossesCount,
+          drawsCount: +item.drawsCount,
+          sumScore: +item.sumScore,
+          avgScores: +item.avgScores,
+        };
+      }),
       totalCount,
       pagesCount,
       page: number,
