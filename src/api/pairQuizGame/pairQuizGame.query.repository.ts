@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { isEmpty } from 'lodash';
+import { isEmpty, isArray } from 'lodash';
 
 import {
   GameStatuses,
@@ -287,7 +287,7 @@ export class PairQuizGameQueryRepository {
   async findTopStatisticPairQuizGame({
     pageNumber,
     pageSize,
-    sort = '?sort=avgScores desc&sort=sumScore desc',
+    sort = '?sort=avgScores desc',
   }: QueryTopStatisticPairQuizGame): Promise<any> {
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
@@ -308,14 +308,16 @@ export class PairQuizGameQueryRepository {
     const offset = `OFFSET ${skip}`;
     const limit = `LIMIT ${size}`;
 
-    const orderBy = sort
-      ? `ORDER BY ${sort
-          .slice(1)
-          .split('&')
-          .map((item) => item.split('=')[1])
+    const formalizeSort = isArray(sort)
+      ? sort
           .map((item) => `"${item.split(' ')[0]}" ${item.split(' ')[1]}`)
-          .join(', ')}`
-      : '';
+          .join(', ')
+      : sort
+          .split(' ')
+          .map((item, index) => (index === 0 ? `"${item}"` : item))
+          .join(' ');
+
+    const orderBy = `ORDER BY ${formalizeSort}`;
 
     const query = `
       SELECT 
@@ -364,9 +366,9 @@ export class PairQuizGameQueryRepository {
       ${offset}
       ${limit}
     ;`;
-    console.log(query);
+
     const topStatisticPairQuizGame = await this.dataSource.query(query);
-    console.log('topStatisticPairQuizGame', topStatisticPairQuizGame);
+
     return {
       items: topStatisticPairQuizGame.map((item) => {
         return {
