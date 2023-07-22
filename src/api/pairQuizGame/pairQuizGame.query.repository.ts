@@ -321,7 +321,8 @@ export class PairQuizGameQueryRepository {
 
     const query = `
       SELECT 
-        DISTINCT qqa."userId",
+        DISTINCT qqa."userId" AS "userId",
+        u."login" as "userLogin",
         (
           SELECT COUNT(*) as "gamesCount"
           FROM pair_quiz_game
@@ -361,6 +362,7 @@ export class PairQuizGameQueryRepository {
           ) as "avgScores"			
         )      
       FROM quiz_question_answer AS qqa
+      LEFT JOIN users as u ON u."id" = "userId"
       ${where}
       ${orderBy}
       ${offset}
@@ -374,7 +376,7 @@ export class PairQuizGameQueryRepository {
         return {
           player: {
             id: item.userId,
-            login: item.userId,
+            login: item.userLogin,
           },
           gamesCount: +item.gamesCount,
           winsCount: +item.winsCount,
