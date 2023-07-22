@@ -12,6 +12,7 @@ import {
 
 import {
   QueryPairQuizGameModel,
+  QueryTopStatisticPairQuizGame,
   PairQuizGameQuestionType,
   PairQuizGameViewModel,
 } from './types';
@@ -282,6 +283,95 @@ export class PairQuizGameQueryRepository {
     const myCurrentPairQuizGame = await this.dataSource.query(query);
 
     return this._getPairQuizGameStaticViewModel(myCurrentPairQuizGame[0]);
+  }
+  async findTopStatisticPairQuizGame({
+    pageNumber,
+    pageSize,
+    sort = '?sort=avgScores desc&sort=sumScore desc',
+  }: QueryTopStatisticPairQuizGame): Promise<any> {
+    const number = pageNumber ? Number(pageNumber) : 1;
+    const size = pageSize ? Number(pageSize) : 10;
+
+    const where = `     
+      WHERE "pairQuizGameId" IN (SELECT id FROM pair_quiz_game WHERE status = '${GameStatuses.FINISHED}')
+    `;
+
+    const totalCountResponse = await this.dataSource.query(`
+      SELECT COUNT(DISTINCT "userId") FROM quiz_question_answer ${where};
+    `);
+
+    const totalCount = +totalCountResponse[0].count;
+
+    const pagesCount = Math.ceil(totalCount / size);
+    const skip = (number - 1) * size;
+
+    const offset = `OFFSET ${skip}`;
+    const limit = `LIMIT ${size}`;
+
+    const orderBy = `ORDER BY ${sort
+      .slice(1)
+      .split('&')
+      .map((item) => item.split('=')[1])
+      .map((item) => `"${item.split(' ')[0]}" ${item.split(' ')[1]}`)
+      .join(', ')}`;
+
+    const query = `
+      SELECT 
+        DISTINCT qqa."userId",
+        (
+          SELECT COUNT(*) as "gamesCount"
+          FROM pair_quiz_game
+          WHERE "firstPlayerId" = qqa."userId" OR "secondPlayerId" = qqa."userId"
+        ),
+        (
+          SELECT COUNT(*) AS "winsCount"
+          FROM pair_quiz_game_result
+          WHERE "userId" = qqa."userId"
+          AND "status" = '${ResultGameStatus.WIN}'
+        ),
+        (
+          SELECT COUNT(*) AS "lossesCount"
+          FROM pair_quiz_game_result
+          WHERE "userId" = qqa."userId"
+          AND "status" = '${ResultGameStatus.LOSSES}'
+        ),
+        (
+          SELECT COUNT(*) AS "drawCount"
+          FROM pair_quiz_game_result
+          WHERE "userId" = qqa."userId"
+          AND "status" = '${ResultGameStatus.DRAW}'
+        ),        
+        (
+          SELECT SUM(score) AS "sumScore"
+          FROM quiz_question_answer
+          WHERE "userId" = qqa."userId"
+          GROUP BY "userId"
+        ),
+        (		
+          SELECT round(AVG("sumScore"), 2) AS "avgScores"
+            FROM (
+            SELECT "pairQuizGameId", SUM("score") AS "sumScore"
+            FROM quiz_question_answer
+            WHERE "userId" = qqa."userId"
+            GROUP BY "pairQuizGameId"
+          ) as "avgScores"			
+        )      
+      FROM quiz_question_answer AS qqa
+      ${where}
+      ${orderBy}
+      ${offset}
+      ${limit}
+    ;`;
+
+    const topStatisticPairQuizGame = await this.dataSource.query(query);
+
+    return {
+      items: topStatisticPairQuizGame,
+      totalCount,
+      pagesCount,
+      page: number,
+      pageSize: size,
+    };
   }
   _getMyPairQuizGamesViewModelDetail({
     items,

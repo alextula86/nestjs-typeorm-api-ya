@@ -23,7 +23,11 @@ import { ConnectionPairQuizGameCommand } from './use-cases';
 import { CreateQuizQuestionAnswerCommand } from '../quizQuestionAnswers/use-cases';
 import { QuizQuestionAnswerQueryRepository } from '../quizQuestionAnswers/quizQuestionAnswer.query.repository';
 import { PairQuizGameQueryRepository } from './pairQuizGame.query.repository';
-import { QueryPairQuizGameModel, PairQuizGameViewModel } from './types';
+import {
+  QueryPairQuizGameModel,
+  PairQuizGameViewModel,
+  QueryTopStatisticPairQuizGame,
+} from './types';
 import { AnswerPairQuizGameDto } from './dto';
 
 @UseGuards(AuthBearerGuard)
@@ -84,6 +88,22 @@ export class PairQuizGameController {
       );
 
     return myStatisticPairQuizGame;
+  }
+  // Получание статистики по всем играм - топ участников
+  @Get('users/top')
+  @HttpCode(HttpStatus.OK)
+  async findTopStatisticPairQuizGame(
+    @Query()
+    { pageNumber, pageSize, sort }: QueryTopStatisticPairQuizGame,
+  ): Promise<PairQuizGameViewModel> {
+    const topStatisticPairQuizGame =
+      await this.pairQuizGameQueryRepository.findTopStatisticPairQuizGame({
+        pageNumber,
+        pageSize,
+        sort,
+      });
+
+    return topStatisticPairQuizGame;
   }
   // Получание игровой пары по идентификатору
   @Get('pairs/:pairQuizGameId')
