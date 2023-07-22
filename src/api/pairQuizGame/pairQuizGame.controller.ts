@@ -30,7 +30,6 @@ import {
 } from './types';
 import { AnswerPairQuizGameDto } from './dto';
 
-@UseGuards(AuthBearerGuard)
 @Controller('api/pair-game-quiz')
 export class PairQuizGameController {
   constructor(
@@ -39,6 +38,7 @@ export class PairQuizGameController {
     private readonly quizQuestionAnswerQueryRepository: QuizQuestionAnswerQueryRepository,
   ) {}
   @Get('pairs/my')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   // Получание всех активных и завершенных игр текущего пользователя
   async findMyPairQuizGames(
@@ -61,6 +61,7 @@ export class PairQuizGameController {
   }
   // Получание активной или ожидающей игровой пары пользователя
   @Get('pairs/my-current')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async findMyCurrentPairQuizGame(
     @Req() request: Request & { userId: string },
@@ -78,6 +79,7 @@ export class PairQuizGameController {
   }
   // Получание статистики игр текущего пользователя
   @Get('users/my-statistic')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async findMyStatisticPairQuizGame(
     @Req() request: Request & { userId: string },
@@ -107,6 +109,7 @@ export class PairQuizGameController {
   }
   // Получание игровой пары по идентификатору
   @Get('pairs/:pairQuizGameId')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async findPairQuizGameById(
     @Req() request: Request & { userId: string },
@@ -146,6 +149,7 @@ export class PairQuizGameController {
   // Подключение текущего пользователя к существующей игровой паре
   // Или создание новой игровой пары, которая будет ждать второго игрока
   @Post('pairs/connection')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async connectionPairQuizGame(
     @Req() request: Request & { userId: string },
@@ -167,6 +171,7 @@ export class PairQuizGameController {
     return foundPairQuizGameById;
   }
   @Post('pairs/my-current/answers')
+  @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.OK)
   async answerPairQuizGame(
     @Req() request: Request & { userId: string },
