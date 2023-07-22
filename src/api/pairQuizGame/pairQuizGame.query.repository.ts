@@ -308,12 +308,14 @@ export class PairQuizGameQueryRepository {
     const offset = `OFFSET ${skip}`;
     const limit = `LIMIT ${size}`;
 
-    const orderBy = `ORDER BY ${sort
-      .slice(1)
-      .split('&')
-      .map((item) => item.split('=')[1])
-      .map((item) => `"${item.split(' ')[0]}" ${item.split(' ')[1]}`)
-      .join(', ')}`;
+    const orderBy = sort
+      ? `ORDER BY ${sort
+          .slice(1)
+          .split('&')
+          .map((item) => item.split('=')[1])
+          .map((item) => `"${item.split(' ')[0]}" ${item.split(' ')[1]}`)
+          .join(', ')}`
+      : '';
 
     const query = `
       SELECT 
