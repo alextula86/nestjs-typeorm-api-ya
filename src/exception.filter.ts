@@ -12,7 +12,6 @@ export class ErrorExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-
     if (process.env.NODE_ENV !== 'production') {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
         error: exception.toString(),

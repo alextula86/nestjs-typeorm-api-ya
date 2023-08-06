@@ -26,6 +26,8 @@ import { QuizQuestionAnswer } from './api/quizQuestionAnswers/entities';
 import { PairQuizGame } from './api/pairQuizGame/entities';
 import { PairQuizGameResult } from './api/pairQuizGameResult/entities';
 import { PairQuizGameBonus } from './api/pairQuizGameBonus/entities';
+import { Wallpapers } from './api/wallpaper/entities';
+import { BlogMainImages } from './api/blogMainImage/entities';
 
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
@@ -48,6 +50,8 @@ import { SessionService } from './api/session/session.service';
 import { CommentLikeStatusService } from './api/commentLikeStatus/commentlikeStatus.service';
 import { PostLikeStatusService } from './api/postLikeStatus/postLikeStatus.service';
 import { QuizQuestionService } from './api/quizQuestion/quizQuestion.service';
+import { WallpaperService } from './api/wallpaper/wallpaper.service';
+import { BlogMainImageService } from './api/blogMainImage/blogMainImage.service';
 
 import {
   LoginUseCase,
@@ -101,6 +105,8 @@ import {
 } from './api/quizQuestion/use-cases';
 import { ConnectionPairQuizGameUseCase } from './api/pairQuizGame/use-cases';
 import { CreateQuizQuestionAnswerUseCase } from './api/quizQuestionAnswers/use-cases';
+import { SaveWallpaperByBlogUseCase } from './api/wallpaper/use-cases';
+import { SaveBlogMainImageByBlogUseCase } from './api/blogMainImage/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -116,6 +122,8 @@ import { QuizQuestionAnswerRepository } from './api/quizQuestionAnswers/quizQues
 import { PairQuizGameRepository } from './api/pairQuizGame/pairQuizGame.repository';
 import { PairQuizGameResultRepository } from './api/pairQuizGameResult/pairQuizGameResult.repository';
 import { PairQuizGameBonusRepository } from './api/pairQuizGameBonus/pairQuizGameBonus.repository';
+import { WallpaperRepository } from './api/wallpaper/wallpaper.repository';
+import { BlogMainImageRepository } from './api/blogMainImage/blogMainImage.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -127,8 +135,10 @@ import { BanQueryRepository } from './api/ban/ban.query.repository';
 import { QuizQuestionQueryRepository } from './api/quizQuestion/quizQuestion.query.repository';
 import { QuizQuestionAnswerQueryRepository } from './api/quizQuestionAnswers/quizQuestionAnswer.query.repository';
 import { PairQuizGameQueryRepository } from './api/pairQuizGame/pairQuizGame.query.repository';
+import { WallpaperQueryRepository } from './api/wallpaper/wallpaper.query.repository';
+import { BlogMainImageQueryRepository } from './api/blogMainImage/blogMainImage.query.repository';
 
-import { EmailAdapter } from './adapters';
+import { EmailAdapter, S3StorageAdapter, SharpAdapter } from './adapters';
 import { EmailManager } from './managers';
 import { IsBlogExistConstraint } from './api/blog/custom-validators/customValidateBlog';
 
@@ -229,7 +239,21 @@ const pairQuizGameResultProviders = [PairQuizGameResultRepository];
 
 const pairQuizGameBonusProviders = [PairQuizGameBonusRepository];
 
-const adapters = [EmailManager, EmailAdapter];
+const wallpaperProviders = [
+  WallpaperService,
+  WallpaperRepository,
+  WallpaperQueryRepository,
+  SaveWallpaperByBlogUseCase,
+];
+
+const blogMainImageProviders = [
+  BlogMainImageService,
+  BlogMainImageRepository,
+  BlogMainImageQueryRepository,
+  SaveBlogMainImageByBlogUseCase,
+];
+
+const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
 
 @Module({
   imports: [
@@ -262,6 +286,8 @@ const adapters = [EmailManager, EmailAdapter];
       PairQuizGame,
       PairQuizGameResult,
       PairQuizGameBonus,
+      Wallpapers,
+      BlogMainImages,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -308,6 +334,8 @@ const adapters = [EmailManager, EmailAdapter];
     ...pairQuizGameProviders,
     ...pairQuizGameResultProviders,
     ...pairQuizGameBonusProviders,
+    ...wallpaperProviders,
+    ...blogMainImageProviders,
     ...adapters,
   ],
 })

@@ -81,16 +81,6 @@ export class BlogRepository {
     blogId: string,
     { name, description, websiteUrl }: UpdateBlogModel,
   ): Promise<boolean> {
-    /*const query = `
-        UPDATE blogs
-        SET
-          "name" = '${name}',
-          "description" = '${description}',
-          "websiteUrl" = '${websiteUrl}'
-        WHERE "id" = '${blogId}';
-      `;
-    await this.blogRepository.query(query);*/
-
     await this.blogRepository
       .createQueryBuilder()
       .update(Blogs)

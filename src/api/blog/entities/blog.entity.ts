@@ -7,6 +7,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Users } from '../../user/entities';
+import { Wallpapers } from '../../wallpaper/entities';
+import { BlogMainImages } from '../../blogMainImage/entities';
 
 @Entity()
 export class Blogs {
@@ -33,6 +35,16 @@ export class Blogs {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  @ManyToOne(() => Wallpapers, (wallpaper) => wallpaper.blog, {
+    onDelete: 'CASCADE',
+  })
+  wallpaper: Wallpapers;
+
+  @ManyToOne(() => BlogMainImages, (blogMainImages) => blogMainImages.blog, {
+    onDelete: 'CASCADE',
+  })
+  blogMainImages: BlogMainImages;
 
   @Column({ nullable: true })
   userId: string;

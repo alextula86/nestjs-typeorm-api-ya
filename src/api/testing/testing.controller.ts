@@ -20,6 +20,8 @@ export class TestingController {
         comments,
         post_like_status,
         posts,
+        wallpapers,
+        blog_main_image,
         blogs,
         quiz_questions,
         quiz_question_answer,

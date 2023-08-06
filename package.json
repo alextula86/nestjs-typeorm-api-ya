@@ -17,9 +17,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "ngrok:dev": "ngrok http 5000 --host-header=\"localhost:5000\""
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.382.0",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
@@ -40,6 +42,7 @@
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.10.0",
+    "ngrok": "^5.0.0-beta.2",
     "nodemailer": "^6.9.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
@@ -47,6 +50,7 @@
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "sharp": "^0.32.4",
     "typeorm": "^0.3.14",
     "uuid": "^9.0.0"
   },
@@ -61,9 +65,11 @@
     "@types/jest": "29.2.4",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/lodash": "^4.14.191",
+    "@types/multer": "^1.4.7",
     "@types/node": "18.11.18",
     "@types/nodemailer": "^6.4.7",
     "@types/passport-local": "^1.0.35",
+    "@types/sharp": "^0.32.0",
     "@types/supertest": "^2.0.11",
     "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

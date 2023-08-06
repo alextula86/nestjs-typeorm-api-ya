@@ -14,8 +14,11 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { AuthBearerGuard } from '../../guards';
 import { ResponseViewModelDetail } from '../../types';
@@ -34,6 +37,14 @@ import { QueryCommentModel, CommentByPostViewModel } from '../comment/types';
 
 import { BanQueryRepository } from '../ban/ban.query.repository';
 import { QueryVannedUserModel, BannedUserViewModel } from '../ban/types';
+
+import { WallpaperQueryRepository } from '../wallpaper/wallpaper.query.repository';
+import { SaveWallpaperByBlogCommand } from '../wallpaper/use-cases';
+import { WallpaperViewModel } from '../wallpaper/types';
+
+import { BlogMainImageQueryRepository } from '../blogMainImage/blogMainImage.query.repository';
+import { SaveBlogMainImageByBlogCommand } from '../blogMainImage/use-cases';
+import { BlogMainImageViewModel } from '../blogMainImage/types';
 
 import {
   CreateBlogCommand,
@@ -56,6 +67,8 @@ export class BloggerController {
     private readonly commentQueryRepository: CommentQueryRepository,
     private readonly banQueryRepository: BanQueryRepository,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly wallpaperQueryRepository: WallpaperQueryRepository,
+    private readonly blogMainImageQueryRepository: BlogMainImageQueryRepository,
   ) {}
   // Получение списка блогеров привязанных к пользователю
   @Get('blogs')
@@ -107,6 +120,7 @@ export class BloggerController {
     @Req() request: Request & { userId: string },
     @Body() createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModel> {
+    console.log('createBlogDto', createBlogDto);
     // Создаем блогера
     const { blogId, statusCode } = await this.commandBus.execute(
       new CreateBlogCommand(request.userId, createBlogDto),
@@ -311,5 +325,75 @@ export class BloggerController {
     if (statusCode === HttpStatus.FORBIDDEN) {
       throw new ForbiddenException();
     }
+  }
+  // Загрузка картинки обоев для блогера
+  @Post('blogs/:blogId/images/wallpaper')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('file'))
+  async UploadWallpaperByBlogId(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<WallpaperViewModel> {
+    // Сохраняем загруженную картинку обоев для блогера
+    const { wallpaperId, statusCode, statusMessage } =
+      await this.commandBus.execute(
+        new SaveWallpaperByBlogCommand(request.userId, blogId, file),
+      );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    // Проверяем принадлежит ли обновляемый блогер пользователю
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+    // Если возникли ошибки валидации файла, возвращаем ошибку 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+    // Порлучаем созданную запись по картинке в формате ответа пользователю
+    const foundWallpaper =
+      await this.wallpaperQueryRepository.findBloggerImages(
+        blogId,
+        wallpaperId,
+      );
+    // Возвращаем созданную запись по картинке
+    return foundWallpaper;
+  }
+  // Загрузка иконки для блогера
+  @Post('blogs/:blogId/images/main')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('file'))
+  async UploadMainImagesByBlogId(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<BlogMainImageViewModel> {
+    // Сохраняем загруженную иконку для блогера
+    const { blogMainImageId, statusCode, statusMessage } =
+      await this.commandBus.execute(
+        new SaveBlogMainImageByBlogCommand(request.userId, blogId, file),
+      );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    // Проверяем принадлежит ли обновляемый блогер пользователю
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+    // Если возникли ошибки валидации файла, возвращаем ошибку 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+    // Порлучаем созданную запись по иконке в формате ответа пользователю
+    const foundBlogMainImage =
+      await this.blogMainImageQueryRepository.findBloggerImages(
+        blogId,
+        blogMainImageId,
+      );
+    // Возвращаем созданную запись по иконке
+    return foundBlogMainImage;
   }
 }
