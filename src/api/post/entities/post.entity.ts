@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../user/entities/user.entity';
 import { Blogs } from '../../blog/entities/blog.entity';
+import { PostMainImages } from '../../postMainImage/entities/postMainImages.entity';
 
 @Entity()
 export class Posts {
@@ -30,6 +31,11 @@ export class Posts {
 
   @ManyToOne(() => Blogs, { nullable: false })
   blog: Blogs;
+
+  @ManyToOne(() => PostMainImages, (postMainImages) => postMainImages.post, {
+    onDelete: 'CASCADE',
+  })
+  postMainImages: PostMainImages;
 
   @ManyToOne(() => Users, { nullable: false })
   user: Users;

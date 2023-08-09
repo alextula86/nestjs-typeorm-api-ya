@@ -55,7 +55,7 @@ export class BlogMainImageRepository {
     return madeBlogMainImage.raw[0];
   }
   // Обновляем картинку для блога по идентификатору картинки
-  async updateBlogMainImageByBlogId(
+  async updateBlogMainImageById(
     blogMainImageId: string,
     { url, width, height, fileSize }: UpdateBlogMainImageModel,
   ): Promise<boolean> {

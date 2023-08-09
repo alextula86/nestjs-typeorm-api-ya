@@ -10,7 +10,7 @@ import { UserRepository } from '../../user/user.repository';
 
 import { BlogMainImageRepository } from '../blogMainImage.repository';
 
-export class SaveBlogMainImageByBlogCommand {
+export class SaveBlogMainImageCommand {
   constructor(
     public userId: string,
     public blogId: string,
@@ -18,9 +18,9 @@ export class SaveBlogMainImageByBlogCommand {
   ) {}
 }
 
-@CommandHandler(SaveBlogMainImageByBlogCommand)
-export class SaveBlogMainImageByBlogUseCase
-  implements ICommandHandler<SaveBlogMainImageByBlogCommand>
+@CommandHandler(SaveBlogMainImageCommand)
+export class SaveBlogMainImageUseCase
+  implements ICommandHandler<SaveBlogMainImageCommand>
 {
   constructor(
     private readonly blogRepository: BlogRepository,
@@ -30,7 +30,7 @@ export class SaveBlogMainImageByBlogUseCase
     private readonly sharpAdapter: SharpAdapter,
   ) {}
   // Загрузка иконки для блогера
-  async execute(command: SaveBlogMainImageByBlogCommand): Promise<{
+  async execute(command: SaveBlogMainImageCommand): Promise<{
     blogMainImageId: string;
     statusCode: HttpStatus;
     statusMessage: [{ message: string; field?: string }];
@@ -80,32 +80,32 @@ export class SaveBlogMainImageByBlogUseCase
         ],
       };
     }
-    // Массив для хранения ошибок валидации картинки
+    // Массив для хранения ошибок валидации иконки
     const messages: MessageType[] = [] as unknown as MessageType[];
-    // Получаем метадату картинки
+    // Получаем метадату иконки
     const metadata = await this.sharpAdapter.metadataFile(file.buffer);
-    // Если размер картинки превышает 100KB, возвращаем ошибку 400
+    // Если размер иконки превышает 100KB, возвращаем ошибку 400
     if (metadata.size > 100000) {
       messages.push({
         message: `The image size should not exceed 100 KB`,
         field: 'file',
       });
     }
-    // Если ширина картинки не равна 156px, возвращаем ошибку 400
+    // Если ширина иконки не равна 156px, возвращаем ошибку 400
     if (metadata.width !== 156) {
       messages.push({
         message: `The image width should be equal to 156 px`,
         field: 'file',
       });
     }
-    // Если ширина картинки не равна 156px, возвращаем ошибку 400
+    // Если ширина иконки не равна 156px, возвращаем ошибку 400
     if (metadata.height !== 156) {
       messages.push({
         message: `The image height should be equal to 156 px`,
         field: 'file',
       });
     }
-    // Если формат картинки не равен png, jpg, jpeg, возвращаем ошибку 400
+    // Если формат иконки не равен png, jpg, jpeg, возвращаем ошибку 400
     if (!['png', 'jpg', 'jpeg'].includes(metadata.format)) {
       messages.push({
         message: `The file format must be png or jpg or jpeg`,
@@ -119,18 +119,18 @@ export class SaveBlogMainImageByBlogUseCase
         statusMessage: messages,
       };
     }*/
-    // Конвертируем буфер картинки в формат webp для хранения на сервере
+    // Конвертируем буфер иконки в формат webp для хранения на сервере
     const webp = await this.sharpAdapter.convertToWebP(file.buffer);
-    // Формируем урл картинки
+    // Формируем урл иконки
     const url = `content/blogs_mains/${blogId}/${blogId}_main`;
-    // Сохраняем картинку в storage s3
+    // Сохраняем иконку в storage s3
     await this.s3StorageAdapter.saveImage(webp, url);
-    // Ищем картинку для текущего блогера
+    // Ищем иконку для текущего блогера
     const fondBlogMainImageByBlogId =
       await this.blogMainImageRepository.findBlogMainImageByBlogId(blogId);
-    // Если картинка найдена, то обновляем ее в базе, чтобы не плодить разные картинки для одного блогера
+    // Если иконка найдена, то обновляем ее в базе, чтобы не плодить разные иконки для одного блогера
     if (!isEmpty(fondBlogMainImageByBlogId)) {
-      await this.blogMainImageRepository.updateBlogMainImageByBlogId(
+      await this.blogMainImageRepository.updateBlogMainImageById(
         fondBlogMainImageByBlogId.id,
         {
           url,
@@ -146,7 +146,7 @@ export class SaveBlogMainImageByBlogUseCase
         statusMessage: [{ message: `File saved` }],
       };
     }
-    // Если картинка для блогера не найдена, то сохраняем ее в базе
+    // Если иконка для блогера не найдена, то сохраняем ее в базе
     const createdBlogMainImage =
       await this.blogMainImageRepository.createBlogMainImageByBlogId({
         url,
@@ -157,7 +157,7 @@ export class SaveBlogMainImageByBlogUseCase
         userId: foundUser.id,
       });
 
-    // Возвращаем идентификатор сохраненной картинки обоев для бллогера
+    // Возвращаем идентификатор сохраненной иконки обоев для бллогера
     return {
       blogMainImageId: createdBlogMainImage.id,
       statusCode: HttpStatus.CREATED,

@@ -28,6 +28,7 @@ import { PairQuizGameResult } from './api/pairQuizGameResult/entities';
 import { PairQuizGameBonus } from './api/pairQuizGameBonus/entities';
 import { Wallpapers } from './api/wallpaper/entities';
 import { BlogMainImages } from './api/blogMainImage/entities';
+import { PostMainImages } from './api/postMainImage/entities';
 
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
@@ -52,6 +53,7 @@ import { PostLikeStatusService } from './api/postLikeStatus/postLikeStatus.servi
 import { QuizQuestionService } from './api/quizQuestion/quizQuestion.service';
 import { WallpaperService } from './api/wallpaper/wallpaper.service';
 import { BlogMainImageService } from './api/blogMainImage/blogMainImage.service';
+import { PostMainImageService } from './api/postMainImage/postMainImage.service';
 
 import {
   LoginUseCase,
@@ -106,7 +108,8 @@ import {
 import { ConnectionPairQuizGameUseCase } from './api/pairQuizGame/use-cases';
 import { CreateQuizQuestionAnswerUseCase } from './api/quizQuestionAnswers/use-cases';
 import { SaveWallpaperByBlogUseCase } from './api/wallpaper/use-cases';
-import { SaveBlogMainImageByBlogUseCase } from './api/blogMainImage/use-cases';
+import { SaveBlogMainImageUseCase } from './api/blogMainImage/use-cases';
+import { SavePostMainImageUseCase } from './api/postMainImage/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -124,6 +127,7 @@ import { PairQuizGameResultRepository } from './api/pairQuizGameResult/pairQuizG
 import { PairQuizGameBonusRepository } from './api/pairQuizGameBonus/pairQuizGameBonus.repository';
 import { WallpaperRepository } from './api/wallpaper/wallpaper.repository';
 import { BlogMainImageRepository } from './api/blogMainImage/blogMainImage.repository';
+import { PostMainImageRepository } from './api/postMainImage/postMainImage.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -137,6 +141,7 @@ import { QuizQuestionAnswerQueryRepository } from './api/quizQuestionAnswers/qui
 import { PairQuizGameQueryRepository } from './api/pairQuizGame/pairQuizGame.query.repository';
 import { WallpaperQueryRepository } from './api/wallpaper/wallpaper.query.repository';
 import { BlogMainImageQueryRepository } from './api/blogMainImage/blogMainImage.query.repository';
+import { PostMainImageQueryRepository } from './api/postMainImage/postMainImage.query.repository';
 
 import { EmailAdapter, S3StorageAdapter, SharpAdapter } from './adapters';
 import { EmailManager } from './managers';
@@ -250,7 +255,14 @@ const blogMainImageProviders = [
   BlogMainImageService,
   BlogMainImageRepository,
   BlogMainImageQueryRepository,
-  SaveBlogMainImageByBlogUseCase,
+  SaveBlogMainImageUseCase,
+];
+
+const postMainImageProviders = [
+  PostMainImageService,
+  PostMainImageRepository,
+  PostMainImageQueryRepository,
+  SavePostMainImageUseCase,
 ];
 
 const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
@@ -288,6 +300,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
       PairQuizGameBonus,
       Wallpapers,
       BlogMainImages,
+      PostMainImages,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -336,6 +349,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
     ...pairQuizGameBonusProviders,
     ...wallpaperProviders,
     ...blogMainImageProviders,
+    ...postMainImageProviders,
     ...adapters,
   ],
 })

@@ -67,31 +67,37 @@ export class BlogQueryRepository {
       pageSize: size,
     });
   }
-  async findBlogById(blogId: string): Promise<{
-    id: string;
-    name: string;
-    description: string;
-    websiteUrl: string;
-    isMembership: boolean;
-    createdAt: string;
-  } | null> {
+  async findBlogById(blogId: string): Promise<BlogViewModel> {
     const query = `
       SELECT
-        "id",
-        "name",
-        "description",
-        "websiteUrl",
-        "isMembership",
-        "createdAt"
+        blogs."id",
+        blogs."name",
+        blogs."description",
+        blogs."websiteUrl",
+        blogs."isMembership",
+        blogs."createdAt",
+        wallpapers."url" as "wallpaperUrl",
+        wallpapers."width" as "wallpaperWidth",
+        wallpapers."height" as "wallpaperHeight",
+        wallpapers."fileSize" as "wallpaperFileSize",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              bmp."url", 
+              bmp."width", 
+              bmp."height",
+              bmp."fileSize"
+            FROM blog_main_images as bmp
+            WHERE bmp."blogId" = blogs."id"
+          ) e
+        ) as "blogMainImages"        
       FROM blogs
-      WHERE "id" = '${blogId}' AND "isBanned" = false;
+      LEFT JOIN wallpapers ON wallpapers."blogId" = blogs."id"
+      WHERE blogs."id" = '${blogId}' AND blogs."isBanned" = false;
     `;
 
     const foundBlog = await this.dataSource.query(query);
-
-    if (isEmpty(foundBlog)) {
-      return null;
-    }
 
     return this._getBlogViewModel(foundBlog[0]);
   }
@@ -230,6 +236,24 @@ export class BlogQueryRepository {
       websiteUrl: blog.websiteUrl,
       isMembership: blog.isMembership,
       createdAt: blog.createdAt,
+      images: {
+        wallpaper: {
+          url: blog.wallpaperUrl
+            ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${blog.wallpaperUrl}`
+            : '',
+          width: blog.wallpaperWidth ? blog.wallpaperWidth : 0,
+          height: blog.wallpaperHeight ? blog.wallpaperHeight : 0,
+          fileSize: blog.wallpaperFileSize ? blog.wallpaperFileSize : 0,
+        },
+        main: !isEmpty(blog.blogMainImages)
+          ? blog.blogMainImages.map((item) => ({
+              url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.url}`,
+              width: item.width,
+              height: item.height,
+              fileSize: item.fileSize,
+            }))
+          : [],
+      },
     };
   }
   _getBlogsViewModelDetail({
@@ -251,6 +275,24 @@ export class BlogQueryRepository {
         websiteUrl: item.websiteUrl,
         isMembership: item.isMembership,
         createdAt: item.createdAt,
+        images: {
+          wallpaper: {
+            url: item.wallpaperUrl
+              ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.wallpaperUrl}`
+              : '',
+            width: item.wallpaperWidth ? item.wallpaperWidth : 0,
+            height: item.wallpaperHeight ? item.wallpaperHeight : 0,
+            fileSize: item.wallpaperFileSize ? item.wallpaperFileSize : 0,
+          },
+          main: !isEmpty(item.blogMainImages)
+            ? item.blogMainImages.map((i) => ({
+                url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${i.url}`,
+                width: i.width,
+                height: i.height,
+                fileSize: i.fileSize,
+              }))
+            : [],
+        },
       })),
     };
   }

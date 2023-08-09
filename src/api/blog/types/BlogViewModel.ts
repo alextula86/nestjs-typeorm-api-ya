@@ -1,3 +1,5 @@
+import { ImageType } from '../../../types';
+
 export type BlogViewModel = {
   id: string;
   name: string;
@@ -5,4 +7,8 @@ export type BlogViewModel = {
   websiteUrl: string;
   isMembership: boolean;
   createdAt: string;
+  images: {
+    wallpaper: ImageType;
+    main: ImageType[];
+  };
 };

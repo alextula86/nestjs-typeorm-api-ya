@@ -12,7 +12,7 @@ export class BlogMainImageQueryRepository {
     blogId: string,
     blogMainImageId: string,
   ): Promise<BlogMainImageViewModel> {
-    const mainImages = await this.dataSource.query(`
+    const wallpaper = await this.dataSource.query(`
       SELECT 
         "url", 
         "width", 
@@ -22,7 +22,7 @@ export class BlogMainImageQueryRepository {
       WHERE "blogId" = '${blogId}';
     `);
 
-    const wallpaper = await this.dataSource.query(`
+    const mainImages = await this.dataSource.query(`
       SELECT 
         "url", 
         "width", 
@@ -32,11 +32,11 @@ export class BlogMainImageQueryRepository {
       WHERE "id" = '${blogMainImageId}';
     `);
 
-    return this._getMainImageViewModel(mainImages, wallpaper[0]);
+    return this._getMainImageViewModel(wallpaper[0], mainImages);
   }
   _getMainImageViewModel(
-    mainImages: ImageType[],
     wallpaper: ImageType,
+    mainImages: ImageType[],
   ): BlogMainImageViewModel {
     return {
       wallpaper: {

@@ -43,8 +43,12 @@ import { SaveWallpaperByBlogCommand } from '../wallpaper/use-cases';
 import { WallpaperViewModel } from '../wallpaper/types';
 
 import { BlogMainImageQueryRepository } from '../blogMainImage/blogMainImage.query.repository';
-import { SaveBlogMainImageByBlogCommand } from '../blogMainImage/use-cases';
+import { SaveBlogMainImageCommand } from '../blogMainImage/use-cases';
 import { BlogMainImageViewModel } from '../blogMainImage/types';
+
+import { PostMainImageQueryRepository } from '../postMainImage/postMainImage.query.repository';
+import { SavePostMainImageCommand } from '../postMainImage/use-cases';
+import { PostMainImageViewModel } from '../postMainImage/types';
 
 import {
   CreateBlogCommand,
@@ -69,6 +73,7 @@ export class BloggerController {
     private readonly postQueryRepository: PostQueryRepository,
     private readonly wallpaperQueryRepository: WallpaperQueryRepository,
     private readonly blogMainImageQueryRepository: BlogMainImageQueryRepository,
+    private readonly postMainImageQueryRepository: PostMainImageQueryRepository,
   ) {}
   // Получение списка блогеров привязанных к пользователю
   @Get('blogs')
@@ -373,7 +378,7 @@ export class BloggerController {
     // Сохраняем загруженную иконку для блогера
     const { blogMainImageId, statusCode, statusMessage } =
       await this.commandBus.execute(
-        new SaveBlogMainImageByBlogCommand(request.userId, blogId, file),
+        new SaveBlogMainImageCommand(request.userId, blogId, file),
       );
     // Если блогер не найден, возвращаем ошибку 404
     if (statusCode === HttpStatus.NOT_FOUND) {
@@ -395,5 +400,41 @@ export class BloggerController {
       );
     // Возвращаем созданную запись по иконке
     return foundBlogMainImage;
+  }
+  // Загрузка иконки для поста
+  @Post('blogs/:blogId/post/postId/images/main')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('file'))
+  async UploadMainImagesByPostId(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<PostMainImageViewModel> {
+    // Сохраняем загруженную иконку для поста
+    const { statusCode, statusMessage } = await this.commandBus.execute(
+      new SavePostMainImageCommand(request.userId, blogId, postId, file),
+    );
+    // Если пост не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+    // Проверяем принадлежит ли обновляемый блогер пользователю
+    if (statusCode === HttpStatus.FORBIDDEN) {
+      throw new ForbiddenException();
+    }
+    // Если возникли ошибки валидации файла, возвращаем ошибку 400
+    if (statusCode === HttpStatus.BAD_REQUEST) {
+      throw new BadRequestException(statusMessage);
+    }
+    // Порлучаем созданную запись по иконке в формате ответа пользователю
+    const foundPostMainImages =
+      await this.postMainImageQueryRepository.findPostImages(postId);
+    // Возвращаем созданную запись по иконке
+    return foundPostMainImages;
   }
 }
