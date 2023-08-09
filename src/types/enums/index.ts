@@ -6,3 +6,4 @@ export * from './GameStatuses';
 export * from './ResultGameStatus';
 export * from './AnswerStatus';
 export * from './SortDirection';
+export * from './PostMainImageType';

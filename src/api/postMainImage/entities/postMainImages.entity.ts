@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { PostMainImageType } from '../../../types';
 import { Posts } from '../../post/entities/post.entity';
 
 @Entity()
@@ -27,6 +28,13 @@ export class PostMainImages {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  @Column({
+    type: 'enum',
+    enum: PostMainImageType,
+    default: PostMainImageType.ORIGINAL,
+  })
+  type: PostMainImageType;
 
   @Column({ nullable: true })
   postId: string;

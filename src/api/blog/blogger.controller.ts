@@ -402,7 +402,7 @@ export class BloggerController {
     return foundBlogMainImage;
   }
   // Загрузка иконки для поста
-  @Post('blogs/:blogId/post/postId/images/main')
+  @Post('blogs/:blogId/post/:postId/images/main')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file'))
   async UploadMainImagesByPostId(

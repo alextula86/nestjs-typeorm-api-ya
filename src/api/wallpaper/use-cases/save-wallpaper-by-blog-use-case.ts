@@ -33,7 +33,7 @@ export class SaveWallpaperByBlogUseCase
   async execute(command: SaveWallpaperByBlogCommand): Promise<{
     wallpaperId: string;
     statusCode: HttpStatus;
-    statusMessage: [{ message: string; field?: string }];
+    statusMessage: MessageType[];
   }> {
     const { userId, blogId, file } = command;
     // Ищем блогера, к которому прикреплен картинку
@@ -112,13 +112,13 @@ export class SaveWallpaperByBlogUseCase
         field: 'file',
       });
     }
-    /*if (!isEmpty(messages)) {
+    if (!isEmpty(messages)) {
       return {
         wallpaperId: null,
         statusCode: HttpStatus.BAD_REQUEST,
         statusMessage: messages,
       };
-    }*/
+    }
     // Конвертируем буфер картинки в формат webp для хранения на сервере
     const webp = await this.sharpAdapter.convertToWebP(file.buffer);
     // Формируем урл картинки

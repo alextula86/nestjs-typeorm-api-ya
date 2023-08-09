@@ -33,6 +33,7 @@ export class PostMainImageRepository {
     height,
     fileSize,
     postId,
+    type,
   }: MakePostMainImageModel): Promise<{ id: string }> {
     const madePostMainImage = await this.postMainImageRepository
       .createQueryBuilder()
@@ -44,6 +45,7 @@ export class PostMainImageRepository {
         height,
         fileSize,
         postId,
+        type,
       })
       .returning(['id'])
       .execute();
@@ -52,14 +54,15 @@ export class PostMainImageRepository {
   }
   // Обновляем иконку для поста по идентификатору
   async updatePostMainImage(
-    postMainImageId: string,
-    { url, width, height, fileSize }: UpdatePostMainImageModel,
+    postId: string,
+    { url, width, height, fileSize, type }: UpdatePostMainImageModel,
   ): Promise<boolean> {
     await this.postMainImageRepository
       .createQueryBuilder()
       .update(PostMainImages)
       .set({ url, width, height, fileSize })
-      .where('id = :postMainImageId', { postMainImageId })
+      .where('id = :postId', { postId })
+      .andWhere('type = :type', { type })
       .execute();
 
     return true;

@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
 import { S3StorageAdapter, SharpAdapter } from '../../../adapters';
-import { MessageType } from '../../../types';
+import { MessageType, PostMainImageType } from '../../../types';
 
 import { UserRepository } from '../../user/user.repository';
 import { BlogRepository } from '../../blog/blog.repository';
@@ -35,7 +35,7 @@ export class SavePostMainImageUseCase
   // Загрузка иконки для поста
   async execute(command: SavePostMainImageCommand): Promise<{
     statusCode: HttpStatus;
-    statusMessage: [{ message: string; field?: string }];
+    statusMessage: MessageType[];
   }> {
     const { userId, blogId, postId, file } = command;
     // Ищем пост по идентификатору
@@ -95,45 +95,46 @@ export class SavePostMainImageUseCase
     }
     // Массив для хранения ошибок валидации иконки
     const messages: MessageType[] = [] as unknown as MessageType[];
-    // Получаем метадату original иконки
-    const metadataOriginal = await this.sharpAdapter.metadataFile(file.buffer);
+    // Получаем метадату иконки
+    const metadata = await this.sharpAdapter.metadataFile(file.buffer);
     // Если размер иконки превышает 100KB, возвращаем ошибку 400
-    if (metadataOriginal.size > 100000) {
+    if (metadata.size > 100000) {
       messages.push({
         message: `The image size should not exceed 100 KB`,
         field: 'file',
       });
     }
     // Если ширина иконки не равна 940px, возвращаем ошибку 400
-    if (metadataOriginal.width !== 940) {
+    if (metadata.width !== 940) {
       messages.push({
         message: `The image width should be equal to 940 px`,
         field: 'file',
       });
     }
     // Если ширина иконки не равна 432px, возвращаем ошибку 400
-    if (metadataOriginal.height !== 432) {
+    if (metadata.height !== 432) {
       messages.push({
         message: `The image height should be equal to 432 px`,
         field: 'file',
       });
     }
     // Если формат иконки не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['png', 'jpg', 'jpeg'].includes(metadataOriginal.format)) {
+    if (!['png', 'jpg', 'jpeg'].includes(metadata.format)) {
       messages.push({
         message: `The file format must be png or jpg or jpeg`,
         field: 'file',
       });
     }
-    /*if (!isEmpty(messages)) {
+    if (!isEmpty(messages)) {
       return {
-        postMainImageId: null,
         statusCode: HttpStatus.BAD_REQUEST,
         statusMessage: messages,
       };
-    }*/
+    }
     // Конвертируем буфер original иконки в формат webp для хранения на сервере
     const webpOriginal = await this.sharpAdapter.convertToWebP(file.buffer);
+    // Получаем метадату original иконки
+    const metadataOriginal = await this.sharpAdapter.metadataFile(webpOriginal);
     // Формируем урл original иконки
     const urlOriginal = `content/posts_mains/${postId}/${postId}_main_original`;
     // Сохраняем иконку в storage s3
@@ -145,10 +146,10 @@ export class SavePostMainImageUseCase
       300,
       180,
     );
-    // Получаем метадату middle иконки
-    const metadataMiddle = await this.sharpAdapter.metadataFile(mainMiddle);
     // Конвертируем буфер middle иконки в формат webp для хранения на сервере
     const webpMiddle = await this.sharpAdapter.convertToWebP(mainMiddle);
+    // Получаем метадату middle иконки
+    const metadataMiddle = await this.sharpAdapter.metadataFile(webpMiddle);
     // Формируем урл middle иконки
     const urlMiddle = `content/posts_mains/${postId}/${postId}_main_middle`;
     // Сохраняем иконку в storage s3
@@ -156,49 +157,43 @@ export class SavePostMainImageUseCase
 
     // Ресайз иконки в small варианте
     const mainSmall = await this.sharpAdapter.resizeFile(file.buffer, 149, 96);
-    // Получаем метадату small иконки
-    const metadataSmall = await this.sharpAdapter.metadataFile(mainSmall);
     // Конвертируем буфер small иконки в формат webp для хранения на сервере
     const webpSmall = await this.sharpAdapter.convertToWebP(mainSmall);
+    // Получаем метадату small иконки
+    const metadataSmall = await this.sharpAdapter.metadataFile(webpSmall);
     // Формируем урл small иконки
     const urlSmall = `content/posts_mains/${postId}/${postId}_main_small`;
     // Сохраняем иконку в storage s3
     await this.s3StorageAdapter.saveImage(webpSmall, urlSmall);
 
     // Ищем иконку для текущего поста
-    const fondPostMainImageByBlogId =
+    const fondPostMainImages =
       await this.postMainImageRepository.findPostMainImage(postId);
     // Если иконка найдена, то обновляем ее в базе, чтобы не плодить разные иконки для одного поста
-    if (!isEmpty(fondPostMainImageByBlogId)) {
-      await this.postMainImageRepository.updatePostMainImage(
-        fondPostMainImageByBlogId.id,
-        {
-          url: urlOriginal,
-          width: metadataOriginal.width,
-          height: metadataOriginal.height,
-          fileSize: metadataOriginal.size,
-        },
-      );
+    if (!isEmpty(fondPostMainImages)) {
+      await this.postMainImageRepository.updatePostMainImage(postId, {
+        url: urlOriginal,
+        width: metadataOriginal.width,
+        height: metadataOriginal.height,
+        fileSize: metadataOriginal.size,
+        type: PostMainImageType.ORIGINAL,
+      });
 
-      await this.postMainImageRepository.updatePostMainImage(
-        fondPostMainImageByBlogId.id,
-        {
-          url: urlMiddle,
-          width: metadataMiddle.width,
-          height: metadataMiddle.height,
-          fileSize: metadataMiddle.size,
-        },
-      );
+      await this.postMainImageRepository.updatePostMainImage(postId, {
+        url: urlMiddle,
+        width: metadataMiddle.width,
+        height: metadataMiddle.height,
+        fileSize: metadataMiddle.size,
+        type: PostMainImageType.MIDDLE,
+      });
 
-      await this.postMainImageRepository.updatePostMainImage(
-        fondPostMainImageByBlogId.id,
-        {
-          url: urlSmall,
-          width: metadataSmall.width,
-          height: metadataSmall.height,
-          fileSize: metadataSmall.size,
-        },
-      );
+      await this.postMainImageRepository.updatePostMainImage(postId, {
+        url: urlSmall,
+        width: metadataSmall.width,
+        height: metadataSmall.height,
+        fileSize: metadataSmall.size,
+        type: PostMainImageType.SMALL,
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
@@ -212,6 +207,7 @@ export class SavePostMainImageUseCase
       height: metadataOriginal.height,
       fileSize: metadataOriginal.size,
       postId: foundPost.id,
+      type: PostMainImageType.ORIGINAL,
     });
 
     await this.postMainImageRepository.createPostMainImage({
@@ -220,6 +216,7 @@ export class SavePostMainImageUseCase
       height: metadataMiddle.height,
       fileSize: metadataMiddle.size,
       postId: foundPost.id,
+      type: PostMainImageType.MIDDLE,
     });
 
     await this.postMainImageRepository.createPostMainImage({
@@ -228,6 +225,7 @@ export class SavePostMainImageUseCase
       height: metadataSmall.height,
       fileSize: metadataSmall.size,
       postId: foundPost.id,
+      type: PostMainImageType.SMALL,
     });
 
     // Возвращаем идентификатор сохраненной иконки обоев для бллогера

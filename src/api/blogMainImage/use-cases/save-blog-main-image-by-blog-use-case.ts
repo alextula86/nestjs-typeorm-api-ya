@@ -33,7 +33,7 @@ export class SaveBlogMainImageUseCase
   async execute(command: SaveBlogMainImageCommand): Promise<{
     blogMainImageId: string;
     statusCode: HttpStatus;
-    statusMessage: [{ message: string; field?: string }];
+    statusMessage: MessageType[];
   }> {
     const { userId, blogId, file } = command;
     // Ищем блогера, к которому прикреплен иконку
@@ -112,13 +112,13 @@ export class SaveBlogMainImageUseCase
         field: 'file',
       });
     }
-    /*if (!isEmpty(messages)) {
+    if (!isEmpty(messages)) {
       return {
         blogMainImageId: null,
         statusCode: HttpStatus.BAD_REQUEST,
         statusMessage: messages,
       };
-    }*/
+    }
     // Конвертируем буфер иконки в формат webp для хранения на сервере
     const webp = await this.sharpAdapter.convertToWebP(file.buffer);
     // Формируем урл иконки
