@@ -33,7 +33,6 @@ export class WallpaperRepository {
     height,
     fileSize,
     blogId,
-    userId,
   }: MakeWallpaperModel): Promise<{ id: string }> {
     const madeWallpaper = await this.wallpaperRepository
       .createQueryBuilder()
@@ -45,7 +44,6 @@ export class WallpaperRepository {
         height,
         fileSize,
         blogId,
-        userId,
       })
       .returning(['id'])
       .execute();

@@ -154,7 +154,6 @@ export class SaveBlogMainImageUseCase
         height: metadata.height,
         fileSize: metadata.size,
         blogId: foundBlog.id,
-        userId: foundUser.id,
       });
 
     // Возвращаем идентификатор сохраненной иконки обоев для бллогера

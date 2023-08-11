@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Users } from '../../user/entities';
@@ -36,12 +37,12 @@ export class Blogs {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @ManyToOne(() => Wallpapers, (wallpaper) => wallpaper.blog, {
+  @OneToMany(() => Wallpapers, (wallpaper) => wallpaper.blog, {
     onDelete: 'CASCADE',
   })
   wallpaper: Wallpapers;
 
-  @ManyToOne(() => BlogMainImages, (blogMainImages) => blogMainImages.blog, {
+  @OneToMany(() => BlogMainImages, (blogMainImages) => blogMainImages.blog, {
     onDelete: 'CASCADE',
   })
   blogMainImages: BlogMainImages;

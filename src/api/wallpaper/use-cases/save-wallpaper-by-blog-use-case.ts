@@ -154,7 +154,6 @@ export class SaveWallpaperByBlogUseCase
         height: metadata.height,
         fileSize: metadata.size,
         blogId: foundBlog.id,
-        userId: foundUser.id,
       });
 
     // Возвращаем идентификатор сохраненной картинки обоев для бллогера

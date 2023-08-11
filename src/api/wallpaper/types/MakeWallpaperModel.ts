@@ -4,5 +4,4 @@ export type MakeWallpaperModel = {
   height: number;
   fileSize: number;
   blogId: string;
-  userId: string;
 };

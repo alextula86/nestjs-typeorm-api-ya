@@ -35,7 +35,6 @@ export class BlogMainImageRepository {
     height,
     fileSize,
     blogId,
-    userId,
   }: MakeBlogMainImageModel): Promise<{ id: string }> {
     const madeBlogMainImage = await this.blogMainImageRepository
       .createQueryBuilder()
@@ -47,7 +46,6 @@ export class BlogMainImageRepository {
         height,
         fileSize,
         blogId,
-        userId,
       })
       .returning(['id'])
       .execute();

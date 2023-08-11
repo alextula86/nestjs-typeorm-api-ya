@@ -36,7 +36,7 @@ export class PostMainImages {
   })
   type: PostMainImageType;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   postId: string;
 
   @ManyToOne(() => Posts, (post) => post.postMainImages, { nullable: false })

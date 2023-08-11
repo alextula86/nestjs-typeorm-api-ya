@@ -15,8 +15,6 @@ import { PairQuizGame } from '../../pairQuizGame/entities';
 import { QuizQuestionAnswer } from '../../quizQuestionAnswers/entities';
 import { PairQuizGameResult } from '../../pairQuizGameResult/entities';
 import { PairQuizGameBonus } from '../../pairQuizGameBonus/entities';
-import { Wallpapers } from '../../wallpaper/entities';
-import { BlogMainImages } from '../../blogMainImage/entities';
 
 @Entity()
 export class Users {
@@ -66,16 +64,6 @@ export class Users {
     onDelete: 'CASCADE',
   })
   blog: Blogs;
-
-  @OneToMany(() => Wallpapers, (wallpaper) => wallpaper.user, {
-    onDelete: 'CASCADE',
-  })
-  wallpaper: Wallpapers;
-
-  @OneToMany(() => BlogMainImages, (blogMainImages) => blogMainImages.user, {
-    onDelete: 'CASCADE',
-  })
-  blogMainImages: BlogMainImages;
 
   @OneToMany(() => PairQuizGame, (pairQuizGame) => pairQuizGame.firstPlayer, {
     onDelete: 'CASCADE',

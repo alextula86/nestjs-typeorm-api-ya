@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Users } from '../../user/entities/user.entity';
 import { Blogs } from '../../blog/entities/blog.entity';
 
 @Entity()
@@ -29,17 +28,10 @@ export class Wallpapers {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   blogId: string;
 
   @ManyToOne(() => Blogs, (blog) => blog.wallpaper, { nullable: false })
   @JoinColumn({ name: 'blogId' })
   blog: Blogs;
-
-  @Column({ nullable: true })
-  userId: string;
-
-  @ManyToOne(() => Users, (user) => user.wallpaper, { nullable: false })
-  @JoinColumn({ name: 'userId' })
-  user: Users;
 }

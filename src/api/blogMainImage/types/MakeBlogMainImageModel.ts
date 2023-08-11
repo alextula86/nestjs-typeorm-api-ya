@@ -4,5 +4,4 @@ export type MakeBlogMainImageModel = {
   height: number;
   fileSize: number;
   blogId: string;
-  userId: string;
 };
