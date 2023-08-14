@@ -122,14 +122,32 @@ export class QuizQuestionAnswerRepository {
     quizQuestionId: string;
     score: number;
   }): Promise<{ id: string }> {
-    const madeQuizQuestionAnswers = await this.quizQuestionAnswerRepository
-      .createQueryBuilder()
-      .update(QuizQuestionAnswer)
-      .set({ score })
-      .where('userId = :userId', { userId })
-      .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
-      .andWhere('quizQuestionId = :quizQuestionId', { quizQuestionId })
-      .execute();
-    return madeQuizQuestionAnswers.raw[0];
+    const updatedQuizQuestionAnswerScore =
+      await this.quizQuestionAnswerRepository
+        .createQueryBuilder()
+        .update(QuizQuestionAnswer)
+        .set({ score })
+        .where('userId = :userId', { userId })
+        .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
+        .andWhere('quizQuestionId = :quizQuestionId', { quizQuestionId })
+        .execute();
+    return updatedQuizQuestionAnswerScore.raw[0];
+  }
+  async resetQuizQuestionAnswerUser({
+    userId,
+    pairQuizGameId,
+  }: {
+    userId: string;
+    pairQuizGameId: string;
+  }): Promise<{ id: string }> {
+    const resetedQuizQuestionAnswerUser =
+      await this.quizQuestionAnswerRepository
+        .createQueryBuilder()
+        .update(QuizQuestionAnswer)
+        .set({ score: 0 })
+        .where('userId = :userId', { userId })
+        .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
+        .execute();
+    return resetedQuizQuestionAnswerUser.raw[0];
   }
 }

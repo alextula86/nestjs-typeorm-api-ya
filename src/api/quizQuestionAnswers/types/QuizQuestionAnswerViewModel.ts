@@ -1,5 +1,13 @@
 import { GameStatuses, AnswerStatus } from '../../../types';
 
+export type PairQuizGameAnswerModel = {
+  questionId: string;
+  answer: string;
+  answerStatus: AnswerStatus;
+  score: number;
+  addedAt: string;
+};
+
 type PairQuizGameAnswerType = {
   questionId: string;
   answerStatus: AnswerStatus;

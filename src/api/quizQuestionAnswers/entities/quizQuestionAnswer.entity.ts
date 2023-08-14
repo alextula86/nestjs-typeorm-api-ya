@@ -2,6 +2,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -24,8 +25,8 @@ export class QuizQuestionAnswer {
   })
   answerStatus: AnswerStatus;
 
-  @Column({ default: new Date().toISOString() })
-  addedAt: string;
+  @CreateDateColumn({ type: 'timestamp with time zone' })
+  addedAt: Date;
 
   @Column({ default: 0 })
   score: number;

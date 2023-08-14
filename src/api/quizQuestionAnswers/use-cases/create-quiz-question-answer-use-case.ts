@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { isEmpty } from 'lodash';
+import { isEmpty, last } from 'lodash';
+import { differenceInSeconds } from 'date-fns';
 
 import { validateOrRejectModel } from '../../../validate';
 import { AnswerStatus, ResultGameStatus } from '../../../types';
@@ -11,6 +12,7 @@ import { PairQuizGameBonusRepository } from '../../pairQuizGameBonus/pairQuizGam
 import { PairQuizGameResultRepository } from '../../pairQuizGameResult/pairQuizGameResult.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
+import { PairQuizGameAnswerModel } from '../types';
 
 export class CreateQuizQuestionAnswerCommand {
   constructor(
@@ -111,7 +113,34 @@ export class CreateQuizQuestionAnswerUseCase
         score,
       });
 
-    // Если количество ответов текущего игрока и количество ответов второго игрока равна количесмтву вопросов
+    // Если второй игрок ответил на все вопросы, а текущий игрок нет
+    // Текущему игроку дается 10 секунд на то, чтобы ответить на все вопросы
+    if (secondPlayerAnswersCount === questionsCount) {
+      const lastAnswerSecondPlayer = last<PairQuizGameAnswerModel>(
+        secondPlayerAnswers.sort(
+          (a: PairQuizGameAnswerModel, b: PairQuizGameAnswerModel) =>
+            Date.parse(a.addedAt) - Date.parse(b.addedAt),
+        ),
+      );
+
+      const diffSeconds = differenceInSeconds(
+        new Date(),
+        new Date(lastAnswerSecondPlayer.addedAt),
+      );
+
+      if (diffSeconds > 10) {
+        await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
+          userId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+        });
+
+        await this.pairQuizGameRepository.finishedPairQuizGame(
+          foundActivePairQuizGame.id,
+        );
+      }
+    }
+
+    // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
     // Запканчиваем игру, записав дату окончания игры и статус Finished
     if (
