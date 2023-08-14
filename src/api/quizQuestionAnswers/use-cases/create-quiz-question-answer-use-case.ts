@@ -112,10 +112,17 @@ export class CreateQuizQuestionAnswerUseCase
           : AnswerStatus.INCORRECT,
         score,
       });
+    // Если текущий игрок ответил на все вопросы, а второй игрок нет
+    if (
+      currentPlayerAnswersCount + 1 === questionsCount &&
+      secondPlayerAnswersCount !== questionsCount
+    ) {
+      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 10000);
+    }
 
     // Если второй игрок ответил на все вопросы, а текущий игрок нет
     // Текущему игроку дается 10 секунд на то, чтобы ответить на все вопросы
-    if (secondPlayerAnswersCount === questionsCount) {
+    /* if (secondPlayerAnswersCount === questionsCount) {
       const lastAnswerSecondPlayer = last<PairQuizGameAnswerModel>(
         secondPlayerAnswers.sort(
           (a: PairQuizGameAnswerModel, b: PairQuizGameAnswerModel) =>
@@ -138,7 +145,7 @@ export class CreateQuizQuestionAnswerUseCase
           foundActivePairQuizGame.id,
         );
       }
-    }
+    } */
 
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
@@ -277,6 +284,28 @@ export class CreateQuizQuestionAnswerUseCase
       quizQuestionAnswerId: createdQuizQuestionAnswers.id,
       statusCode: HttpStatus.OK,
     };
+  }
+  async _isCompletedGameBySecondPlayer(currentPlayerId: string): Promise<void> {
+    // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
+    const foundActivePairQuizGame =
+      await this.pairQuizGameRepository.findActivePairQuizGame(currentPlayerId);
+    // Если игровая пара еще не завершена
+    if (foundActivePairQuizGame) {
+      // Получаем идентификатор второго игрока
+      const secondPlayerId =
+        foundActivePairQuizGame.firstPlayerId !== currentPlayerId
+          ? foundActivePairQuizGame.firstPlayerId
+          : foundActivePairQuizGame.secondPlayerId;
+
+      await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
+        userId: secondPlayerId,
+        pairQuizGameId: foundActivePairQuizGame.id,
+      });
+
+      await this.pairQuizGameRepository.finishedPairQuizGame(
+        foundActivePairQuizGame.id,
+      );
+    }
   }
   _getResultGameStatus(
     currentPlayerSumScore: number,
