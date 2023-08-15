@@ -268,7 +268,6 @@ export class CreateQuizQuestionAnswerUseCase
     // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
     const foundActivePairQuizGame =
       await this.pairQuizGameRepository.findActivePairQuizGame(userId);
-    console.log('foundActivePairQuizGame', foundActivePairQuizGame);
     // Если игровая пара еще не завершена
     if (foundActivePairQuizGame) {
       // Получаем идентификатор второго игрока
@@ -284,6 +283,11 @@ export class CreateQuizQuestionAnswerUseCase
         userId: secondPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
       });
+
+      await this.pairQuizGameRepository.finishedPairQuizGame(
+        foundActivePairQuizGame.id,
+      );
+
       // Получаем список вопросов
       const questions = this._getQuestions(foundActivePairQuizGame.questions);
       // Получаем запись моследнего вопроса
@@ -318,11 +322,6 @@ export class CreateQuizQuestionAnswerUseCase
           score: Number(foundCurrentPlayerLastAnswerScore.score) + 1,
         });
       }
-
-      await this.pairQuizGameRepository.finishedPairQuizGame(
-        foundActivePairQuizGame.id,
-      );
-
       console.log('end');
     }
   }
