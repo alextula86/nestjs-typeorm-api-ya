@@ -1,7 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { isEmpty, last } from 'lodash';
-import { differenceInSeconds } from 'date-fns';
+import { isEmpty } from 'lodash';
 
 import { validateOrRejectModel } from '../../../validate';
 import { AnswerStatus, ResultGameStatus } from '../../../types';
@@ -12,7 +11,6 @@ import { PairQuizGameBonusRepository } from '../../pairQuizGameBonus/pairQuizGam
 import { PairQuizGameResultRepository } from '../../pairQuizGameResult/pairQuizGameResult.repository';
 
 import { QuizQuestionAnswerRepository } from '../quizQuestionAnswer.repository';
-import { PairQuizGameAnswerModel } from '../types';
 
 export class CreateQuizQuestionAnswerCommand {
   constructor(
@@ -51,11 +49,7 @@ export class CreateQuizQuestionAnswerUseCase
       };
     }
     // Получаем список вопросов
-    const questionsModel = JSON.parse(foundActivePairQuizGame.questions);
-    const questions =
-      !isEmpty(questionsModel) && !isEmpty(questionsModel.quizQuestions)
-        ? questionsModel.quizQuestions
-        : [];
+    const questions = this._getQuestions(foundActivePairQuizGame.questions);
     // Если вопросов нет, то возвращаем ошибку 403
     if (isEmpty(questions)) {
       return {
@@ -63,24 +57,14 @@ export class CreateQuizQuestionAnswerUseCase
         statusCode: HttpStatus.FORBIDDEN,
       };
     }
-    // Получаем ответы текущего пользователя
-    const currentPlayerAnswers =
-      foundActivePairQuizGame.firstPlayerId === userId
-        ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
-        : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
-    // Получаем ответы второго игрока
-    const secondPlayerAnswers =
-      foundActivePairQuizGame.firstPlayerId !== userId
-        ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
-        : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
-    // Если количество ответов текущего пользователя равно количеству вопросов
+    // Получаем ответы игроков
+    const { currentPlayerAnswers, secondPlayerAnswers } =
+      this._getPlayersAnswers(userId, foundActivePairQuizGame);
+    // Если количество ответов текущего игрока равно количеству вопросов
     // Значит на все вопросы были уже данны ответы, возвращаем ошибку 403
-    const currentPlayerAnswersCount = !isEmpty(currentPlayerAnswers)
-      ? currentPlayerAnswers.length
-      : 0;
-    const secondPlayerAnswersCount = !isEmpty(secondPlayerAnswers)
-      ? secondPlayerAnswers.length
-      : 0;
+    const currentPlayerAnswersCount =
+      this._getAnswersCount(currentPlayerAnswers);
+    const secondPlayerAnswersCount = this._getAnswersCount(secondPlayerAnswers);
     const questionsCount = questions.length;
     if (currentPlayerAnswersCount === questionsCount) {
       return {
@@ -119,34 +103,6 @@ export class CreateQuizQuestionAnswerUseCase
     ) {
       setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 10000);
     }
-
-    // Если второй игрок ответил на все вопросы, а текущий игрок нет
-    // Текущему игроку дается 10 секунд на то, чтобы ответить на все вопросы
-    /* if (secondPlayerAnswersCount === questionsCount) {
-      const lastAnswerSecondPlayer = last<PairQuizGameAnswerModel>(
-        secondPlayerAnswers.sort(
-          (a: PairQuizGameAnswerModel, b: PairQuizGameAnswerModel) =>
-            Date.parse(a.addedAt) - Date.parse(b.addedAt),
-        ),
-      );
-
-      const diffSeconds = differenceInSeconds(
-        new Date(),
-        new Date(lastAnswerSecondPlayer.addedAt),
-      );
-
-      if (diffSeconds > 10) {
-        await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
-          userId,
-          pairQuizGameId: foundActivePairQuizGame.id,
-        });
-
-        await this.pairQuizGameRepository.finishedPairQuizGame(
-          foundActivePairQuizGame.id,
-        );
-      }
-    } */
-
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
     // Запканчиваем игру, записав дату окончания игры и статус Finished
@@ -172,16 +128,10 @@ export class CreateQuizQuestionAnswerUseCase
 
       // Определяем есть ли хоть один правильный ответ у текущего игрока
       const isCorrectCurrentPlayerAnswer =
-        !isEmpty(currentPlayerAnswers) &&
-        !!currentPlayerAnswers.find(
-          (i: any) => i.answerStatus === AnswerStatus.CORRECT,
-        );
+        this._isCorrectPlayerAnswer(currentPlayerAnswers);
       // Определяем есть ли хоть один правильный ответ у второго игрока
       const isCorrectSecondPlayerAnswer =
-        !isEmpty(secondPlayerAnswers) &&
-        !!secondPlayerAnswers.find(
-          (i: any) => i.answerStatus === AnswerStatus.CORRECT,
-        );
+        this._isCorrectPlayerAnswer(secondPlayerAnswers);
 
       const currentPlayerId =
         foundActivePairQuizGame.firstPlayerId === userId
@@ -285,22 +235,86 @@ export class CreateQuizQuestionAnswerUseCase
       statusCode: HttpStatus.OK,
     };
   }
-  async _isCompletedGameBySecondPlayer(currentPlayerId: string): Promise<void> {
+  _getQuestions(questions: any) {
+    const questionsModel = JSON.parse(questions);
+
+    return !isEmpty(questionsModel) && !isEmpty(questionsModel.quizQuestions)
+      ? questionsModel.quizQuestions
+      : [];
+  }
+  _getPlayersAnswers(userId: string, foundActivePairQuizGame: any) {
+    const currentPlayerAnswers =
+      foundActivePairQuizGame.firstPlayerId === userId
+        ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
+        : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
+    // Получаем ответы второго игрока
+    const secondPlayerAnswers =
+      foundActivePairQuizGame.firstPlayerId !== userId
+        ? foundActivePairQuizGame.firstPlayerQuizQuestionAnswer
+        : foundActivePairQuizGame.secondPlayerQuizQuestionAnswer;
+
+    return { currentPlayerAnswers, secondPlayerAnswers };
+  }
+  _getAnswersCount(playerAnswers: any) {
+    return !isEmpty(playerAnswers) ? playerAnswers.length : 0;
+  }
+  _isCorrectPlayerAnswer(playerAnswers: any) {
+    return (
+      !isEmpty(playerAnswers) &&
+      !!playerAnswers.find((i: any) => i.answerStatus === AnswerStatus.CORRECT)
+    );
+  }
+  async _isCompletedGameBySecondPlayer(userId: string): Promise<void> {
     // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
     const foundActivePairQuizGame =
-      await this.pairQuizGameRepository.findActivePairQuizGame(currentPlayerId);
+      await this.pairQuizGameRepository.findActivePairQuizGame(userId);
     // Если игровая пара еще не завершена
     if (foundActivePairQuizGame) {
       // Получаем идентификатор второго игрока
       const secondPlayerId =
-        foundActivePairQuizGame.firstPlayerId !== currentPlayerId
+        foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
-
+      // Обнуляем все баллы за ответы второго игрока, т.к. он не успел ответить
+      // на все вопросы за 10 секунд
       await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
         userId: secondPlayerId,
         pairQuizGameId: foundActivePairQuizGame.id,
       });
+      // Получаем список вопросов
+      const questions = this._getQuestions(foundActivePairQuizGame.questions);
+      // Получаем запись моследнего вопроса
+      const questionLastItem = questions[questions.length - 1];
+      // Получаем ответы текущего игрока
+      const { currentPlayerAnswers } = this._getPlayersAnswers(
+        userId,
+        foundActivePairQuizGame,
+      );
+      // Определяем есть ли хоть один правильный ответ у текущего игрока
+      const isCorrectCurrentPlayerAnswer =
+        this._isCorrectPlayerAnswer(currentPlayerAnswers);
+
+      if (isCorrectCurrentPlayerAnswer) {
+        await this.pairQuizGameBonusRepository.updatePairQuizGameBonus({
+          userId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          bonus: 1,
+        });
+        // Находим балл полученный на ответ последнего вопроса
+        const foundCurrentPlayerLastAnswerScore =
+          await this.quizQuestionAnswerRepository.findLastAnswersScore(
+            userId,
+            foundActivePairQuizGame.id,
+            questionLastItem.id,
+          );
+        // Обновляем итоговый балл за ответ увеличив его на бонусный балл
+        await this.quizQuestionAnswerRepository.updateQuizQuestionAnswerScore({
+          userId,
+          pairQuizGameId: foundActivePairQuizGame.id,
+          quizQuestionId: questionLastItem.id,
+          score: Number(foundCurrentPlayerLastAnswerScore.score) + 1,
+        });
+      }
 
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
