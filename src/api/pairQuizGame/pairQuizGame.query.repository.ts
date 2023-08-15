@@ -237,6 +237,7 @@ export class PairQuizGameQueryRepository {
       return null;
     }
 
+    console.log('foundPairQuizGameById', foundPairQuizGameById);
     return this._getPairQuizGameViewModel(foundPairQuizGameById[0]);
   }
   async findMyStatisticPairQuizGame(userId: string): Promise<any> {

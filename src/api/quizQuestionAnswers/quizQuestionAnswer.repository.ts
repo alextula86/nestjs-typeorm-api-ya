@@ -123,6 +123,10 @@ export class QuizQuestionAnswerRepository {
     quizQuestionId: string;
     score: number;
   }): Promise<{ id: string }> {
+    console.log('userId', userId);
+    console.log('pairQuizGameId', pairQuizGameId);
+    console.log('quizQuestionId', quizQuestionId);
+    console.log('score', score);
     const updatedQuizQuestionAnswerScore =
       await this.quizQuestionAnswerRepository
         .createQueryBuilder()
