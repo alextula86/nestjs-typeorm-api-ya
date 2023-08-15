@@ -317,6 +317,7 @@ export class CreateQuizQuestionAnswerUseCase
       }
     }
   }
+
   _getResultGameStatus(
     currentPlayerSumScore: number,
     secondPlayerSumScore: number,
