@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { isEmpty, differenceBy, isEqual } from 'lodash';
+import { isEmpty, differenceBy } from 'lodash';
 
 import { validateOrRejectModel } from '../../../validate';
 import { AnswerStatus, ResultGameStatus } from '../../../types';
@@ -60,7 +60,6 @@ export class CreateQuizQuestionAnswerUseCase
     // Получаем ответы игроков
     const { currentPlayerAnswers, secondPlayerAnswers } =
       this._getPlayersAnswers(userId, foundActivePairQuizGame);
-    console.log('currentPlayerAnswers', currentPlayerAnswers);
     // Если количество ответов текущего игрока равно количеству вопросов
     // Значит на все вопросы были уже данны ответы, возвращаем ошибку 403
     const currentPlayerAnswersCount =
