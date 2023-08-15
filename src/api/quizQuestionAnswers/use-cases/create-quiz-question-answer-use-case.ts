@@ -287,7 +287,6 @@ export class CreateQuizQuestionAnswerUseCase
         secondPlayerAnswers,
         'quizQuestionId',
       );
-
       const values = unansweredQuestions
         .map((question) => {
           return `('', '${AnswerStatus.INCORRECT}', 0, '${secondPlayerId}', '${foundActivePairQuizGame.id}', '${question.quizQuestionId}')`;
@@ -317,7 +316,6 @@ export class CreateQuizQuestionAnswerUseCase
       }
     }
   }
-
   _getResultGameStatus(
     currentPlayerSumScore: number,
     secondPlayerSumScore: number,
