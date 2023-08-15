@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { isEmpty } from 'lodash';
+import { isEmpty, differenceBy, isEqual } from 'lodash';
 
 import { validateOrRejectModel } from '../../../validate';
 import { AnswerStatus, ResultGameStatus } from '../../../types';
@@ -275,14 +275,6 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
-      console.log('userId', userId);
-      console.log('secondPlayerId', secondPlayerId);
-      // Обнуляем все баллы за ответы второго игрока, т.к. он не успел ответить
-      // на все вопросы за 10 секунд
-      await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
-        userId: secondPlayerId,
-        pairQuizGameId: foundActivePairQuizGame.id,
-      });
 
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
@@ -293,10 +285,26 @@ export class CreateQuizQuestionAnswerUseCase
       // Получаем запись моследнего вопроса
       const questionLastItem = questions[questions.length - 1];
       // Получаем ответы текущего игрока
-      const { currentPlayerAnswers } = this._getPlayersAnswers(
-        userId,
-        foundActivePairQuizGame,
+      const { currentPlayerAnswers, secondPlayerAnswers } =
+        this._getPlayersAnswers(userId, foundActivePairQuizGame);
+
+      const unansweredQuestions: any = differenceBy(
+        currentPlayerAnswers,
+        secondPlayerAnswers,
+        'quizQuestionId',
       );
+
+      const values = unansweredQuestions
+        .map((question) => {
+          return `('', '${AnswerStatus.INCORRECT}', 0, '${secondPlayerId}', '${foundActivePairQuizGame.id}', '${question.quizQuestionId}')`;
+        })
+        .join(',');
+      // Обнуляем все баллы за ответы второго игрока, т.к. он не успел ответить
+      // на все вопросы за 10 секунд
+      await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
+        values,
+      });
+
       // Определяем есть ли хоть один правильный ответ у текущего игрока
       const isCorrectCurrentPlayerAnswer =
         this._isCorrectPlayerAnswer(currentPlayerAnswers);
@@ -317,7 +325,6 @@ export class CreateQuizQuestionAnswerUseCase
           score: Number(foundCurrentPlayerLastAnswerScore.score) + 1,
         });
       }
-      console.log('end');
     }
   }
   _getResultGameStatus(

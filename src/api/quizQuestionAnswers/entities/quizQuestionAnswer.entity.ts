@@ -16,7 +16,7 @@ export class QuizQuestionAnswer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   answer: string;
 
   @Column({

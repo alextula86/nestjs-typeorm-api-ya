@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
 import { AnswerStatus } from '../../types';
 import { QuizQuestionAnswer } from './entities';
@@ -8,6 +8,7 @@ import { QuizQuestionAnswer } from './entities';
 @Injectable()
 export class QuizQuestionAnswerRepository {
   constructor(
+    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(QuizQuestionAnswer)
     private readonly quizQuestionAnswerRepository: Repository<QuizQuestionAnswer>,
   ) {}
@@ -134,20 +135,16 @@ export class QuizQuestionAnswerRepository {
     return updatedQuizQuestionAnswerScore.raw[0];
   }
   async resetQuizQuestionAnswerUser({
-    userId,
-    pairQuizGameId,
+    values,
   }: {
-    userId: string;
-    pairQuizGameId: string;
-  }): Promise<{ id: string }> {
-    const resetedQuizQuestionAnswerUser =
-      await this.quizQuestionAnswerRepository
-        .createQueryBuilder()
-        .update(QuizQuestionAnswer)
-        .set({ score: 0 })
-        .where('userId = :userId', { userId })
-        .andWhere('pairQuizGameId = :pairQuizGameId', { pairQuizGameId })
-        .execute();
-    return resetedQuizQuestionAnswerUser.raw[0];
+    values: string;
+  }): Promise<void> {
+    const query = `
+      INSERT INTO quiz_question_answer
+        ("answer", "answerStatus", "score", "userId", "pairQuizGameId", "quizQuestionId")
+      VALUES ${values};
+    `;
+
+    await this.dataSource.query(query);
   }
 }
