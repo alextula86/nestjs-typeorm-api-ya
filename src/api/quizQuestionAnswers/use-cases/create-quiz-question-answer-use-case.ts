@@ -302,11 +302,6 @@ export class CreateQuizQuestionAnswerUseCase
         this._isCorrectPlayerAnswer(currentPlayerAnswers);
 
       if (isCorrectCurrentPlayerAnswer) {
-        await this.pairQuizGameBonusRepository.updatePairQuizGameBonus({
-          userId,
-          pairQuizGameId: foundActivePairQuizGame.id,
-          bonus: 1,
-        });
         // Находим балл полученный на ответ последнего вопроса
         const foundCurrentPlayerLastAnswerScore =
           await this.quizQuestionAnswerRepository.findLastAnswersScore(
