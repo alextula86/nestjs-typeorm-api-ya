@@ -101,7 +101,7 @@ export class CreateQuizQuestionAnswerUseCase
       currentPlayerAnswersCount + 1 === questionsCount &&
       secondPlayerAnswersCount !== questionsCount
     ) {
-      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 3000);
+      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 10000);
     }
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
