@@ -101,7 +101,7 @@ export class CreateQuizQuestionAnswerUseCase
       currentPlayerAnswersCount + 1 === questionsCount &&
       secondPlayerAnswersCount !== questionsCount
     ) {
-      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 10000);
+      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 8000);
     }
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
@@ -268,6 +268,7 @@ export class CreateQuizQuestionAnswerUseCase
     // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
     const foundActivePairQuizGame =
       await this.pairQuizGameRepository.findActivePairQuizGame(userId);
+    console.log('foundActivePairQuizGame', foundActivePairQuizGame);
     // Если игровая пара еще не завершена
     if (foundActivePairQuizGame) {
       // Получаем идентификатор второго игрока
@@ -275,6 +276,8 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
+      console.log('userId', userId);
+      console.log('secondPlayerId', secondPlayerId);
       // Обнуляем все баллы за ответы второго игрока, т.к. он не успел ответить
       // на все вопросы за 10 секунд
       await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
@@ -319,6 +322,8 @@ export class CreateQuizQuestionAnswerUseCase
       await this.pairQuizGameRepository.finishedPairQuizGame(
         foundActivePairQuizGame.id,
       );
+
+      console.log('end');
     }
   }
   _getResultGameStatus(
