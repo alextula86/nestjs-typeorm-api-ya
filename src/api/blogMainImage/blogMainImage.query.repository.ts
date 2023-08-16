@@ -39,14 +39,14 @@ export class BlogMainImageQueryRepository {
     mainImages: ImageType[],
   ): BlogMainImageViewModel {
     return {
-      wallpaper: {
-        url: wallpaper
-          ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${wallpaper.url}`
-          : '',
-        width: wallpaper ? wallpaper.width : 0,
-        height: wallpaper ? wallpaper.height : 0,
-        fileSize: wallpaper ? wallpaper.fileSize : 0,
-      },
+      wallpaper: !isEmpty(wallpaper)
+        ? {
+            url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${wallpaper.url}`,
+            width: wallpaper ? wallpaper.width : 0,
+            height: wallpaper ? wallpaper.height : 0,
+            fileSize: wallpaper ? wallpaper.fileSize : 0,
+          }
+        : null,
       main: !isEmpty(mainImages)
         ? mainImages.map((item) => ({
             url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.url}`,
