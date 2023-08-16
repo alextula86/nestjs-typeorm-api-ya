@@ -82,6 +82,19 @@ export class SaveWallpaperByBlogUseCase
     }
     // Массив для хранения ошибок валидации картинки
     const messages: MessageType[] = [] as unknown as MessageType[];
+    // Если формат файла не равен png, jpg, jpeg, возвращаем ошибку 400
+    if (!['image/png', 'image/jpg', 'jimage/peg'].includes(file.mimetype)) {
+      return {
+        wallpaperId: null,
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `The file format must be png or jpg or jpeg`,
+            field: 'file',
+          },
+        ],
+      };
+    }
     // Получаем метадату картинки
     const metadata = await this.sharpAdapter.metadataFile(file.buffer);
     // Если размер картинки превышает 100KB, возвращаем ошибку 400
@@ -102,13 +115,6 @@ export class SaveWallpaperByBlogUseCase
     if (metadata.height !== 312) {
       messages.push({
         message: `The image height should be equal to 312 px`,
-        field: 'file',
-      });
-    }
-    // Если формат картинки не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['png', 'jpg', 'jpeg'].includes(metadata.format)) {
-      messages.push({
-        message: `The file format must be png or jpg or jpeg`,
         field: 'file',
       });
     }
