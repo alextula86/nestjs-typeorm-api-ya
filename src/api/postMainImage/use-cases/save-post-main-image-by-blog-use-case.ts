@@ -93,6 +93,18 @@ export class SavePostMainImageUseCase
         ],
       };
     }
+    // Если формат файла не равен png, jpg, jpeg, возвращаем ошибку 400
+    if (!['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        statusMessage: [
+          {
+            message: `The file format must be png or jpg or jpeg`,
+            field: 'file',
+          },
+        ],
+      };
+    }
     // Массив для хранения ошибок валидации иконки
     const messages: MessageType[] = [] as unknown as MessageType[];
     // Получаем метадату иконки
@@ -115,13 +127,6 @@ export class SavePostMainImageUseCase
     if (metadata.height !== 432) {
       messages.push({
         message: `The image height should be equal to 432 px`,
-        field: 'file',
-      });
-    }
-    // Если формат иконки не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['png', 'jpg', 'jpeg'].includes(metadata.format)) {
-      messages.push({
-        message: `The file format must be png or jpg or jpeg`,
         field: 'file',
       });
     }

@@ -80,10 +80,8 @@ export class SaveWallpaperByBlogUseCase
         ],
       };
     }
-    // Массив для хранения ошибок валидации картинки
-    const messages: MessageType[] = [] as unknown as MessageType[];
     // Если формат файла не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['image/png', 'image/jpg', 'jimage/peg'].includes(file.mimetype)) {
+    if (!['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)) {
       return {
         wallpaperId: null,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -95,6 +93,8 @@ export class SaveWallpaperByBlogUseCase
         ],
       };
     }
+    // Массив для хранения ошибок валидации картинки
+    const messages: MessageType[] = [] as unknown as MessageType[];
     // Получаем метадату картинки
     const metadata = await this.sharpAdapter.metadataFile(file.buffer);
     // Если размер картинки превышает 100KB, возвращаем ошибку 400
