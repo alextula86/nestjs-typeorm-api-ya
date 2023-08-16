@@ -141,17 +141,34 @@ export class BlogQueryRepository {
 
     const query = `
       SELECT 
-        "id", 
-        "name", 
-        "description",
-        "websiteUrl",
-        "userId",
-        "isMembership", 
-        "isBanned",
-        "banDate",
-        "createdAt"
+        blogs."id", 
+        blogs."name", 
+        blogs."description",
+        blogs."websiteUrl",
+        blogs."userId",
+        blogs."isMembership", 
+        blogs."isBanned",
+        blogs."banDate",
+        blogs."createdAt",
+        wallpapers."url" as "wallpaperUrl",
+        wallpapers."width" as "wallpaperWidth",
+        wallpapers."height" as "wallpaperHeight",
+        wallpapers."fileSize" as "wallpaperFileSize",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              bmp."url", 
+              bmp."width", 
+              bmp."height",
+              bmp."fileSize"
+            FROM blog_main_images as bmp
+            WHERE bmp."blogId" = blogs."id"
+          ) e
+        ) as "blogMainImages"
       FROM blogs
-      ${where}
+      LEFT JOIN wallpapers ON wallpapers."blogId" = blogs."id"
+         ${where}
       ${orderBy}
       ${offset}
       ${limit};

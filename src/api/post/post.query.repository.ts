@@ -96,7 +96,19 @@ export class PostQueryRepository {
                   pls."postId" = posts."id" AND pls."userId" = ${userUUID}
               ) 
             ELSE '${LikeStatuses.NONE}'
-        END, '${LikeStatuses.NONE}') as  "likeStatus"
+        END, '${LikeStatuses.NONE}') as  "likeStatus",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              bmp."url", 
+              bmp."width", 
+              bmp."height",
+              bmp."fileSize"
+            FROM post_main_images as bmp
+            WHERE bmp."postId" = posts."id"
+          ) e
+        ) as "postMainImages"          
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
@@ -200,7 +212,19 @@ export class PostQueryRepository {
                   pls."postId" = posts."id" AND pls."userId" = ${userUUID}
               ) 
             ELSE '${LikeStatuses.NONE}'
-        END, '${LikeStatuses.NONE}') as  "likeStatus"
+        END, '${LikeStatuses.NONE}') as  "likeStatus",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              bmp."url", 
+              bmp."width", 
+              bmp."height",
+              bmp."fileSize"
+            FROM post_main_images as bmp
+            WHERE bmp."postId" = posts."id"
+          ) e
+        ) as "postMainImages"          
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       ${where}
@@ -271,7 +295,19 @@ export class PostQueryRepository {
                   pls."postId" = posts."id" AND pls."userId" = ${userUUID}
               ) 
             ELSE '${LikeStatuses.NONE}'
-        END, '${LikeStatuses.NONE}') as  "likeStatus"
+        END, '${LikeStatuses.NONE}') as  "likeStatus",
+        (
+          SELECT json_agg(e)
+          FROM (
+            SELECT 
+              bmp."url", 
+              bmp."width", 
+              bmp."height",
+              bmp."fileSize"
+            FROM post_main_images as bmp
+            WHERE bmp."postId" = posts."id"
+          ) e
+        ) as "postMainImages"         
       FROM posts
       LEFT JOIN blogs ON blogs."id" = posts."blogId"
       WHERE posts."id" = '${postId}' AND posts."isBanned" = false;
@@ -303,6 +339,16 @@ export class PostQueryRepository {
               addedAt: i.addedAt,
               userId: i.userId,
               login: i.login,
+            }))
+          : [],
+      },
+      images: {
+        main: !isEmpty(post.postMainImages)
+          ? post.postMainImages.map((item) => ({
+              url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.url}`,
+              width: item.width,
+              height: item.height,
+              fileSize: item.fileSize,
             }))
           : [],
       },
@@ -338,6 +384,16 @@ export class PostQueryRepository {
                   addedAt: i.addedAt,
                   userId: i.userId,
                   login: i.login,
+                }))
+              : [],
+          },
+          images: {
+            main: !isEmpty(item.postMainImages)
+              ? item.postMainImages.map((i) => ({
+                  url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${i.url}`,
+                  width: i.width,
+                  height: i.height,
+                  fileSize: i.fileSize,
                 }))
               : [],
           },

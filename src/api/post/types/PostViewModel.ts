@@ -1,4 +1,4 @@
-import { LikeStatuses } from '../../../types';
+import { LikeStatuses, ImageType } from '../../../types';
 
 export type NewestLikes = {
   addedAt: string;
@@ -22,4 +22,7 @@ export type PostViewModel = {
   blogName: string;
   createdAt: string;
   extendedLikesInfo: ExtendedLikesInfo;
+  images: {
+    main: ImageType[];
+  };
 };
