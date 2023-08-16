@@ -120,11 +120,11 @@ export class SaveBlogMainImageUseCase
       };
     }
     // Конвертируем буфер иконки в формат webp для хранения на сервере
-    const webp = await this.sharpAdapter.convertToWebP(file.buffer);
+    // const webp = await this.sharpAdapter.convertToWebP(file.buffer);
     // Формируем урл иконки
     const url = `content/blogs_mains/${blogId}/${blogId}_main`;
     // Сохраняем иконку в storage s3
-    await this.s3StorageAdapter.saveImage(webp, url);
+    await this.s3StorageAdapter.saveImage(file.buffer, url);
     // Ищем иконку для текущего блогера
     const fondBlogMainImageByBlogId =
       await this.blogMainImageRepository.findBlogMainImageByBlogId(blogId);
