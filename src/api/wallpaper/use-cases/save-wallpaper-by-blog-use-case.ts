@@ -120,11 +120,11 @@ export class SaveWallpaperByBlogUseCase
       };
     }
     // Конвертируем буфер картинки в формат webp для хранения на сервере
-    const webp = await this.sharpAdapter.convertToWebP(file.buffer);
+    // const webp = await this.sharpAdapter.convertToWebP(file.buffer);
     // Формируем урл картинки
     const url = `content/wallpapers/${blogId}/${blogId}_wallpaper`;
     // Сохраняем картинку в storage s3
-    await this.s3StorageAdapter.saveImage(webp, url);
+    await this.s3StorageAdapter.saveImage(file.buffer, url);
     // Ищем картинку для текущего блогера
     const fondWallpaperByBlogId =
       await this.wallpaperRepository.findWallpaperByBlogId(blogId);

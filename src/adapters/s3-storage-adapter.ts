@@ -34,7 +34,7 @@ export class S3StorageAdapter {
         // Key: `content/wallpapers/${blogId}/${file.originalname}`, // Оригинальное наименование файла
         Key: url,
         Body: buffer,
-        ContentType: 'image/webp', // Принудительный форматирование в webp
+        // ContentType: 'image/webp', // Принудительный форматирование в webp
       };
       const command = new PutObjectCommand(params);
       const uploadResult: PutObjectCommandOutput = await this.s3Client.send(
