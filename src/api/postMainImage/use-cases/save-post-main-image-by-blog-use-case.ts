@@ -136,41 +136,32 @@ export class SavePostMainImageUseCase
         statusMessage: messages,
       };
     }
-    // Конвертируем буфер original иконки в формат webp для хранения на сервере
-    const webpOriginal = await this.sharpAdapter.convertToWebP(file.buffer);
     // Получаем метадату original иконки
-    const metadataOriginal = await this.sharpAdapter.metadataFile(webpOriginal);
+    const metadataOriginal = await this.sharpAdapter.metadataFile(file.buffer);
     // Формируем урл original иконки
     const urlOriginal = `content/posts_mains/${postId}/${postId}_main_original`;
     // Сохраняем иконку в storage s3
-    await this.s3StorageAdapter.saveImage(webpOriginal, urlOriginal);
-
+    await this.s3StorageAdapter.saveImage(file.buffer, urlOriginal);
     // Ресайз иконки в middle варианте
     const mainMiddle = await this.sharpAdapter.resizeFile(
       file.buffer,
       300,
       180,
     );
-    // Конвертируем буфер middle иконки в формат webp для хранения на сервере
-    const webpMiddle = await this.sharpAdapter.convertToWebP(mainMiddle);
     // Получаем метадату middle иконки
-    const metadataMiddle = await this.sharpAdapter.metadataFile(webpMiddle);
+    const metadataMiddle = await this.sharpAdapter.metadataFile(mainMiddle);
     // Формируем урл middle иконки
     const urlMiddle = `content/posts_mains/${postId}/${postId}_main_middle`;
     // Сохраняем иконку в storage s3
-    await this.s3StorageAdapter.saveImage(webpMiddle, urlMiddle);
-
+    await this.s3StorageAdapter.saveImage(mainMiddle, urlMiddle);
     // Ресайз иконки в small варианте
     const mainSmall = await this.sharpAdapter.resizeFile(file.buffer, 149, 96);
-    // Конвертируем буфер small иконки в формат webp для хранения на сервере
-    const webpSmall = await this.sharpAdapter.convertToWebP(mainSmall);
     // Получаем метадату small иконки
-    const metadataSmall = await this.sharpAdapter.metadataFile(webpSmall);
+    const metadataSmall = await this.sharpAdapter.metadataFile(mainSmall);
     // Формируем урл small иконки
     const urlSmall = `content/posts_mains/${postId}/${postId}_main_small`;
     // Сохраняем иконку в storage s3
-    await this.s3StorageAdapter.saveImage(webpSmall, urlSmall);
-
+    await this.s3StorageAdapter.saveImage(mainSmall, urlSmall);
     // Ищем иконку для текущего поста
     const fondPostMainImages =
       await this.postMainImageRepository.findPostMainImage(postId);
