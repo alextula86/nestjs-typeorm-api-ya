@@ -237,14 +237,16 @@ export class BlogQueryRepository {
       isMembership: blog.isMembership,
       createdAt: blog.createdAt,
       images: {
-        wallpaper: {
-          url: blog.wallpaperUrl
-            ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${blog.wallpaperUrl}`
-            : '',
-          width: blog.wallpaperWidth ? blog.wallpaperWidth : 0,
-          height: blog.wallpaperHeight ? blog.wallpaperHeight : 0,
-          fileSize: blog.wallpaperFileSize ? blog.wallpaperFileSize : 0,
-        },
+        wallpaper: blog.wallpaperUrl
+          ? {
+              url: blog.wallpaperUrl
+                ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${blog.wallpaperUrl}`
+                : '',
+              width: blog.wallpaperWidth ? blog.wallpaperWidth : 0,
+              height: blog.wallpaperHeight ? blog.wallpaperHeight : 0,
+              fileSize: blog.wallpaperFileSize ? blog.wallpaperFileSize : 0,
+            }
+          : null,
         main: !isEmpty(blog.blogMainImages)
           ? blog.blogMainImages.map((item) => ({
               url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.url}`,
@@ -276,14 +278,16 @@ export class BlogQueryRepository {
         isMembership: item.isMembership,
         createdAt: item.createdAt,
         images: {
-          wallpaper: {
-            url: item.wallpaperUrl
-              ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.wallpaperUrl}`
-              : '',
-            width: item.wallpaperWidth ? item.wallpaperWidth : 0,
-            height: item.wallpaperHeight ? item.wallpaperHeight : 0,
-            fileSize: item.wallpaperFileSize ? item.wallpaperFileSize : 0,
-          },
+          wallpaper: item.wallpaperUrl
+            ? {
+                url: item.wallpaperUrl
+                  ? `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.wallpaperUrl}`
+                  : '',
+                width: item.wallpaperWidth ? item.wallpaperWidth : 0,
+                height: item.wallpaperHeight ? item.wallpaperHeight : 0,
+                fileSize: item.wallpaperFileSize ? item.wallpaperFileSize : 0,
+              }
+            : null,
           main: !isEmpty(item.blogMainImages)
             ? item.blogMainImages.map((i) => ({
                 url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${i.url}`,
