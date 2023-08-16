@@ -101,7 +101,7 @@ export class CreateQuizQuestionAnswerUseCase
       currentPlayerAnswersCount + 1 === questionsCount &&
       secondPlayerAnswersCount !== questionsCount
     ) {
-      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 8000);
+      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 7000);
     }
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
@@ -275,10 +275,6 @@ export class CreateQuizQuestionAnswerUseCase
         foundActivePairQuizGame.firstPlayerId !== userId
           ? foundActivePairQuizGame.firstPlayerId
           : foundActivePairQuizGame.secondPlayerId;
-
-      await this.pairQuizGameRepository.finishedPairQuizGame(
-        foundActivePairQuizGame.id,
-      );
       // Получаем ответы текущего игрока
       const { currentPlayerAnswers, secondPlayerAnswers } =
         this._getPlayersAnswers(userId, foundActivePairQuizGame);
@@ -294,9 +290,14 @@ export class CreateQuizQuestionAnswerUseCase
         .join(',');
       // Обнуляем все баллы за ответы второго игрока, т.к. он не успел ответить
       // на все вопросы за 10 секунд
-      await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
-        values,
-      });
+      Promise.all([
+        await this.pairQuizGameRepository.finishedPairQuizGame(
+          foundActivePairQuizGame.id,
+        ),
+        await this.quizQuestionAnswerRepository.resetQuizQuestionAnswerUser({
+          values,
+        }),
+      ]);
       // Определяем есть ли хоть один правильный ответ у текущего игрока
       const isCorrectCurrentPlayerAnswer =
         this._isCorrectPlayerAnswer(currentPlayerAnswers);
