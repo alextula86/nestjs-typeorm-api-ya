@@ -97,12 +97,12 @@ export class CreateQuizQuestionAnswerUseCase
         score,
       });
     // Если текущий игрок ответил на все вопросы, а второй игрок нет
-    /*if (
+    if (
       currentPlayerAnswersCount + 1 === questionsCount &&
       secondPlayerAnswersCount !== questionsCount
     ) {
-      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 10000);
-    }*/
+      setTimeout(() => this._isCompletedGameBySecondPlayer(userId), 7000);
+    }
     // Если количество ответов текущего игрока и количество ответов второго игрока равна количеству вопросов
     // (количество ответов текущего игрока + 1, т.к. необходимо учитывать текущий ответ),
     // Запканчиваем игру, записав дату окончания игры и статус Finished
@@ -265,7 +265,7 @@ export class CreateQuizQuestionAnswerUseCase
     );
   }
   async _isCompletedGameBySecondPlayer(userId: string): Promise<void> {
-    // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра уже начата.
+    // Получаем игровую пару по текущему пользователю со статусом активная, т.е игра еще не закончена.
     const foundActivePairQuizGame =
       await this.pairQuizGameRepository.findActivePairQuizGame(userId);
     // Если игровая пара еще не завершена

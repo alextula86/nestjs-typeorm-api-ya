@@ -5,7 +5,6 @@ import { isEmpty } from 'lodash';
 import { GameStatuses } from '../../types';
 import { QuizQuestions } from '../quizQuestion/entities';
 import { PairQuizGame } from './entities';
-import { ActivePairQuizGameModel } from './types';
 
 @Injectable()
 export class PairQuizGameRepository {
