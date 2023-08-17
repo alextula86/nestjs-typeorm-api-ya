@@ -81,7 +81,10 @@ export class SaveBlogMainImageUseCase
       };
     }
     // Если формат файла не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)) {
+    if (
+      !file ||
+      !['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)
+    ) {
       return {
         blogMainImageId: null,
         statusCode: HttpStatus.BAD_REQUEST,
@@ -125,8 +128,6 @@ export class SaveBlogMainImageUseCase
         statusMessage: messages,
       };
     }
-    // Конвертируем буфер иконки в формат webp для хранения на сервере
-    // const webp = await this.sharpAdapter.convertToWebP(file.buffer);
     // Формируем урл иконки
     const url = `content/blogs_mains/${blogId}/${blogId}_main`;
     // Сохраняем иконку в storage s3

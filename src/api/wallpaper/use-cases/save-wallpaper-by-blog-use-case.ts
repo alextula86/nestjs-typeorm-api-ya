@@ -81,7 +81,10 @@ export class SaveWallpaperByBlogUseCase
       };
     }
     // Если формат файла не равен png, jpg, jpeg, возвращаем ошибку 400
-    if (!['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)) {
+    if (
+      !file ||
+      !['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype)
+    ) {
       return {
         wallpaperId: null,
         statusCode: HttpStatus.BAD_REQUEST,
