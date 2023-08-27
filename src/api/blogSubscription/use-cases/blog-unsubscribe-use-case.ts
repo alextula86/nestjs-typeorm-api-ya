@@ -27,12 +27,20 @@ export class BlogUnSubscribeUseCase
     const foundBlog = await this.blogRepository.findBlogById(blogId);
     // Если блогер не найден, возвращаем ошибку 404
     if (isEmpty(foundBlog)) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      return { statusCode: HttpStatus.NOT_FOUND };
+    }
+    // Ищем подписку пользователя на блог
+    const foundBlogSubscription =
+      await this.blogSubscriptionRepository.findBlogSubscription(
+        userId,
+        blogId,
+      );
+    // Если подписка на блог не найден, возвращаем ошибку 404
+    if (isEmpty(foundBlogSubscription)) {
+      return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Отписываемся от блога
-    await this.blogSubscriptionRepository.unsubscribe(blogId, userId);
+    await this.blogSubscriptionRepository.unsubscribe(userId, blogId);
     return { statusCode: HttpStatus.NO_CONTENT };
   }
 }

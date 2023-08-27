@@ -113,7 +113,7 @@ import { SaveWallpaperByBlogUseCase } from './api/wallpaper/use-cases';
 import { SaveBlogMainImageUseCase } from './api/blogMainImage/use-cases';
 import { SavePostMainImageUseCase } from './api/postMainImage/use-cases';
 import {
-  BlogSubscribeCommand,
+  BlogSubscribeUseCase,
   BlogUnSubscribeUseCase,
 } from './api/blogSubscription/use-cases';
 
@@ -275,7 +275,7 @@ const postMainImageProviders = [
 const blogSubscriptionProviders = [
   BlogSubscriptionService,
   BlogSubscriptionRepository,
-  BlogSubscribeCommand,
+  BlogSubscribeUseCase,
   BlogUnSubscribeUseCase,
 ];
 

@@ -116,7 +116,7 @@ export class BlogController {
     return postsByBlogId;
   }
   // Подписаться на блог
-  @Post('blogs/:blogId/subscription')
+  @Post(':blogId/subscription')
   @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async blogSubscription(
@@ -133,7 +133,7 @@ export class BlogController {
     }
   }
   // Отписаться от блога
-  @Delete('blogs/:blogId/subscription')
+  @Delete(':blogId/subscription')
   @UseGuards(AuthBearerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async blogUnSubscription(

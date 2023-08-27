@@ -23,6 +23,8 @@ export class BlogSubscribeUseCase
     statusCode: HttpStatus;
   }> {
     const { userId, blogId } = command;
+    console.log('userId', userId);
+    console.log('blogId', blogId);
     // Ищем блогера, на которого подписываемся
     const foundBlog = await this.blogRepository.findBlogById(blogId);
     // Если блогер не найден, возвращаем ошибку 404
@@ -30,7 +32,7 @@ export class BlogSubscribeUseCase
       return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Подписываемся на блог
-    await this.blogSubscriptionRepository.subscribe(blogId, userId);
+    await this.blogSubscriptionRepository.subscribe(userId, blogId);
     return { statusCode: HttpStatus.NO_CONTENT };
   }
 }

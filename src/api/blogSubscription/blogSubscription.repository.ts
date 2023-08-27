@@ -12,8 +12,8 @@ export class BlogSubscriptionRepository {
     private readonly blogSubscriptionRepository: Repository<BlogSubscription>,
   ) {}
   async findBlogSubscription(
-    blogId: string,
     userId: string,
+    blogId: string,
   ): Promise<BlogSubscriptionModel | null> {
     const foundBlogSubscription = await this.blogSubscriptionRepository.query(
       `SELECT * FROM blog_subscription WHERE "blogId" = '${blogId}' AND "userId" = '${userId}';`,
@@ -25,7 +25,7 @@ export class BlogSubscriptionRepository {
 
     return foundBlogSubscription[0];
   }
-  async subscribe(blogId: string, userId: string): Promise<void> {
+  async subscribe(userId: string, blogId: string): Promise<void> {
     await this.blogSubscriptionRepository
       .createQueryBuilder()
       .insert()
@@ -37,7 +37,7 @@ export class BlogSubscriptionRepository {
       })
       .execute();
   }
-  async unsubscribe(blogId: string, userId: string): Promise<boolean> {
+  async unsubscribe(userId: string, blogId: string): Promise<boolean> {
     await this.blogSubscriptionRepository
       .createQueryBuilder()
       .update(BlogSubscription)
