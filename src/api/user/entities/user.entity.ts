@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   OneToOne,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { EmailConfirmation } from './emailConfirmation.entity';
 import { PasswordRecovery } from './passwordRecovery.entity';
@@ -15,6 +16,7 @@ import { PairQuizGame } from '../../pairQuizGame/entities';
 import { QuizQuestionAnswer } from '../../quizQuestionAnswers/entities';
 import { PairQuizGameResult } from '../../pairQuizGameResult/entities';
 import { PairQuizGameBonus } from '../../pairQuizGameBonus/entities';
+import { BlogSubscription } from '../../blogSubscription/entities';
 
 @Entity()
 export class Users {
@@ -101,4 +103,13 @@ export class Users {
     },
   )
   pairQuizGameBonus: PairQuizGameBonus;
+
+  @ManyToMany(
+    () => BlogSubscription,
+    (blogSubscription) => blogSubscription.user,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  blogSubscription: BlogSubscription;
 }

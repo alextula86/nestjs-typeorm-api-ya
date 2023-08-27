@@ -7,3 +7,4 @@ export * from './ResultGameStatus';
 export * from './AnswerStatus';
 export * from './SortDirection';
 export * from './PostMainImageType';
+export * from './BlogSubscriptionStatus';

@@ -6,10 +6,12 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  ManyToMany,
 } from 'typeorm';
 import { Users } from '../../user/entities';
 import { Wallpapers } from '../../wallpaper/entities';
 import { BlogMainImages } from '../../blogMainImage/entities';
+import { BlogSubscription } from '../../blogSubscription/entities';
 
 @Entity()
 export class Blogs {
@@ -46,6 +48,15 @@ export class Blogs {
     onDelete: 'CASCADE',
   })
   blogMainImages: BlogMainImages;
+
+  @ManyToMany(
+    () => BlogSubscription,
+    (blogSubscription) => blogSubscription.blog,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  blogSubscription: BlogSubscription;
 
   @Column({ nullable: true })
   userId: string;

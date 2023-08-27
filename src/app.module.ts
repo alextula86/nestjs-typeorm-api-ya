@@ -29,6 +29,7 @@ import { PairQuizGameBonus } from './api/pairQuizGameBonus/entities';
 import { Wallpapers } from './api/wallpaper/entities';
 import { BlogMainImages } from './api/blogMainImage/entities';
 import { PostMainImages } from './api/postMainImage/entities';
+import { BlogSubscription } from './api/blogSubscription/entities';
 
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
@@ -54,6 +55,7 @@ import { QuizQuestionService } from './api/quizQuestion/quizQuestion.service';
 import { WallpaperService } from './api/wallpaper/wallpaper.service';
 import { BlogMainImageService } from './api/blogMainImage/blogMainImage.service';
 import { PostMainImageService } from './api/postMainImage/postMainImage.service';
+import { BlogSubscriptionService } from './api/blogSubscription/blogSubscription.service';
 
 import {
   LoginUseCase,
@@ -110,6 +112,10 @@ import { CreateQuizQuestionAnswerUseCase } from './api/quizQuestionAnswers/use-c
 import { SaveWallpaperByBlogUseCase } from './api/wallpaper/use-cases';
 import { SaveBlogMainImageUseCase } from './api/blogMainImage/use-cases';
 import { SavePostMainImageUseCase } from './api/postMainImage/use-cases';
+import {
+  BlogSubscribeCommand,
+  BlogUnSubscribeUseCase,
+} from './api/blogSubscription/use-cases';
 
 import { UserRepository } from './api/user/user.repository';
 import { BlogRepository } from './api/blog/blog.repository';
@@ -128,6 +134,7 @@ import { PairQuizGameBonusRepository } from './api/pairQuizGameBonus/pairQuizGam
 import { WallpaperRepository } from './api/wallpaper/wallpaper.repository';
 import { BlogMainImageRepository } from './api/blogMainImage/blogMainImage.repository';
 import { PostMainImageRepository } from './api/postMainImage/postMainImage.repository';
+import { BlogSubscriptionRepository } from './api/blogSubscription/blogSubscription.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -265,6 +272,13 @@ const postMainImageProviders = [
   SavePostMainImageUseCase,
 ];
 
+const blogSubscriptionProviders = [
+  BlogSubscriptionService,
+  BlogSubscriptionRepository,
+  BlogSubscribeCommand,
+  BlogUnSubscribeUseCase,
+];
+
 const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
 
 @Module({
@@ -301,6 +315,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
       Wallpapers,
       BlogMainImages,
       PostMainImages,
+      BlogSubscription,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -350,6 +365,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
     ...wallpaperProviders,
     ...blogMainImageProviders,
     ...postMainImageProviders,
+    ...blogSubscriptionProviders,
     ...adapters,
   ],
 })

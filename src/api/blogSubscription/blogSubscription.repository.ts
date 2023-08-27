@@ -1,0 +1,51 @@
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BlogSubscription } from './entities';
+import { BlogSubscriptionStatus } from '../../types';
+import { BlogSubscriptionModel } from './types';
+
+@Injectable()
+export class BlogSubscriptionRepository {
+  constructor(
+    @InjectRepository(BlogSubscription)
+    private readonly blogSubscriptionRepository: Repository<BlogSubscription>,
+  ) {}
+  async findBlogSubscription(
+    blogId: string,
+    userId: string,
+  ): Promise<BlogSubscriptionModel | null> {
+    const foundBlogSubscription = await this.blogSubscriptionRepository.query(
+      `SELECT * FROM blog_subscription WHERE "blogId" = '${blogId}' AND "userId" = '${userId}';`,
+    );
+
+    if (!foundBlogSubscription) {
+      return null;
+    }
+
+    return foundBlogSubscription[0];
+  }
+  async subscribe(blogId: string, userId: string): Promise<void> {
+    await this.blogSubscriptionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(BlogSubscription)
+      .values({
+        blogId,
+        userId,
+        status: BlogSubscriptionStatus.SUBSCRIBED,
+      })
+      .execute();
+  }
+  async unsubscribe(blogId: string, userId: string): Promise<boolean> {
+    await this.blogSubscriptionRepository
+      .createQueryBuilder()
+      .update(BlogSubscription)
+      .set({ status: BlogSubscriptionStatus.UNSUBSCRIBED })
+      .where('blogId = :blogId', { blogId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
+
+    return true;
+  }
+}

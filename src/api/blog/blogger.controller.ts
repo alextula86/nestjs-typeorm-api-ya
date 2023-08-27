@@ -125,7 +125,6 @@ export class BloggerController {
     @Req() request: Request & { userId: string },
     @Body() createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModel> {
-    console.log('createBlogDto', createBlogDto);
     // Создаем блогера
     const { blogId, statusCode } = await this.commandBus.execute(
       new CreateBlogCommand(request.userId, createBlogDto),

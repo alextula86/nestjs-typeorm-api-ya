@@ -8,13 +8,21 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Post,
+  Delete,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 
-import { AuthPublicGuard } from '../../guards';
+import { AuthPublicGuard, AuthBearerGuard } from '../../guards';
 import { ResponseViewModelDetail } from '../../types';
 
 import { PostQueryRepository } from '../post/post.query.repository';
 import { PostViewModel, QueryPostModel } from '../post/types';
+
+import {
+  BlogSubscribeCommand,
+  BlogUnSubscribeCommand,
+} from '../blogSubscription/use-cases';
 
 import { BlogService } from './blog.service';
 import { BlogQueryRepository } from './blog.query.repository';
@@ -23,6 +31,7 @@ import { QueryBlogModel, BlogViewModel } from './types';
 @Controller('api/blogs')
 export class BlogController {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly blogService: BlogService,
     private readonly postQueryRepository: PostQueryRepository,
     private readonly blogQueryRepository: BlogQueryRepository,
@@ -105,5 +114,39 @@ export class BlogController {
     );
 
     return postsByBlogId;
+  }
+  // Подписаться на блог
+  @Post('blogs/:blogId/subscription')
+  @UseGuards(AuthBearerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async blogSubscription(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+  ): Promise<void> {
+    // Подписываемся на блог
+    const { statusCode } = await this.commandBus.execute(
+      new BlogSubscribeCommand(request.userId, blogId),
+    );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
+  }
+  // Отписаться от блога
+  @Delete('blogs/:blogId/subscription')
+  @UseGuards(AuthBearerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async blogUnSubscription(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+  ): Promise<void> {
+    // Отписываемся от блога
+    const { statusCode } = await this.commandBus.execute(
+      new BlogUnSubscribeCommand(request.userId, blogId),
+    );
+    // Если блогер не найден, возвращаем ошибку 404
+    if (statusCode === HttpStatus.NOT_FOUND) {
+      throw new NotFoundException();
+    }
   }
 }
