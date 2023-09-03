@@ -22,14 +22,14 @@ export class BlogSubscription {
   })
   status: BlogSubscriptionStatus;
 
-  @Column({ nullable: false })
+  @Column('uuid')
   blogId: string;
 
   @ManyToMany(() => Blogs, (blog) => blog.blogSubscription, { nullable: false })
   @JoinColumn({ name: 'blogId' })
   blog: Blogs;
 
-  @Column({ nullable: false })
+  @Column('uuid')
   userId: string;
 
   @ManyToMany(() => Users, (user) => user.blogSubscription, { nullable: false })

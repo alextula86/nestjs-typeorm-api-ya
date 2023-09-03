@@ -2,8 +2,8 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isEmpty } from 'lodash';
 
+import { BlogSubscriptionStatus } from '../../../types';
 import { BlogRepository } from '../../blog/blog.repository';
-
 import { BlogSubscriptionRepository } from '../blogSubscription.repository';
 
 export class BlogUnSubscribeCommand {
@@ -40,7 +40,11 @@ export class BlogUnSubscribeUseCase
       return { statusCode: HttpStatus.NOT_FOUND };
     }
     // Отписываемся от блога
-    await this.blogSubscriptionRepository.unsubscribe(userId, blogId);
+    await this.blogSubscriptionRepository.subscribeUpdate(
+      userId,
+      blogId,
+      BlogSubscriptionStatus.UNSUBSCRIBED,
+    );
     return { statusCode: HttpStatus.NO_CONTENT };
   }
 }

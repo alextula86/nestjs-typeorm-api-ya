@@ -3,19 +3,27 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { isEmpty } from 'lodash';
 
-import { ResponseViewModelDetail, SortDirection } from '../../types';
+import {
+  ResponseViewModelDetail,
+  SortDirection,
+  BlogSubscriptionStatus,
+} from '../../types';
 import { QueryBlogModel, BlogViewModel, BlogViewAdminModel } from './types';
 
 @Injectable()
 export class BlogQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-  async findAllBlogs({
-    searchNameTerm,
-    pageNumber,
-    pageSize,
-    sortBy = 'createdAt',
-    sortDirection = SortDirection.DESC,
-  }: QueryBlogModel): Promise<ResponseViewModelDetail<BlogViewModel>> {
+  async findAllBlogs(
+    userId: string,
+    {
+      searchNameTerm,
+      pageNumber,
+      pageSize,
+      sortBy = 'createdAt',
+      sortDirection = SortDirection.DESC,
+    }: QueryBlogModel,
+  ): Promise<ResponseViewModelDetail<BlogViewModel>> {
+    const userUUID = userId ? `'${userId}'` : null;
     const number = pageNumber ? Number(pageNumber) : 1;
     const size = pageSize ? Number(pageSize) : 10;
 
@@ -44,11 +52,11 @@ export class BlogQueryRepository {
 
     const query = `
       SELECT 
-        blogs."id", 
-        blogs."name", 
+        blogs."id",
+        blogs."name",
         blogs."description",
         blogs."websiteUrl",
-        blogs."isMembership", 
+        blogs."isMembership",
         blogs."createdAt",
         wallpapers."url" as "wallpaperUrl",
         wallpapers."width" as "wallpaperWidth",
@@ -57,15 +65,32 @@ export class BlogQueryRepository {
         (
           SELECT json_agg(e)
           FROM (
-            SELECT 
-              bmp."url", 
-              bmp."width", 
+            SELECT
+              bmp."url",
+              bmp."width",
               bmp."height",
               bmp."fileSize"
             FROM blog_main_images as bmp
             WHERE bmp."blogId" = blogs."id"
           ) e
-        ) as "blogMainImages"  
+        ) as "blogMainImages",
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL
+            THEN
+              (
+                SELECT bs."status"
+                FROM blog_subscription as bs
+                WHERE
+                  bs."blogId" = blogs."id" AND bs."userId" = ${userUUID}
+              )
+            ELSE '${BlogSubscriptionStatus.NONE}'
+        END, '${BlogSubscriptionStatus.NONE}') as  "currentUserSubscriptionStatus",
+        (
+          SELECT COUNT(*)
+          FROM blog_subscription as bs
+          WHERE 
+            bs."blogId" = blogs."id" AND bs."status" = '${BlogSubscriptionStatus.SUBSCRIBED}'
+        ) as "subscribersCount"        
       FROM blogs
       LEFT JOIN wallpapers ON wallpapers."blogId" = blogs."id"
       ${where}
@@ -84,7 +109,9 @@ export class BlogQueryRepository {
       pageSize: size,
     });
   }
-  async findBlogById(blogId: string): Promise<BlogViewModel> {
+  async findBlogById(blogId: string, userId: string): Promise<BlogViewModel> {
+    const userUUID = userId ? `'${userId}'` : null;
+
     const query = `
       SELECT
         blogs."id",
@@ -108,7 +135,24 @@ export class BlogQueryRepository {
             FROM blog_main_images as bmp
             WHERE bmp."blogId" = blogs."id"
           ) e
-        ) as "blogMainImages"        
+        ) as "blogMainImages",
+        COALESCE(
+          CASE WHEN ${userUUID} IS NOT NULL
+            THEN
+              (
+                SELECT bs."status"
+                FROM blog_subscription AS bs
+                WHERE
+                  bs."blogId" = '${blogId}' AND bs."userId" = ${userUUID}
+              )
+            ELSE '${BlogSubscriptionStatus.NONE}'
+        END, '${BlogSubscriptionStatus.NONE}') as  "currentUserSubscriptionStatus",
+        (
+          SELECT COUNT(*)
+          FROM blog_subscription as bs
+          WHERE 
+            bs."blogId" = '${blogId}' AND bs."status" = '${BlogSubscriptionStatus.SUBSCRIBED}'
+        ) as "subscribersCount"
       FROM blogs
       LEFT JOIN wallpapers ON wallpapers."blogId" = blogs."id"
       WHERE blogs."id" = '${blogId}' AND blogs."isBanned" = false;
@@ -185,7 +229,7 @@ export class BlogQueryRepository {
         ) as "blogMainImages"
       FROM blogs
       LEFT JOIN wallpapers ON wallpapers."blogId" = blogs."id"
-         ${where}
+      ${where}
       ${orderBy}
       ${offset}
       ${limit};
@@ -290,6 +334,9 @@ export class BlogQueryRepository {
             }))
           : [],
       },
+      currentUserSubscriptionStatus:
+        blog.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
+      subscribersCount: blog.subscribersCount || 0,
     };
   }
   _getBlogsViewModelDetail({
@@ -331,6 +378,9 @@ export class BlogQueryRepository {
               }))
             : [],
         },
+        currentUserSubscriptionStatus:
+          item.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
+        subscribersCount: item.subscribersCount || 0,
       })),
     };
   }

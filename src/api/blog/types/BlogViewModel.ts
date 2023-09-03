@@ -1,4 +1,4 @@
-import { ImageType } from '../../../types';
+import { ImageType, BlogSubscriptionStatus } from '../../../types';
 
 export type BlogViewModel = {
   id: string;
@@ -11,4 +11,6 @@ export type BlogViewModel = {
     wallpaper: ImageType;
     main: ImageType[];
   };
+  currentUserSubscriptionStatus?: BlogSubscriptionStatus;
+  subscribersCount?: number;
 };

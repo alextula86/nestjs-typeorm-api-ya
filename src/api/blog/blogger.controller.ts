@@ -134,7 +134,10 @@ export class BloggerController {
       throw new BadRequestException();
     }
     // Порлучаем созданный блог в формате ответа пользователю
-    const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
+    const foundBlog = await this.blogQueryRepository.findBlogById(
+      blogId,
+      request.userId,
+    );
     // Возвращаем созданного блогера
     return foundBlog;
   }

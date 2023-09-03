@@ -38,8 +38,10 @@ export class BlogController {
   ) {}
   // Получение списка блогеров
   @Get()
+  @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
   async findAllBlogs(
+    @Req() request: Request & { userId: string },
     @Query()
     {
       searchNameTerm,
@@ -49,23 +51,33 @@ export class BlogController {
       sortDirection,
     }: QueryBlogModel,
   ): Promise<ResponseViewModelDetail<BlogViewModel>> {
-    const allBlogs = await this.blogQueryRepository.findAllBlogs({
-      searchNameTerm,
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-    });
+    const allBlogs = await this.blogQueryRepository.findAllBlogs(
+      request.userId,
+      {
+        searchNameTerm,
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDirection,
+      },
+    );
 
     return allBlogs;
   }
   // Получение конкретного блогера по его идентификатору
   @Get(':blogId')
+  @UseGuards(AuthPublicGuard)
   @HttpCode(HttpStatus.OK)
   // Получаем конкретного блогера по его идентификатору
-  async findBlogById(@Param('blogId') blogId: string): Promise<BlogViewModel> {
+  async findBlogById(
+    @Req() request: Request & { userId: string },
+    @Param('blogId') blogId: string,
+  ): Promise<BlogViewModel> {
     // Получаем блдогера по идентификатору
-    const foundBlog = await this.blogQueryRepository.findBlogById(blogId);
+    const foundBlog = await this.blogQueryRepository.findBlogById(
+      blogId,
+      request.userId,
+    );
     // Если блог не найден возвращаем ошибку
     if (!foundBlog) {
       throw new NotFoundException();
