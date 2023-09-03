@@ -23,6 +23,7 @@ export class TestingController {
         blog_subscription,
         post_main_images,
         post_like_status,
+        integrations,
         posts,
         blogs,
         quiz_questions,

@@ -30,6 +30,7 @@ import { Wallpapers } from './api/wallpaper/entities';
 import { BlogMainImages } from './api/blogMainImage/entities';
 import { PostMainImages } from './api/postMainImage/entities';
 import { BlogSubscription } from './api/blogSubscription/entities';
+import { Integrations } from './api/integrations/entities';
 
 import { AuthController } from './api/auth/auth.controller';
 import { UserController } from './api/user/user.controller';
@@ -135,6 +136,7 @@ import { WallpaperRepository } from './api/wallpaper/wallpaper.repository';
 import { BlogMainImageRepository } from './api/blogMainImage/blogMainImage.repository';
 import { PostMainImageRepository } from './api/postMainImage/postMainImage.repository';
 import { BlogSubscriptionRepository } from './api/blogSubscription/blogSubscription.repository';
+import { IntegrationsRepository } from './api/integrations/integrations.repository';
 
 import { UserQueryRepository } from './api/user/user.query.repository';
 import { BlogQueryRepository } from './api/blog/blog.query.repository';
@@ -149,6 +151,7 @@ import { PairQuizGameQueryRepository } from './api/pairQuizGame/pairQuizGame.que
 import { WallpaperQueryRepository } from './api/wallpaper/wallpaper.query.repository';
 import { BlogMainImageQueryRepository } from './api/blogMainImage/blogMainImage.query.repository';
 import { PostMainImageQueryRepository } from './api/postMainImage/postMainImage.query.repository';
+import { IntegrationsQueryRepository } from './api/integrations/integrations.query.repository';
 
 import { EmailAdapter, S3StorageAdapter, SharpAdapter } from './adapters';
 import { EmailManager } from './managers';
@@ -279,6 +282,11 @@ const blogSubscriptionProviders = [
   BlogUnSubscribeUseCase,
 ];
 
+const integrationsProviders = [
+  IntegrationsRepository,
+  IntegrationsQueryRepository,
+];
+
 const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
 
 @Module({
@@ -316,6 +324,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
       BlogMainImages,
       PostMainImages,
       BlogSubscription,
+      Integrations,
     ]),
     MailerModule.forRoot({
       transport: {
@@ -366,6 +375,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
     ...blogMainImageProviders,
     ...postMainImageProviders,
     ...blogSubscriptionProviders,
+    ...integrationsProviders,
     ...adapters,
   ],
 })
