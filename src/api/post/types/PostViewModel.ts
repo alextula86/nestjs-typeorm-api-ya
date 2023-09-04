@@ -22,7 +22,7 @@ export type PostViewModel = {
   blogName: string;
   createdAt: string;
   extendedLikesInfo: ExtendedLikesInfo;
-  images: {
+  images?: {
     main: ImageType[];
   };
 };
