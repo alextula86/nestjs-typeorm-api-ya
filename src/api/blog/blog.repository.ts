@@ -102,17 +102,7 @@ export class BlogRepository {
   }
   // Бан блогера
   async banBlog(blogId: string, isBanned: boolean): Promise<boolean> {
-    const banDate = isBanned ? `'${new Date().toISOString()}'` : null;
-
-    /*const query = `
-      UPDATE blogs
-      SET 
-        "isBanned" = ${isBanned},
-        "banDate" = ${banDate}
-      WHERE "id" = '${blogId}';
-    `;
-
-    await this.blogRepository.query(query);*/
+    const banDate = isBanned ? `'${new Date()}'` : null;
 
     await this.blogRepository
       .createQueryBuilder()
@@ -125,15 +115,6 @@ export class BlogRepository {
   }
   // Привязка пользователя к блогу
   async bindWithUser(userId: string, blogId: string): Promise<boolean> {
-    /*const query = `
-      UPDATE blogs
-      SET 
-        "userId" = '${userId}'
-      WHERE "id" = '${blogId}';
-    `;
-
-    await this.blogRepository.query(query);*/
-
     await this.blogRepository
       .createQueryBuilder()
       .update(Blogs)

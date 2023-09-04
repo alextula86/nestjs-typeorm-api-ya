@@ -24,12 +24,14 @@ export class BanBlogUseCase implements ICommandHandler<BanBlogCommand> {
     statusCode: HttpStatus;
   }> {
     const { blogId, banBlogDto } = command;
+
     // Валидируем DTO
     await validateOrRejectModel(banBlogDto, BanBlogDto);
     // Получаем поля из DTO
     const { isBanned } = banBlogDto;
     // Ищем блогера
     const foundBlog = await this.blogRepository.findBlogById(blogId);
+
     // Если блогер не найден, возвращаем ошибку 404
     if (isEmpty(foundBlog)) {
       return { statusCode: HttpStatus.NOT_FOUND };

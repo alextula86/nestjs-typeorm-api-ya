@@ -216,7 +216,7 @@ export class UserRepository {
       .into(PasswordRecovery)
       .values({
         recoveryCode: generateUUID(),
-        expirationDate: new Date().toISOString(),
+        expirationDate: new Date(),
         isRecovered: true,
         userId,
       })
@@ -343,7 +343,7 @@ export class UserRepository {
     banReason: string,
     userId: string,
   ): Promise<boolean> {
-    const dateNow = new Date().toISOString();
+    const dateNow = new Date();
 
     await this.userRepository
       .createQueryBuilder()

@@ -38,7 +38,7 @@ export class BanRepository {
     banReason,
   }: MakeBanModel): Promise<any> {
     const banReasonResult = isBanned ? `'${banReason}'` : null;
-    const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
+    const banDateResult = isBanned ? `'${new Date()}'` : null;
 
     const query = `
       INSERT INTO ban_user_for_blog
@@ -59,7 +59,7 @@ export class BanRepository {
     banReason: string,
   ): Promise<boolean> {
     const banReasonResult = isBanned ? `'${banReason}'` : null;
-    const banDateResult = isBanned ? `'${new Date().toISOString()}'` : null;
+    const banDateResult = isBanned ? `'${new Date()}'` : null;
 
     const query = `
       UPDATE ban_user_for_blog

@@ -78,7 +78,7 @@ export class SessionRepository {
     attempt: number;
   }> {
     const attempt = 1;
-    const issuedAtt = new Date().toISOString();
+    const issuedAtt = new Date();
 
     const query = `
       UPDATE sessions
