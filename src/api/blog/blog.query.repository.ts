@@ -160,6 +160,10 @@ export class BlogQueryRepository {
 
     const foundBlog = await this.dataSource.query(query);
 
+    if (isEmpty(foundBlog)) {
+      return null;
+    }
+
     return this._getBlogViewModel(foundBlog[0]);
   }
   async findAllBlogsByUserId(
