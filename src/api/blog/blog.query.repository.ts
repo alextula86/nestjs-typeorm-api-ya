@@ -411,10 +411,10 @@ export class BlogQueryRepository {
           userId: item.userId,
           userLogin: item.userLogin,
         },
-        /*banInfo: {
+        banInfo: {
           isBanned: item.isBanned,
           banDate: item.banDate,
-        },*/
+        },
       })),
     };
   }
