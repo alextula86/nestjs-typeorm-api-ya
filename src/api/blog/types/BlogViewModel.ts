@@ -7,7 +7,7 @@ export type BlogViewModel = {
   websiteUrl: string;
   isMembership: boolean;
   createdAt: string;
-  images: {
+  images?: {
     wallpaper: ImageType;
     main: ImageType[];
   };

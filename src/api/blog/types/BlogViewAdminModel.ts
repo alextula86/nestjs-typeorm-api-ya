@@ -13,5 +13,5 @@ export type BlogViewAdminModel = {
   isMembership: boolean;
   createdAt: string;
   blogOwnerInfo: BlogOwnerInfoType;
-  banInfo: BanInfoType;
+  banInfo?: BanInfoType;
 };
