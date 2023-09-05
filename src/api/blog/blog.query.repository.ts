@@ -318,7 +318,7 @@ export class BlogQueryRepository {
       websiteUrl: blog.websiteUrl,
       isMembership: blog.isMembership,
       createdAt: blog.createdAt,
-      /*images: {
+      images: {
         wallpaper: blog.wallpaperUrl
           ? {
               url: blog.wallpaperUrl
@@ -342,7 +342,7 @@ export class BlogQueryRepository {
         blog.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
       subscribersCount: blog.subscribersCount
         ? Number(blog.subscribersCount)
-        : 0,*/
+        : 0,
     };
   }
   _getBlogsViewModelDetail({
@@ -364,7 +364,7 @@ export class BlogQueryRepository {
         websiteUrl: item.websiteUrl,
         isMembership: item.isMembership,
         createdAt: item.createdAt,
-        /*images: {
+        images: {
           wallpaper: item.wallpaperUrl
             ? {
                 url: item.wallpaperUrl
@@ -388,7 +388,7 @@ export class BlogQueryRepository {
           item.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
         subscribersCount: item.subscribersCount
           ? Number(item.subscribersCount)
-          : 0,*/
+          : 0,
       })),
     };
   }

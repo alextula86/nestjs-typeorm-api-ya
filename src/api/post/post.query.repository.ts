@@ -342,7 +342,7 @@ export class PostQueryRepository {
             }))
           : [],
       },
-      /*images: {
+      images: {
         main: !isEmpty(post.postMainImages)
           ? post.postMainImages.map((item) => ({
               url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${item.url}`,
@@ -351,7 +351,7 @@ export class PostQueryRepository {
               fileSize: item.fileSize,
             }))
           : [],
-      },*/
+      },
     };
   }
   _getPostsViewModelDetail({
@@ -387,7 +387,7 @@ export class PostQueryRepository {
                 }))
               : [],
           },
-          /*images: {
+          images: {
             main: !isEmpty(item.postMainImages)
               ? item.postMainImages.map((i) => ({
                   url: `https://storage.yandexcloud.net/nestjs-typeorm-api-ya/${i.url}`,
@@ -396,7 +396,7 @@ export class PostQueryRepository {
                   fileSize: i.fileSize,
                 }))
               : [],
-          },*/
+          },
         };
       }),
     };

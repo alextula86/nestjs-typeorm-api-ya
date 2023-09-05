@@ -7,10 +7,10 @@ export type BlogViewModel = {
   websiteUrl: string;
   isMembership: boolean;
   createdAt: string;
-  images?: {
+  images: {
     wallpaper: ImageType;
     main: ImageType[];
   };
-  currentUserSubscriptionStatus?: BlogSubscriptionStatus;
-  subscribersCount?: number;
+  currentUserSubscriptionStatus: BlogSubscriptionStatus;
+  subscribersCount: number;
 };
