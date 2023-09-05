@@ -11,6 +11,6 @@ export type BlogViewModel = {
     wallpaper: ImageType;
     main: ImageType[];
   };
-  currentUserSubscriptionStatus?: BlogSubscriptionStatus;
-  subscribersCount?: number;
+  currentUserSubscriptionStatus: BlogSubscriptionStatus;
+  subscribersCount: number;
 };

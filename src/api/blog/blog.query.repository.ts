@@ -338,11 +338,11 @@ export class BlogQueryRepository {
             }))
           : [],
       },
-      /*currentUserSubscriptionStatus:
+      currentUserSubscriptionStatus:
         blog.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
       subscribersCount: blog.subscribersCount
         ? Number(blog.subscribersCount)
-        : 0,*/
+        : 0,
     };
   }
   _getBlogsViewModelDetail({
@@ -384,11 +384,11 @@ export class BlogQueryRepository {
               }))
             : [],
         },
-        /*currentUserSubscriptionStatus:
+        currentUserSubscriptionStatus:
           item.currentUserSubscriptionStatus || BlogSubscriptionStatus.NONE,
         subscribersCount: item.subscribersCount
           ? Number(item.subscribersCount)
-          : 0,*/
+          : 0,
       })),
     };
   }
