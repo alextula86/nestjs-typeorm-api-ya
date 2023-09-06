@@ -12,7 +12,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { AuthBearerGuard } from '../../guards';
 
 @Controller('api/integrations')
-export class IntegrationsBlogController {
+export class IntegrationsController {
   constructor(private readonly commandBus: CommandBus) {}
   @Get('telegram/auth-bot-link')
   @UseGuards(AuthBearerGuard)
