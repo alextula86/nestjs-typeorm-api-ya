@@ -42,6 +42,7 @@ import { DeviceSqlController } from './api/device/device.controller';
 import { CommentController } from './api/comment/comment.controller';
 import { QuizQuestionController } from './api/quizQuestion/quizQuestion.controller';
 import { PairQuizGameController } from './api/pairQuizGame/pairQuizGame.controller';
+import { IntegrationsController } from './api/integrations/integrations.controller';
 import { TestingController } from './api/testing/testing.controller';
 
 import { AuthService } from './api/auth/auth.service';
@@ -352,6 +353,7 @@ const adapters = [EmailManager, EmailAdapter, S3StorageAdapter, SharpAdapter];
     DeviceSqlController,
     QuizQuestionController,
     PairQuizGameController,
+    IntegrationsController,
     TestingController,
   ],
   providers: [
